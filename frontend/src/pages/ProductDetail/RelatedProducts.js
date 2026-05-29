@@ -24,7 +24,7 @@ export default class RelatedProducts {
             <button type="button" data-rail-next="${section.key}" class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#E8E4DC] bg-white shadow-sm transition-all duration-300 hover:scale-105 hover:bg-[#0A0A0A] hover:text-white hover:border-[#0A0A0A]">${icon('chevron', 'h-4 w-4')}</button>
           </div>` : ''}
         </div>
-        <div data-rail="${section.key}" class="${(section.key === 'cross' || section.key === 'recent') ? 'pdp-luxury-scroll' : 'pdp-hide-scroll'} flex gap-4 overflow-x-auto pb-2">
+        <div data-rail="${section.key}" class="pdp-hide-scroll flex gap-4 overflow-x-auto pb-2">
           ${section.items.map((item) => this._card(item)).join('')}
         </div>
       </div>

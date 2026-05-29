@@ -271,7 +271,7 @@ async function boot() {
     theme_colors: {}
   };
   try {
-    const res = await fetch(`${API_BASE}/api/settings`);
+    const res = await fetch(`${API_BASE}/api/settings?t=${Date.now()}`);
     if (res.ok) {
       const json = await res.json();
       if (json.success && json.data) {

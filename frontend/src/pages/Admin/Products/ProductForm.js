@@ -1,5 +1,5 @@
 import { showToast } from '../shared/ui.js';
-import { createProduct, updateProduct, getCategories } from '../../../services/adminService.js';
+import { createProduct, updateProduct, getCategories, getBrands } from '../../../services/adminService.js';
 import { openImagePicker } from './ImagePicker.js';
 
 const MOVEMENTS = ['automatic', 'quartz', 'mechanical', 'solar'];
@@ -210,8 +210,10 @@ export function openProductForm(product, onSaved) {
             </div>
 
             <div>
-              <label class="form-label">Thương hiệu</label>
-              <input name="brand" class="form-input" value="${product?.brand || ''}"/>
+              <label class="form-label">Thương hiệu *</label>
+              <select name="brand" required class="form-input" id="pf-brand">
+                <option value="">-- Chọn --</option>
+              </select>
             </div>
 
             <div>
@@ -416,6 +418,7 @@ export function openProductForm(product, onSaved) {
   if (window.lenis) window.lenis.stop();
 
   loadCategories(overlay, product?.category_id);
+  loadBrands(overlay, product?.brand);
   setupImages(overlay, product?.images || []);
   setupCustomSpecs(overlay, specs);
 
@@ -558,6 +561,21 @@ async function loadCategories(overlay, selectedId) {
       opt.value = c.id;
       opt.textContent = c.parent_id ? `  ↳ ${c.name}` : c.name;
       if (c.id == selectedId) opt.selected = true;
+      sel.appendChild(opt);
+    });
+  } catch {}
+}
+
+async function loadBrands(overlay, selectedBrand) {
+  try {
+    const res = await getBrands();
+    const brands = res.data || res;
+    const sel = overlay.querySelector('#pf-brand');
+    (Array.isArray(brands) ? brands : []).forEach(b => {
+      const opt = document.createElement('option');
+      opt.value = b.source_name;
+      opt.textContent = b.name;
+      if (b.source_name === selectedBrand) opt.selected = true;
       sel.appendChild(opt);
     });
   } catch {}

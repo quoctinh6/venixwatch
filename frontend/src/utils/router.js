@@ -14,6 +14,8 @@ const routes = [
   { path: '/tai-khoan', component: () => import('../pages/Account/index.js') },
   { path: '/so-sanh', component: () => import('../pages/Compare/index.js') },
   { path: '/san-pham/:slug', component: () => import('../pages/ProductDetail/index.js') },
+  { path: '/tin-tuc', component: () => import('../pages/NewsList/index.js') },
+  { path: '/tin-tuc/:slug', component: () => import('../pages/NewsDetail/index.js') },
 ];
 
 function matchRoute(pathname) {

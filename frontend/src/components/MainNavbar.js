@@ -1,7 +1,7 @@
 import { cartService } from '../services/cartService.js';
 import { navigate } from '../utils/helpers.js';
 import { authService } from '../services/authService.js';
-import { openQuickSettings } from './QuickSettingsModal.js';
+import { openQuickSettings } from './QuickSettingsModal.js?v=1.0.3';
 
 const NAM_SUBS = [
   { label: 'Đồng Hồ Nam Cổ', href: '/nam?category=nam-co' },
@@ -268,59 +268,153 @@ export class MainNavbar {
       (user.permissions && user.permissions.includes('settings:write')) || hasAdminRole
     );
 
+    const menuItems = window.APP_SETTINGS?.navigation_menu || [
+      {
+        "label": "ĐỒNG HỒ NAM",
+        "href": "/nam",
+        "children": NAM_SUBS
+      },
+      {
+        "label": "ĐỒNG HỒ NỮ",
+        "href": "/nu",
+        "children": NU_SUBS
+      },
+      {
+        "label": "PHỤ KIỆN",
+        "href": "/phu-kien",
+        "children": []
+      },
+      {
+        "label": "SALE",
+        "href": "/sale",
+        "children": [],
+        "badge": "HOT"
+      }
+    ];
+
+    // Auto-append TIN TỨC if not configured explicitly in navigation_menu
+    if (!menuItems.some(item => item.href === '/tin-tuc' || item.label.toLowerCase() === 'tin tức')) {
+      menuItems.push({
+        "label": "TIN TỨC",
+        "href": "/tin-tuc",
+        "children": []
+      });
+    }
+
+    const desktopMenuHtml = menuItems.map(item => {
+      const hasChildren = item.children && item.children.length > 0;
+      const isNam = item.label.toUpperCase() === 'ĐỒNG HỒ NAM' || item.href === '/nam';
+      const isNu = item.label.toUpperCase() === 'ĐỒNG HỒ NỮ' || item.href === '/nu';
+
+      if (hasChildren) {
+        if (isNam || isNu) {
+          const genderKey = isNam ? 'nam' : 'nu';
+          return `
+            <div class="nav-dropdown group/menu py-6">
+              <button class="nav-link flex items-center gap-1 text-sm font-semibold uppercase tracking-[0.1em] text-[#0A0A0A] hover:text-[#C9A961] transition duration-300 outline-none">
+                ${item.label}
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="group-hover/menu:rotate-180 transition-transform duration-300"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div class="mega-menu absolute left-1/2 top-[100%] z-50 mt-1 w-[calc(100%-48px)] xl:w-full max-w-[1344px] -translate-x-1/2 opacity-0 invisible -translate-y-2 group-hover/menu:opacity-100 group-hover/menu:visible group-hover/menu:translate-y-0 transition-all duration-[250ms] ease-[cubic-bezier(0.4,0,0.2,1)] border-t-2 border-[#C9A961] bg-white py-8 px-10 rounded-b-[8px] flex gap-6" style="box-shadow: 0 12px 32px rgba(0,0,0,0.08);">
+                ${this._megaMenuHtml(genderKey)}
+              </div>
+            </div>
+          `;
+        } else {
+          return `
+            <div class="nav-dropdown group/menu relative py-6">
+              <button class="nav-link flex items-center gap-1 text-sm font-semibold uppercase tracking-[0.1em] text-[#0A0A0A] hover:text-[#C9A961] transition duration-300 outline-none">
+                ${item.label}
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="group-hover/menu:rotate-180 transition-transform duration-300"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div class="mega-menu absolute left-0 top-[100%] z-50 mt-1 w-56 opacity-0 invisible -translate-y-2 group-hover/menu:opacity-100 group-hover/menu:visible group-hover/menu:translate-y-0 transition-all duration-[200ms] border-t-2 border-[#C9A961] bg-white py-2 rounded-b-[8px] flex flex-col" style="box-shadow: 0 8px 24px rgba(0,0,0,0.08);">
+                ${item.children.map(child => `
+                  <a href="${child.href}" class="dd-link px-4 py-2.5 text-xs font-semibold text-zinc-700 hover:bg-zinc-50 hover:text-[#C9A961] transition-colors">
+                    ${child.label}
+                  </a>
+                `).join('')}
+              </div>
+            </div>
+          `;
+        }
+      } else {
+        return `
+          <a href="${item.href}" class="nav-link-a flex items-center text-sm font-semibold uppercase tracking-[0.1em] text-[#0A0A0A] hover:text-[#C9A961] transition duration-300">
+            ${item.label}
+            ${item.badge ? `<span class="ml-1.5 inline-flex items-center rounded-full bg-[#C9A961] px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-[0.12em] text-zinc-950 leading-none">${item.badge}</span>` : ''}
+          </a>
+        `;
+      }
+    }).join('');
+
+    const mobileMenuHtml = menuItems.map((item, idx) => {
+      const hasChildren = item.children && item.children.length > 0;
+      if (hasChildren) {
+        let icon = `<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`;
+        if (item.label.toUpperCase().includes('NỮ')) {
+          icon = `<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.182 15.182a4.5 4.5 0 01-6.364 0M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`;
+        }
+        return `
+          <div class="mobile-accordion">
+            <button class="mobile-accordion-toggle flex h-14 w-full items-center justify-between px-6 text-[15px] font-medium tracking-[0.08em] text-zinc-800 transition hover:bg-zinc-50 outline-none">
+              <span class="flex items-center gap-4">
+                ${icon}
+                ${item.label}
+              </span>
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" class="accordion-chevron transition-transform duration-300"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="mobile-accordion-content max-h-0 overflow-hidden transition-all duration-300 bg-zinc-50/50 pl-14">
+              ${item.children.map(child => `
+                <a href="${child.href}" class="mobile-sublink flex h-10 items-center text-sm text-zinc-600 transition hover:text-[#C9A961]">${child.label}</a>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      } else {
+        let icon = `<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" /></svg>`;
+        if (item.label.toUpperCase().includes('SALE') || item.label.toUpperCase().includes('KHUYẾN MÃI')) {
+          icon = `<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581a1.125 1.125 0 001.591 0l4.318-4.318a1.125 1.125 0 000-1.591L9.568 4.591A2.25 2.25 0 009.568 3z" /></svg>`;
+        } else if (item.label.toUpperCase().includes('TIN TỨC') || item.label.toUpperCase().includes('BLOG')) {
+          icon = `<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>`;
+        }
+        const textClass = (item.label.toUpperCase().includes('SALE') || item.label.toUpperCase().includes('KHUYẾN MÃI')) ? 'text-[#C9A961]' : 'text-zinc-800';
+        return `
+          <a href="${item.href}" class="mobile-link flex h-14 items-center gap-4 px-6 text-[15px] font-medium tracking-[0.08em] ${textClass} transition hover:bg-zinc-50">
+            ${icon}
+            ${item.label}
+            ${item.badge ? `<span class="ml-1 inline-flex items-center rounded-full bg-[#C9A961] px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-[0.12em] text-zinc-950 leading-none">${item.badge}</span>` : ''}
+          </a>
+        `;
+      }
+    }).join('');
+
     return `
       <!-- DESKTOP NAVBAR -->
       <div id="navbar-container" class="mx-auto hidden h-20 w-full max-w-[1440px] items-center justify-between gap-8 px-12 lg:flex transition-all duration-300">
         <!-- Logo (Left) -->
         <div class="flex items-center gap-2">
-          <a href="/" id="nav-logo-wrap" class="flex items-center gap-3">
-            ${logoUrl ? `<img src="${logoUrl}" alt="${brandName}" class="h-8 object-contain" />` : `
+          <a href="/" id="nav-logo-wrap" class="flex items-center gap-2.5">
+            ${logoUrl ? `<div class="h-9 w-9 flex items-center justify-center rounded-full bg-zinc-950 border border-zinc-800 shadow-sm overflow-hidden p-1.5"><img src="${logoUrl}" alt="${brandName}" class="h-full w-full object-contain" /></div>` : `
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary-gold, #C9A961)" stroke-width="1.5" class="animate-pulse">
                 <circle cx="12" cy="12" r="10"/>
                 <polyline points="12 6 12 12 16 14"/>
               </svg>
-              <span class="font-serif text-xl font-bold tracking-[0.08em] text-[#0A0A0A] hover:text-[#C9A961] transition duration-300">${brandName}</span>
             `}
+            <span class="font-serif text-xl font-bold tracking-[0.08em] text-[#0A0A0A] hover:text-[#C9A961] transition duration-300">${brandName}</span>
           </a>
           ${canEditSettings ? `
             <button type="button" id="quick-edit-logo-desktop" class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/80 backdrop-blur-sm border border-[#E8E4DC] hover:bg-[#C9A84C] hover:text-white hover:border-[#C9A84C] text-[#A88840] transition-all shadow-sm cursor-pointer ml-1.5" title="Chỉnh sửa logo & thương hiệu">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+            <button type="button" id="quick-edit-menu-desktop" class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/80 backdrop-blur-sm border border-[#E8E4DC] hover:bg-[#C9A84C] hover:text-white hover:border-[#C9A84C] text-[#A88840] transition-all shadow-sm cursor-pointer ml-1" title="Chỉnh sửa Menu">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
             </button>
           ` : ''}
         </div>
 
         <!-- Menu (Center) -->
         <div class="flex items-center gap-10">
-          <!-- ĐỒNG HỒ NAM -->
-          <div class="nav-dropdown group/menu py-6">
-            <button class="nav-link flex items-center gap-1 text-sm font-semibold uppercase tracking-[0.1em] text-[#0A0A0A] hover:text-[#C9A961] transition duration-300 outline-none">
-              ĐỒNG HỒ NAM
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="group-hover/menu:rotate-180 transition-transform duration-300"><polyline points="6 9 12 15 18 9"/></svg>
-            </button>
-            <div class="mega-menu absolute left-1/2 top-[100%] z-50 mt-1 w-[calc(100%-48px)] xl:w-full max-w-[1344px] -translate-x-1/2 opacity-0 invisible -translate-y-2 group-hover/menu:opacity-100 group-hover/menu:visible group-hover/menu:translate-y-0 transition-all duration-[250ms] ease-[cubic-bezier(0.4,0,0.2,1)] border-t-2 border-[#C9A961] bg-white py-8 px-10 rounded-b-[8px] flex gap-6" style="box-shadow: 0 12px 32px rgba(0,0,0,0.08);">
-              ${this._megaMenuHtml('nam')}
-            </div>
-          </div>
-
-          <!-- ĐỒNG HỒ NỮ -->
-          <div class="nav-dropdown group/menu py-6">
-            <button class="nav-link flex items-center gap-1 text-sm font-semibold uppercase tracking-[0.1em] text-[#0A0A0A] hover:text-[#C9A961] transition duration-300 outline-none">
-              ĐỒNG HỒ NỮ
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="group-hover/menu:rotate-180 transition-transform duration-300"><polyline points="6 9 12 15 18 9"/></svg>
-            </button>
-            <div class="mega-menu absolute left-1/2 top-[100%] z-50 mt-1 w-[calc(100%-48px)] xl:w-full max-w-[1344px] -translate-x-1/2 opacity-0 invisible -translate-y-2 group-hover/menu:opacity-100 group-hover/menu:visible group-hover/menu:translate-y-0 transition-all duration-[250ms] ease-[cubic-bezier(0.4,0,0.2,1)] border-t-2 border-[#C9A961] bg-white py-8 px-10 rounded-b-[8px] flex gap-6" style="box-shadow: 0 12px 32px rgba(0,0,0,0.08);">
-              ${this._megaMenuHtml('nu')}
-            </div>
-          </div>
-
-          <!-- PHỤ KIỆN -->
-          <a href="/phu-kien" class="nav-link-a text-sm font-semibold uppercase tracking-[0.1em] text-[#0A0A0A] hover:text-[#C9A961] transition duration-300">PHỤ KIỆN</a>
-
-          <!-- SALE -->
-          <a href="/sale" class="nav-link-a flex items-center text-sm font-semibold uppercase tracking-[0.1em] text-[#0A0A0A] hover:text-[#C9A961] transition duration-300">
-            SALE
-            <span class="ml-1.5 inline-flex items-center rounded-full bg-[#C9A961] px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-[0.12em] text-zinc-950 leading-none">HOT</span>
-          </a>
+          ${desktopMenuHtml}
         </div>
 
         <!-- Actions (Right) -->
@@ -359,18 +453,21 @@ export class MainNavbar {
 
         <!-- Logo (center) -->
         <div class="flex items-center gap-1.5 justify-center">
-          <a href="/" id="mobile-logo" class="flex items-center gap-1.5 font-serif text-base font-bold tracking-[0.08em] text-zinc-950 uppercase">
-            ${logoUrl ? `<img src="${logoUrl}" alt="${brandName}" class="h-6 object-contain" />` : `
+          <a href="/" id="mobile-logo" class="flex items-center gap-2 font-serif text-base font-bold tracking-[0.08em] text-zinc-950 uppercase">
+            ${logoUrl ? `<div class="h-7 w-7 flex items-center justify-center rounded-full bg-zinc-950 border border-zinc-800 shadow-sm overflow-hidden p-1"><img src="${logoUrl}" alt="${brandName}" class="h-full w-full object-contain" /></div>` : `
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary-gold, #C9A961)" stroke-width="2">
                 <circle cx="12" cy="12" r="10"/>
                 <polyline points="12 6 12 12 16 14"/>
               </svg>
-              <span>${brandName}</span>
             `}
+            <span>${brandName}</span>
           </a>
           ${canEditSettings ? `
             <button type="button" id="quick-edit-logo-mobile" class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-white/80 backdrop-blur-sm border border-[#E8E4DC] hover:bg-[#C9A84C] hover:text-white hover:border-[#C9A84C] text-[#A88840] transition-all shadow-sm cursor-pointer ml-1" title="Chỉnh sửa logo & thương hiệu">
               <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+            <button type="button" id="quick-edit-menu-mobile" class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-white/80 backdrop-blur-sm border border-[#E8E4DC] hover:bg-[#C9A84C] hover:text-white hover:border-[#C9A84C] text-[#A88840] transition-all shadow-sm cursor-pointer ml-0.5" title="Chỉnh sửa Menu">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
             </button>
           ` : ''}
         </div>
@@ -393,9 +490,9 @@ export class MainNavbar {
         </button>
         <div class="w-full max-w-4xl px-8 flex flex-col gap-6 text-center">
           <span class="text-xs font-black uppercase tracking-[0.18em] text-[#C9A961]">Bạn đang tìm kiếm gì?</span>
-          <div class="relative border-b-2 border-zinc-700 focus-within:border-[#C9A961] transition duration-300">
+          <div class="relative border-b-2 border-zinc-700 focus-within:border-[#C9A84C] transition duration-300">
             <input id="search-overlay-input" type="text" placeholder="Gõ tên đồng hồ hoặc thương hiệu..." class="w-full py-4 bg-transparent text-white text-2xl font-medium outline-none text-center placeholder-zinc-600" />
-            <svg class="absolute right-0 top-1/2 -translate-y-1/2 text-[#C9A961]" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <svg class="absolute right-0 top-1/2 -translate-y-1/2 text-[#C9A84C]" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
               <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
             </svg>
           </div>
@@ -422,70 +519,12 @@ export class MainNavbar {
         </div>
 
         <!-- Drawer Content (Scrollable) -->
-        <div class="flex-1 overflow-y-auto py-4 space-y-4">
-          <!-- Navigation list with icons and accordion sub-menus -->
+        <div class="flex-1 overflow-y-auto py-4 space-y-4" data-lenis-prevent>
+          <!-- Navigation list with accordion sub-menus -->
           <div class="space-y-1">
-            <!-- Accordion 1: Đồng Hồ Nam -->
-            <div class="mobile-accordion">
-              <button class="mobile-accordion-toggle flex h-14 w-full items-center justify-between px-6 text-[15px] font-medium tracking-[0.08em] text-zinc-800 transition hover:bg-zinc-50 outline-none">
-                <span class="flex items-center gap-4">
-                  <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                  ĐỒNG HỒ NAM
-                </span>
-                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" class="accordion-chevron transition-transform duration-300"><polyline points="6 9 12 15 18 9"/></svg>
-              </button>
-              <div class="mobile-accordion-content max-h-0 overflow-hidden transition-all duration-300 bg-zinc-50/50 pl-14">
-                <a href="/nam?category=nam-co" class="mobile-sublink flex h-10 items-center text-sm text-zinc-600 transition hover:text-[#C9A961]">Đồng Hồ Nam Cổ</a>
-                <a href="/nam?category=nam-dien-tu" class="mobile-sublink flex h-10 items-center text-sm text-zinc-600 transition hover:text-[#C9A961]">Đồng Hồ Nam Điện Tử</a>
-                <a href="/nam?category=nam-the-thao" class="mobile-sublink flex h-10 items-center text-sm text-zinc-600 transition hover:text-[#C9A961]">Đồng Hồ Thể Thao Nam</a>
-                <a href="/nam?category=nam-luxury" class="mobile-sublink flex h-10 items-center text-sm text-zinc-600 transition hover:text-[#C9A961]">Đồng Hồ Luxury Nam</a>
-              </div>
-            </div>
-
-            <!-- Accordion 2: Đồng Hồ Nữ -->
-            <div class="mobile-accordion">
-              <button class="mobile-accordion-toggle flex h-14 w-full items-center justify-between px-6 text-[15px] font-medium tracking-[0.08em] text-zinc-800 transition hover:bg-zinc-50 outline-none">
-                <span class="flex items-center gap-4">
-                  <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.182 15.182a4.5 4.5 0 01-6.364 0M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                  ĐỒNG HỒ NỮ
-                </span>
-                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" class="accordion-chevron transition-transform duration-300"><polyline points="6 9 12 15 18 9"/></svg>
-              </button>
-              <div class="mobile-accordion-content max-h-0 overflow-hidden transition-all duration-300 bg-zinc-50/50 pl-14">
-                <a href="/nu?category=nu-thoi-trang" class="mobile-sublink flex h-10 items-center text-sm text-zinc-600 transition hover:text-[#C9A961]">Đồng Hồ Nữ Thời Trang</a>
-                <a href="/nu?category=nu-co" class="mobile-sublink flex h-10 items-center text-sm text-zinc-600 transition hover:text-[#C9A961]">Đồng Hồ Nữ Cổ</a>
-                <a href="/nu?category=nu-day-da" class="mobile-sublink flex h-10 items-center text-sm text-zinc-600 transition hover:text-[#C9A961]">Đồng Hồ Nữ Dây Da</a>
-                <a href="/nu?category=nu-luxury" class="mobile-sublink flex h-10 items-center text-sm text-zinc-600 transition hover:text-[#C9A961]">Đồng Hồ Luxury Nữ</a>
-              </div>
-            </div>
-
-            <!-- Divider -->
-            <div class="h-px bg-zinc-100 mx-6 my-2"></div>
-
-            <!-- Phụ Kiện -->
-            <a href="/phu-kien" class="mobile-link flex h-14 items-center gap-4 px-6 text-[15px] font-medium tracking-[0.08em] text-zinc-800 transition hover:bg-zinc-50">
-              <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.242c0-.89-.542-1.617-1.28-1.992z" /><path stroke-linecap="round" stroke-linejoin="round" d="M14.53 9.622a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.242c0-.89-.542-1.617-1.28-1.992z" /></svg>
-              PHỤ KIỆN
-            </a>
-
-            <!-- Sale -->
-            <a href="/sale" class="mobile-link flex h-14 items-center gap-4 px-6 text-[15px] font-medium tracking-[0.08em] text-[#C9A961] transition hover:bg-zinc-50">
-              <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581a1.125 1.125 0 001.591 0l4.318-4.318a1.125 1.125 0 000-1.591L9.568 4.591A2.25 2.25 0 009.568 3z" /></svg>
-              KHUYẾN MÃI (SALE)
-            </a>
-
-            <!-- Divider -->
-            <div class="h-px bg-zinc-100 mx-6 my-2"></div>
-
-            <!-- Tài khoản -->
-            <a href="/tai-khoan" class="mobile-link flex h-14 items-center gap-4 px-6 text-[15px] font-medium tracking-[0.08em] text-zinc-800 transition hover:bg-zinc-50">
-              <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-              <span class="mobile-user-name">${authService.getUser() ? (authService.getUser().name || authService.getUser().full_name) : 'TÀI KHOẢN'}</span>
-            </a>
-
-            <!-- Giỏ hàng -->
-            <a href="/gio-hang" class="mobile-link flex h-14 items-center gap-4 px-6 text-[15px] font-medium tracking-[0.08em] text-zinc-800 transition hover:bg-zinc-50">
-              <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
+            ${mobileMenuHtml}
+          </div>
+        </div>1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
               GIỎ HÀNG
             </a>
           </div>
@@ -540,6 +579,18 @@ export class MainNavbar {
       e.preventDefault();
       e.stopPropagation();
       openQuickSettings('brand');
+    });
+
+    // Quick edit menu
+    nav.querySelector('#quick-edit-menu-desktop')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      openQuickSettings('menu');
+    });
+    nav.querySelector('#quick-edit-menu-mobile')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      openQuickSettings('menu');
     });
 
     // Nav Dropdown Hover Effects with staggered items fade in support

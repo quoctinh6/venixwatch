@@ -1,9 +1,26 @@
 import { API_BASE } from '../../services/config.js';
+import { authService } from '../../services/authService.js';
+import { openQuickSettings } from '../../components/QuickSettingsModal.js?v=1.0.3';
 
 export class Newsletter {
   render() {
+    const nl = window.APP_SETTINGS?.home_sections?.newsletter || {
+      title: "Nhận Ưu Đãi Độc Quyền",
+      description: "Đăng ký để nhận thông tin về bộ sưu tập mới, ưu đãi đặc biệt và tips chăm sóc đồng hồ từ các chuyên gia.",
+      button_label: "Đăng Ký Ngay"
+    };
+
+    const user = authService.getUser();
+    const hasAdminRole = user && user.roles && user.roles.some(r => {
+      const name = (typeof r === 'object' && r !== null) ? r.name : r;
+      return name === 'super_admin' || name === 'admin' || name === 'editor';
+    });
+    const canEditSettings = user && (
+      (user.permissions && user.permissions.includes('settings:write')) || hasAdminRole
+    );
+
     const section = document.createElement('section');
-    section.className = 'bg-zinc-950 py-12 font-sans sm:py-16 lg:py-20';
+    section.className = 'bg-zinc-950 py-12 font-sans sm:py-16 lg:py-20 relative';
 
     const container = document.createElement('div');
     container.className = 'mx-auto grid max-w-7xl grid-cols-1 gap-10 px-4 sm:px-6 lg:grid-cols-[0.95fr,1.05fr] lg:gap-16 lg:px-8';
@@ -11,9 +28,9 @@ export class Newsletter {
     const left = document.createElement('div');
     left.innerHTML = `
       <p class="mb-3 text-[10px] font-bold uppercase tracking-[0.18em] text-[#C9A961]">Newsletter</p>
-      <h2 class="text-3xl font-black leading-tight tracking-[0.05em] text-white sm:text-4xl">Nhận Ưu Đãi<br/>Độc Quyền</h2>
+      <h2 class="text-3xl font-black leading-tight tracking-[0.05em] text-white sm:text-4xl">${nl.title}</h2>
       <p class="mt-5 max-w-xl text-sm leading-8 text-zinc-400">
-        Đăng ký để nhận thông tin về bộ sưu tập mới, ưu đãi đặc biệt và tips chăm sóc đồng hồ từ các chuyên gia.
+        ${nl.description}
       </p>
       
       <!-- Counters Section -->
@@ -63,7 +80,7 @@ export class Newsletter {
           <!-- Gradient Shift Newsletter Button -->
           <button type="submit" id="nl-submit"
             class="newsletter-btn inline-flex h-12 w-full items-center justify-center rounded-xl px-4 text-xs font-black uppercase tracking-[0.12em] text-zinc-950">
-            Đăng Ký Ngay
+            ${nl.button_label}
           </button>
           <p id="nl-error" class="hidden text-xs text-red-500"></p>
         </form>
@@ -137,6 +154,21 @@ export class Newsletter {
     container.appendChild(left);
     container.appendChild(right);
     section.appendChild(container);
+
+    if (canEditSettings) {
+      const editBtn = document.createElement('button');
+      editBtn.type = 'button';
+      editBtn.className = 'absolute right-8 top-4 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-white/90 border border-zinc-200 text-[#A88840] hover:bg-[#C9A84C] hover:text-white hover:border-[#C9A84C] transition-all shadow-md cursor-pointer';
+      editBtn.title = 'Chỉnh sửa Newsletter';
+      editBtn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`;
+      editBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        openQuickSettings('sections', 'newsletter');
+      });
+      section.appendChild(editBtn);
+    }
+
     return section;
   }
 }

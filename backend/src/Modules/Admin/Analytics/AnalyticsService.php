@@ -10,6 +10,7 @@ use App\Models\PageViewEvent;
 use App\Models\PageSession;
 use App\Models\Order;
 use App\Models\Product;
+use PDO;
 
 class AnalyticsService
 {
@@ -27,6 +28,31 @@ class AnalyticsService
         $this->sessionModel = new PageSession($pdo);
         $this->orderModel = new Order($pdo);
         $this->productModel = new Product($pdo);
+    }
+
+    private function getDateRangeFilters(array $params, string $tableAlias = ''): array
+    {
+        $prefix = $tableAlias ? $tableAlias . '.' : '';
+        $days = (int)($params['days'] ?? 30);
+        $startDate = $params['start_date'] ?? null;
+        $endDate = $params['end_date'] ?? null;
+
+        if ($startDate && $endDate) {
+            return [
+                'sql' => "{$prefix}created_at BETWEEN :start_date AND :end_date",
+                'params' => [
+                    ':start_date' => $startDate . ' 00:00:00',
+                    ':end_date' => $endDate . ' 23:59:59',
+                ]
+            ];
+        } else {
+            return [
+                'sql' => "{$prefix}created_at >= DATE_SUB(NOW(), INTERVAL :days DAY)",
+                'params' => [
+                    ':days' => $days
+                ]
+            ];
+        }
     }
 
     public function getDashboardStats(): array
@@ -159,20 +185,90 @@ class AnalyticsService
         ];
     }
 
-    public function getVisitorsChart(int $days = 30): array
+    public function getHourlyVisitors(string $day): array
     {
-        $to = date('Y-m-d');
-        $from = date('Y-m-d', strtotime("-{$days} days"));
+        $pdo = Database::getInstance();
+        $stmt = $pdo->prepare(
+            "SELECT HOUR(created_at) AS hour,
+                    COUNT(DISTINCT session_id) AS unique_visitors,
+                    COUNT(*) AS total_visits
+             FROM visitor_logs
+             WHERE DATE(created_at) = :day
+             GROUP BY HOUR(created_at)
+             ORDER BY hour ASC"
+        );
+        $stmt->bindValue(':day', $day, PDO::PARAM_STR);
+        $stmt->execute();
+        $raw = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+
+        $hourlyData = [];
+        for ($h = 0; $h < 24; $h++) {
+            $hourlyData[$h] = [
+                'date' => sprintf('%02d:00', $h),
+                'unique_visitors' => 0,
+                'total_visits' => 0
+            ];
+        }
+
+        foreach ($raw as $row) {
+            $h = (int)$row['hour'];
+            $hourlyData[$h] = [
+                'date' => sprintf('%02d:00', $h),
+                'unique_visitors' => (int)$row['unique_visitors'],
+                'total_visits' => (int)$row['total_visits']
+            ];
+        }
+
+        return array_values($hourlyData);
+    }
+
+    public function getVisitorsChart(array $params = []): array
+    {
+        $startDate = $params['start_date'] ?? null;
+        $endDate = $params['end_date'] ?? null;
+        $days = (int)($params['days'] ?? 30);
+
+        if ($startDate && $endDate) {
+            if ($startDate === $endDate) {
+                $data = $this->getHourlyVisitors($startDate);
+                return ['success' => true, 'data' => $data];
+            }
+            $from = $startDate;
+            $to = $endDate;
+        } else {
+            $to = date('Y-m-d');
+            $from = date('Y-m-d', strtotime("-{$days} days"));
+        }
         $data = $this->visitorModel->getByDateRange($from, $to);
 
         return ['success' => true, 'data' => $data];
     }
 
-    public function getTopPages(int $limit = 10, int $days = 30): array
+    public function getTopPages(int $limit = 10, array $params = []): array
     {
+        $pdo = Database::getInstance();
+        $dateInfo = $this->getDateRangeFilters($params);
+
+        $sql = "SELECT page_url, page_title,
+                       COUNT(*) AS views,
+                       COUNT(DISTINCT session_id) AS unique_views,
+                       ROUND(AVG(time_on_page)) AS avg_time,
+                       ROUND(AVG(scroll_depth)) AS avg_scroll
+                FROM page_view_events
+                WHERE {$dateInfo['sql']}
+                GROUP BY page_url, page_title
+                ORDER BY views DESC
+                LIMIT :limit";
+
+        $stmt = $pdo->prepare($sql);
+        foreach ($dateInfo['params'] as $key => $val) {
+            $stmt->bindValue($key, $val, is_int($val) ? PDO::PARAM_INT : PDO::PARAM_STR);
+        }
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->execute();
         return [
             'success' => true,
-            'data' => $this->pageViewModel->getTopPages($limit, $days),
+            'data' => $stmt->fetchAll() ?: []
         ];
     }
 
@@ -188,41 +284,161 @@ class AnalyticsService
         ];
     }
 
-    public function getCountryStats(int $limit = 10, int $days = 30): array
+    public function getCountryStats(int $limit = 10, array $params = []): array
     {
+        $pdo = Database::getInstance();
+        $dateInfo = $this->getDateRangeFilters($params);
+
+        $sql = "SELECT country_code, country_name,
+                       COUNT(DISTINCT session_id) AS unique_visitors
+                FROM visitor_logs
+                WHERE country_code IS NOT NULL
+                  AND {$dateInfo['sql']}
+                GROUP BY country_code, country_name
+                ORDER BY unique_visitors DESC
+                LIMIT :limit";
+
+        $stmt = $pdo->prepare($sql);
+        foreach ($dateInfo['params'] as $key => $val) {
+            $stmt->bindValue($key, $val, is_int($val) ? PDO::PARAM_INT : PDO::PARAM_STR);
+        }
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->execute();
         return [
             'success' => true,
-            'data' => $this->visitorModel->getByCountry($limit, $days),
+            'data' => $stmt->fetchAll() ?: []
         ];
     }
 
-    public function getCityStats(int $limit = 10, int $days = 30): array
+    public function getCityStats(int $limit = 10, array $params = []): array
     {
+        $pdo = Database::getInstance();
+        $dateInfo = $this->getDateRangeFilters($params);
+
+        $sql = "SELECT city, country_name,
+                       COUNT(DISTINCT session_id) AS unique_visitors
+                FROM visitor_logs
+                WHERE city IS NOT NULL
+                  AND city <> ''
+                  AND {$dateInfo['sql']}
+                GROUP BY city, country_name
+                ORDER BY unique_visitors DESC
+                LIMIT :limit";
+
+        $stmt = $pdo->prepare($sql);
+        foreach ($dateInfo['params'] as $key => $val) {
+            $stmt->bindValue($key, $val, is_int($val) ? PDO::PARAM_INT : PDO::PARAM_STR);
+        }
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->execute();
         return [
             'success' => true,
-            'data' => $this->visitorModel->getByCity($limit, $days),
+            'data' => $stmt->fetchAll() ?: []
         ];
     }
 
-    public function getDeviceStats(int $days = 30): array
+    public function getDeviceStats(array $params = []): array
     {
+        $pdo = Database::getInstance();
+        $dateInfo = $this->getDateRangeFilters($params);
+
+        $sql = "SELECT device_type,
+                       COUNT(DISTINCT session_id) AS unique_visitors
+                FROM visitor_logs
+                WHERE {$dateInfo['sql']}
+                GROUP BY device_type
+                ORDER BY unique_visitors DESC";
+
+        $stmt = $pdo->prepare($sql);
+        foreach ($dateInfo['params'] as $key => $val) {
+            $stmt->bindValue($key, $val, is_int($val) ? PDO::PARAM_INT : PDO::PARAM_STR);
+        }
+        $stmt->execute();
         return [
             'success' => true,
-            'data' => $this->visitorModel->getDeviceSplit($days),
+            'data' => $stmt->fetchAll() ?: []
         ];
     }
 
-    public function getSourceStats(int $limit = 10, int $days = 30): array
+    public function getSourceStats(int $limit = 10, array $params = []): array
     {
+        $pdo = Database::getInstance();
+        $dateInfo = $this->getDateRangeFilters($params);
+
+        $sql = "SELECT
+                    CASE
+                        WHEN referrer IS NULL OR referrer = '' THEN 'Direct'
+                        WHEN referrer LIKE '%google.%' THEN 'Google'
+                        WHEN referrer LIKE '%facebook.%' OR referrer LIKE '%fb.%' THEN 'Facebook'
+                        WHEN referrer LIKE '%zalo.%' THEN 'Zalo'
+                        WHEN referrer LIKE '%instagram.%' THEN 'Instagram'
+                        WHEN referrer LIKE '%tiktok.%' THEN 'TikTok'
+                        WHEN referrer LIKE '%youtube.%' THEN 'YouTube'
+                        ELSE 'Referral'
+                    END AS source,
+                    COUNT(DISTINCT session_id) AS unique_visitors
+                FROM visitor_logs
+                WHERE {$dateInfo['sql']}
+                GROUP BY source
+                ORDER BY unique_visitors DESC
+                LIMIT :limit";
+
+        $stmt = $pdo->prepare($sql);
+        foreach ($dateInfo['params'] as $key => $val) {
+            $stmt->bindValue($key, $val, is_int($val) ? PDO::PARAM_INT : PDO::PARAM_STR);
+        }
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->execute();
         return [
             'success' => true,
-            'data' => $this->visitorModel->getSourceSplit($limit, $days),
+            'data' => $stmt->fetchAll() ?: []
         ];
     }
 
-    public function getSummary(int $days = 30): array
+    public function getSummary(array $params = []): array
     {
-        $visitors = $this->visitorModel->getSummary($days);
+        $pdo = Database::getInstance();
+        $dateInfo = $this->getDateRangeFilters($params);
+
+        // 1. Total visits and unique visitors
+        $sqlVis = "SELECT COUNT(*) AS total_visits,
+                          COUNT(DISTINCT session_id) AS unique_visitors
+                   FROM visitor_logs
+                   WHERE {$dateInfo['sql']}";
+        $stmtVis = $pdo->prepare($sqlVis);
+        foreach ($dateInfo['params'] as $key => $val) {
+            $stmtVis->bindValue($key, $val, is_int($val) ? PDO::PARAM_INT : PDO::PARAM_STR);
+        }
+        $stmtVis->execute();
+        $visitors = $stmtVis->fetch() ?: ['total_visits' => 0, 'unique_visitors' => 0];
+
+        // 2. Page views
+        $sqlViews = "SELECT COUNT(*) FROM page_view_events WHERE {$dateInfo['sql']}";
+        $stmtViews = $pdo->prepare($sqlViews);
+        foreach ($dateInfo['params'] as $key => $val) {
+            $stmtViews->bindValue($key, $val, is_int($val) ? PDO::PARAM_INT : PDO::PARAM_STR);
+        }
+        $stmtViews->execute();
+        $pageViews = (int)$stmtViews->fetchColumn();
+
+        // 3. Avg time on page
+        $sqlTime = "SELECT AVG(time_on_page) FROM page_view_events WHERE exited_at IS NOT NULL AND {$dateInfo['sql']}";
+        $stmtTime = $pdo->prepare($sqlTime);
+        foreach ($dateInfo['params'] as $key => $val) {
+            $stmtTime->bindValue($key, $val, is_int($val) ? PDO::PARAM_INT : PDO::PARAM_STR);
+        }
+        $stmtTime->execute();
+        $avgTime = round((float)$stmtTime->fetchColumn(), 2);
+
+        // 4. Avg scroll depth
+        $sqlScroll = "SELECT AVG(scroll_depth) FROM page_view_events WHERE exited_at IS NOT NULL AND {$dateInfo['sql']}";
+        $stmtScroll = $pdo->prepare($sqlScroll);
+        foreach ($dateInfo['params'] as $key => $val) {
+            $stmtScroll->bindValue($key, $val, is_int($val) ? PDO::PARAM_INT : PDO::PARAM_STR);
+        }
+        $stmtScroll->execute();
+        $avgScroll = round((float)$stmtScroll->fetchColumn(), 2);
+
         $activeUsers = $this->sessionModel->getActiveCount(5);
 
         return [
@@ -230,12 +446,138 @@ class AnalyticsService
             'data' => [
                 'total_visits' => (int)($visitors['total_visits'] ?? 0),
                 'unique_visitors' => (int)($visitors['unique_visitors'] ?? 0),
-                'page_views' => $this->pageViewModel->getTotalViews($days),
-                'avg_time_on_page' => $this->pageViewModel->getAvgTimeOnPage($days),
-                'avg_scroll_depth' => $this->pageViewModel->getAvgScrollDepth($days),
+                'page_views' => $pageViews,
+                'avg_time_on_page' => $avgTime,
+                'avg_scroll_depth' => $avgScroll,
                 'active_users' => $activeUsers,
             ],
         ];
+    }
+
+    public function getBusinessStats(array $params = []): array
+    {
+        $pdo = Database::getInstance();
+        $dateInfo = $this->getDateRangeFilters($params);
+
+        $sql = "SELECT COUNT(*) AS total_orders,
+                       SUM(CASE WHEN status IN ('completed', 'processing', 'shipping') THEN total_amount ELSE 0 END) AS total_revenue
+                FROM orders
+                WHERE {$dateInfo['sql']}";
+
+        $stmt = $pdo->prepare($sql);
+        foreach ($dateInfo['params'] as $key => $val) {
+            $stmt->bindValue($key, $val, is_int($val) ? PDO::PARAM_INT : PDO::PARAM_STR);
+        }
+        $stmt->execute();
+        $res = $stmt->fetch() ?: ['total_orders' => 0, 'total_revenue' => 0];
+
+        $totalOrders = (int)$res['total_orders'];
+        $totalRevenue = (float)$res['total_revenue'];
+        $aov = $totalOrders > 0 ? round($totalRevenue / $totalOrders, 2) : 0;
+
+        return [
+            'total_orders' => $totalOrders,
+            'total_revenue' => $totalRevenue,
+            'aov' => $aov
+        ];
+    }
+
+    public function getTopViewedProducts(int $limit = 5, array $params = []): array
+    {
+        $pdo = Database::getInstance();
+        $dateInfo = $this->getDateRangeFilters($params, 'pve');
+
+        $sql = "SELECT p.id, p.name, p.slug, p.price, p.sale_price, p.images, p.sku,
+                       COUNT(*) AS views,
+                       COUNT(DISTINCT pve.session_id) AS unique_views
+                FROM page_view_events pve
+                INNER JOIN products p ON pve.page_url = CONCAT('/san-pham/', p.slug)
+                WHERE {$dateInfo['sql']}
+                GROUP BY p.id, p.name, p.slug, p.price, p.sale_price, p.images, p.sku
+                ORDER BY views DESC
+                LIMIT :limit";
+
+        $stmt = $pdo->prepare($sql);
+        foreach ($dateInfo['params'] as $key => $val) {
+            $stmt->bindValue($key, $val, is_int($val) ? PDO::PARAM_INT : PDO::PARAM_STR);
+        }
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->execute();
+        $rows = $stmt->fetchAll() ?: [];
+
+        foreach ($rows as &$row) {
+            $row['images'] = $row['images'] ? json_decode($row['images'], true) : [];
+        }
+        return $rows;
+    }
+
+    public function getTopViewedCategories(array $params = []): array
+    {
+        $pdo = Database::getInstance();
+        $dateInfo = $this->getDateRangeFilters($params);
+
+        $sql = "SELECT 
+                    CASE 
+                        WHEN page_url LIKE '/nam%' THEN 'Nam'
+                        WHEN page_url LIKE '/nu%' THEN 'Nữ'
+                        WHEN page_url LIKE '/phu-kien%' THEN 'Phụ kiện'
+                        WHEN page_url LIKE '/sale%' THEN 'Khuyến mãi'
+                        ELSE 'Khác'
+                    END AS name,
+                    COUNT(*) AS count
+                FROM page_view_events
+                WHERE (page_url LIKE '/nam%' OR page_url LIKE '/nu%' OR page_url LIKE '/phu-kien%' OR page_url LIKE '/sale%')
+                  AND {$dateInfo['sql']}
+                GROUP BY name
+                ORDER BY count DESC";
+
+        $stmt = $pdo->prepare($sql);
+        foreach ($dateInfo['params'] as $key => $val) {
+            $stmt->bindValue($key, $val, is_int($val) ? PDO::PARAM_INT : PDO::PARAM_STR);
+        }
+        $stmt->execute();
+        return $stmt->fetchAll() ?: [];
+    }
+
+    public function getTopSearchKeywords(int $limit = 10, array $params = []): array
+    {
+        $pdo = Database::getInstance();
+        $dateInfo = $this->getDateRangeFilters($params);
+
+        $sql = "SELECT page_url
+                FROM page_view_events
+                WHERE page_url LIKE '%search=%'
+                  AND {$dateInfo['sql']}";
+
+        $stmt = $pdo->prepare($sql);
+        foreach ($dateInfo['params'] as $key => $val) {
+            $stmt->bindValue($key, $val, is_int($val) ? PDO::PARAM_INT : PDO::PARAM_STR);
+        }
+        $stmt->execute();
+        $rows = $stmt->fetchAll(PDO::FETCH_COLUMN) ?: [];
+
+        $keywords = [];
+        foreach ($rows as $url) {
+            $parsed = parse_url($url);
+            if (!empty($parsed['query'])) {
+                parse_str($parsed['query'], $queryParts);
+                $q = trim($queryParts['search'] ?? '');
+                if ($q !== '') {
+                    $qLower = mb_strtolower($q, 'UTF-8');
+                    if (!isset($keywords[$qLower])) {
+                        $keywords[$qLower] = [
+                            'name' => $q,
+                            'count' => 0
+                        ];
+                    }
+                    $keywords[$qLower]['count']++;
+                }
+            }
+        }
+
+        uasort($keywords, fn($a, $b) => $b['count'] <=> $a['count']);
+
+        return array_slice(array_values($keywords), 0, $limit);
     }
 
     public function resolveCountry(string $ip): array

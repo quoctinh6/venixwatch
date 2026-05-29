@@ -1,7 +1,8 @@
 const PHONE = '0929000063';
 const ZALO_URL = `https://zalo.me/${PHONE}`;
 const PHONE_URL = `tel:${PHONE}`;
-const FB_URL = 'https://facebook.com/donghoatuan';
+const MESSENGER_URL = 'https://m.me/61590595195580';
+const FB_URL = 'https://www.facebook.com/people/Venix-Watch/61590595195580/';
 
 export class ContactFloater {
   mount() {
@@ -44,6 +45,7 @@ export class ContactFloater {
       }
       .contact-btn-zalo { background: #0068FF; }
       .contact-btn-facebook { background: #1877F2; }
+      .contact-btn-messenger { background: linear-gradient(135deg, #0084FF 0%, #A033FF 50%, #FF5C87 100%); }
       .contact-btn-phone { background: #C9A961; }
       .contact-label {
         position: absolute;
@@ -116,6 +118,19 @@ export class ContactFloater {
       </svg>
     `;
 
+    const messengerBtn = document.createElement('a');
+    messengerBtn.href = MESSENGER_URL;
+    messengerBtn.target = '_blank';
+    messengerBtn.rel = 'noopener noreferrer';
+    messengerBtn.title = 'Chat Messenger';
+    messengerBtn.className = 'contact-btn contact-btn-messenger';
+    messengerBtn.innerHTML = `
+      <span class="contact-label">Messenger</span>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="white" aria-hidden="true">
+        <path d="M12 2C6.48 2 2 6.14 2 11.25c0 2.91 1.45 5.51 3.73 7.12V22l3.43-1.89c.89.25 1.84.39 2.84.39 5.52 0 10-4.14 10-9.25S17.52 2 12 2zm1.18 11.83l-2.55-2.73-4.97 2.73 5.46-5.8 2.62 2.73 4.9-2.73-5.46 5.8z"/>
+      </svg>
+    `;
+
     const phoneBtn = document.createElement('a');
     phoneBtn.href = PHONE_URL;
     phoneBtn.title = `Gọi ${PHONE}`;
@@ -128,6 +143,7 @@ export class ContactFloater {
     `;
 
     floater.appendChild(facebookBtn);
+    floater.appendChild(messengerBtn);
     floater.appendChild(zaloBtn);
     floater.appendChild(phoneBtn);
     document.body.appendChild(floater);

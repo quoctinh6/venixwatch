@@ -1,31 +1,35 @@
-import { PEXELS } from '../../services/config.js';
+import { PEXELS, resolveImageUrl } from '../../services/config.js';
 import { navigate, throttle } from '../../utils/helpers.js';
-
-const CATEGORIES = [
-  {
-    img: PEXELS.CATEGORY_NAM,
-    title: 'Đồng Hồ Nam',
-    subtitle: 'Mạnh mẽ. Lịch lãm. Đẳng cấp.',
-    href: '/nam',
-  },
-  {
-    img: PEXELS.CATEGORY_NU,
-    title: 'Đồng Hồ Nữ',
-    subtitle: 'Thanh lịch. Tinh tế. Quyến rũ.',
-    href: '/nu',
-  },
-  {
-    img: PEXELS.CATEGORY_PHU_KIEN,
-    title: 'Phụ Kiện',
-    subtitle: 'Dây đeo. Hộp đựng. Phụ kiện cao cấp.',
-    href: '/phu-kien',
-  },
-];
+import { authService } from '../../services/authService.js';
+import { openQuickSettings } from '../../components/QuickSettingsModal.js?v=1.0.3';
 
 export class CategoryBanners {
   render() {
+    const user = authService.getUser();
+    const hasAdminRole = user && user.roles && user.roles.some(r => {
+      const name = (typeof r === 'object' && r !== null) ? r.name : r;
+      return name === 'super_admin' || name === 'admin' || name === 'editor';
+    });
+    const canEditSettings = user && (
+      (user.permissions && user.permissions.includes('settings:write')) || hasAdminRole
+    );
+
     const section = document.createElement('section');
-    section.className = 'pb-10 font-sans sm:pb-14 lg:pb-16 overflow-hidden';
+    section.className = 'pb-10 font-sans sm:pb-14 lg:pb-16 overflow-hidden relative';
+
+    if (canEditSettings) {
+      const editBtn = document.createElement('button');
+      editBtn.type = 'button';
+      editBtn.className = 'absolute right-8 top-2 z-30 flex h-7 w-7 items-center justify-center rounded-full bg-white/90 border border-zinc-200 text-[#A88840] hover:bg-zinc-950 hover:text-white hover:border-zinc-950 transition-all shadow-md cursor-pointer';
+      editBtn.title = 'Chỉnh sửa Danh Mục Nổi Bật';
+      editBtn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`;
+      editBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        openQuickSettings('sections', 'category_banners');
+      });
+      section.appendChild(editBtn);
+    }
 
     const container = document.createElement('div');
     container.className = 'mx-auto max-w-7xl px-4 sm:px-6 lg:px-8';
@@ -33,13 +37,37 @@ export class CategoryBanners {
     const grid = document.createElement('div');
     grid.className = 'grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-5';
 
-    CATEGORIES.forEach((category) => {
+    const defaultImgs = [PEXELS.CATEGORY_NAM, PEXELS.CATEGORY_NU, PEXELS.CATEGORY_PHU_KIEN];
+    const cb = window.APP_SETTINGS?.home_sections?.category_banners || [
+      {
+        img: PEXELS.CATEGORY_NAM,
+        title: 'Đồng Hồ Nam',
+        subtitle: 'Mạnh mẽ. Lịch lãm. Đẳng cấp.',
+        href: '/nam',
+      },
+      {
+        img: PEXELS.CATEGORY_NU,
+        title: 'Đồng Hồ Nữ',
+        subtitle: 'Thanh lịch. Tinh tế. Quyến rũ.',
+        href: '/nu',
+      },
+      {
+        img: PEXELS.CATEGORY_PHU_KIEN,
+        title: 'Phụ Kiện',
+        subtitle: 'Dây đeo. Hộp đựng. Phụ kiện cao cấp.',
+        href: '/phu-kien',
+      },
+    ];
+
+    cb.forEach((category, idx) => {
+      const defaultImg = defaultImgs[idx] || PEXELS.CATEGORY_NAM;
+      const imgUrl = resolveImageUrl(category.img) || defaultImg;
       const item = document.createElement('article');
       item.className = 'group relative aspect-[4/5] cursor-pointer overflow-hidden rounded-2xl';
       item.innerHTML = `
         <!-- Image Parallax Wrapper -->
         <div class="absolute inset-0 overflow-hidden rounded-2xl">
-          <img src="${category.img}" alt="${category.title}"
+          <img src="${imgUrl}" alt="${category.title}"
             class="parallax-img h-full w-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-110"
             style="will-change: transform;"
             loading="lazy"

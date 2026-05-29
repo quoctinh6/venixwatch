@@ -1,4 +1,4 @@
-import { getCategories, deleteCategory } from '../../../services/adminService.js';
+import { getCategories, deleteCategory, getSubcategories, deleteSubcategory } from '../../../services/adminService.js';
 import { createConfirmDialog, showToast, createPagination } from '../shared/ui.js';
 import { openCategoryForm } from './CategoryForm.js';
 
@@ -80,26 +80,93 @@ function updateSortIcons(container) {
 
 function getSorted(data) {
   const [col, dir] = Object.entries(state.sortDir).find(([, v]) => v) || [];
-  if (!col) return data;
+  
+  // Tách biệt danh mục cha và danh mục con
+  const cats = data.filter(item => !item.is_subcategory);
+  const subs = data.filter(item => item.is_subcategory);
+  
+  if (!col) {
+    // Nếu không sắp xếp, xếp theo cấu trúc cây tự nhiên
+    const merged = [];
+    cats.forEach(cat => {
+      merged.push(cat);
+      const children = subs.filter(sub => Number(sub.category_id) === Number(cat.id));
+      children.sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+      children.forEach(child => merged.push(child));
+    });
+    // Add các danh mục con mồ côi (nếu có)
+    subs.forEach(sub => {
+      if (!cats.some(cat => Number(cat.id) === Number(sub.category_id))) {
+        merged.push(sub);
+      }
+    });
+    return merged;
+  }
+  
   const factor = dir === 'asc' ? 1 : -1;
-  return [...data].sort((a, b) => {
+  const sortFn = (a, b) => {
     let va, vb;
     if (col === 'name')  { va = (a.name || '').toLowerCase(); vb = (b.name || '').toLowerCase(); return va.localeCompare(vb) * factor; }
     if (col === 'count') { va = Number(a.products_count ?? 0); vb = Number(b.products_count ?? 0); return (va - vb) * factor; }
     return 0;
+  };
+
+  // Sắp xếp các danh mục cha
+  const sortedCats = [...cats].sort(sortFn);
+  const merged = [];
+  
+  sortedCats.forEach(cat => {
+    merged.push(cat);
+    // Sắp xếp các danh mục con thuộc danh mục cha này
+    const children = subs.filter(sub => Number(sub.category_id) === Number(cat.id));
+    const sortedChildren = [...children].sort(sortFn);
+    sortedChildren.forEach(child => merged.push(child));
   });
+
+  // Xử lý các danh mục con mồ côi
+  const orphans = subs.filter(sub => !cats.some(cat => Number(cat.id) === Number(sub.category_id)));
+  const sortedOrphans = [...orphans].sort(sortFn);
+  sortedOrphans.forEach(sub => merged.push(sub));
+
+  return merged;
 }
 
 async function loadCategories(container) {
   const tbody = container.querySelector('#cat-tbody');
   if (!tbody) return;
   try {
-    const res = await getCategories();
-    const list = Array.isArray(res.data) ? res.data : (Array.isArray(res) ? res : []);
-    state.data = list;
+    const [catsRes, subsRes] = await Promise.all([
+      getCategories(),
+      getSubcategories()
+    ]);
+    const cats = Array.isArray(catsRes.data) ? catsRes.data : (Array.isArray(catsRes) ? catsRes : []);
+    const subs = Array.isArray(subsRes.data) ? subsRes.data : (Array.isArray(subsRes) ? subsRes : []);
+
+    cats.forEach(c => { c.is_subcategory = false; });
+    subs.forEach(s => { s.is_subcategory = true; });
+
+    // Ghép cây danh mục
+    const merged = [];
+    cats.forEach(cat => {
+      merged.push(cat);
+      const children = subs.filter(sub => Number(sub.category_id) === Number(cat.id));
+      children.sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+      children.forEach(child => {
+        merged.push(child);
+      });
+    });
+
+    subs.forEach(sub => {
+      if (!cats.some(cat => Number(cat.id) === Number(sub.category_id))) {
+        merged.push(sub);
+      }
+    });
+
+    state.data = merged;
     renderRows(container);
     renderPageNav(container);
-  } catch {
+  } catch (error) {
+    console.error(error);
     tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-red-400 text-sm">Lỗi tải danh mục</td></tr>`;
   }
 }
@@ -108,7 +175,7 @@ function renderRows(container) {
   const tbody = container.querySelector('#cat-tbody');
   const sorted = getSorted(state.data);
   const catMap = {};
-  state.data.forEach(item => { catMap[item.id] = item; });
+  state.data.forEach(item => { if (!item.is_subcategory) catMap[item.id] = item; });
 
   if (!sorted.length) {
     tbody.innerHTML = `<tr><td colspan="6" class="py-10 text-center text-gray-400 text-sm">Chưa có danh mục nào</td></tr>`;
@@ -122,13 +189,15 @@ function renderRows(container) {
   rows.forEach((cat) => {
     const tr = document.createElement('tr');
     tr.className = 'hover:bg-gray-50 transition-colors';
-    const indent = cat.parent_id ? 'pl-8' : '';
-    const prefix = cat.parent_id ? `<span class="text-gray-300 mr-1">↳</span>` : '';
+    
+    const isSub = cat.is_subcategory;
+    const indent = isSub ? 'pl-8' : '';
+    const prefix = isSub ? `<span class="text-gray-300 mr-2 font-normal">↳</span>` : '';
 
     tr.innerHTML = `
       <td class="px-4 py-3 font-medium text-gray-900 ${indent}">${prefix}${cat.name}</td>
       <td class="px-4 py-3 text-gray-500 font-mono text-xs">${cat.slug || '-'}</td>
-      <td class="px-4 py-3 text-gray-600 text-xs">${cat.parent_id && catMap[cat.parent_id] ? catMap[cat.parent_id].name : '-'}</td>
+      <td class="px-4 py-3 text-gray-600 text-xs">${isSub && catMap[cat.category_id] ? catMap[cat.category_id].name : '-'}</td>
       <td class="px-4 py-3 text-gray-600">${cat.products_count ?? 0}</td>
       <td class="px-4 py-3">
         <span class="px-2 py-0.5 text-xs rounded-full font-medium ${cat.is_active !== false && Number(cat.is_active) !== 0 ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}">
@@ -151,8 +220,12 @@ function renderRows(container) {
     tr.querySelector('.del-btn').addEventListener('click', () => {
       createConfirmDialog(`Xóa danh mục "${cat.name}"?`, async () => {
         try {
-          await deleteCategory(cat.id);
-          showToast('Đã xóa');
+          if (isSub) {
+            await deleteSubcategory(cat.id);
+          } else {
+            await deleteCategory(cat.id);
+          }
+          showToast('Đã xóa danh mục thành công');
           loadCategories(container);
         } catch (error) {
           showToast(error.message, 'error');

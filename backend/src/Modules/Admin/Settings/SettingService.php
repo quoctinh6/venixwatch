@@ -48,7 +48,9 @@ class SettingService
                 'brand_name' => 'Venix Watch',
                 'logo_url' => '',
                 'hero_banners' => [],
-                'theme_colors' => []
+                'theme_colors' => [],
+                'navigation_menu' => [],
+                'home_sections' => []
             ];
         }
 
@@ -121,16 +123,44 @@ class SettingService
                 }
             }
 
-            // Log changes to settings_history
+            // 5. Compare navigation_menu
+            if (isset($newSettings['navigation_menu'])) {
+                $oldVal = json_encode($oldSettings['navigation_menu'] ?? [], JSON_UNESCAPED_UNICODE);
+                $newVal = json_encode($newSettings['navigation_menu'], JSON_UNESCAPED_UNICODE);
+                if ($oldVal !== $newVal) {
+                    $logs[] = [
+                        'action' => 'Cập nhật Menu điều hướng',
+                        'details' => "Thay đổi cấu trúc danh mục và liên kết của thanh điều hướng"
+                    ];
+                    $this->updateSetting('navigation_menu', $newVal);
+                }
+            }
+
+            // 6. Compare home_sections
+            if (isset($newSettings['home_sections'])) {
+                $oldVal = json_encode($oldSettings['home_sections'] ?? [], JSON_UNESCAPED_UNICODE);
+                $newVal = json_encode($newSettings['home_sections'], JSON_UNESCAPED_UNICODE);
+                if ($oldVal !== $newVal) {
+                    $logs[] = [
+                        'action' => 'Cập nhật Bố cục trang chủ',
+                        'details' => "Thay đổi nội dung, hình ảnh hoặc nút bấm của các section trang chủ"
+                    ];
+                    $this->updateSetting('home_sections', $newVal);
+                }
+            }
+
+            // Log changes to settings_history with snapshot of new state
+            $newSnapshot = json_encode($this->getAllSettings(), JSON_UNESCAPED_UNICODE);
             foreach ($logs as $log) {
                 $stmt = $this->pdo->prepare(
-                    "INSERT INTO settings_history (`action`, `details`, `changed_by`) 
-                     VALUES (:action, :details, :changed_by)"
+                    "INSERT INTO settings_history (`action`, `details`, `changed_by`, `settings_snapshot`) 
+                     VALUES (:action, :details, :changed_by, :settings_snapshot)"
                 );
                 $stmt->execute([
                     ':action' => $log['action'],
                     ':details' => $log['details'],
-                    ':changed_by' => $changedBy
+                    ':changed_by' => $changedBy,
+                    ':settings_snapshot' => $newSnapshot
                 ]);
             }
 
@@ -212,4 +242,57 @@ class SettingService
         }
         return rtrim($base, '/') . '/image/settings/' . $filename;
     }
+
+    public function rollbackTo(int $historyId, string $changedBy): array
+    {
+        try {
+            $stmt = $this->pdo->prepare("SELECT * FROM settings_history WHERE id = :id");
+            $stmt->execute([':id' => $historyId]);
+            $history = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$history) {
+                return ['success' => false, 'error' => 'Không tìm thấy bản ghi lịch sử.', 'code' => 404];
+            }
+
+            $snapshotStr = $history['settings_snapshot'] ?? '';
+            if (empty($snapshotStr)) {
+                return ['success' => false, 'error' => 'Bản ghi lịch sử này không chứa ảnh chụp cấu hình (được tạo trước khi có tính năng hoàn tác).', 'code' => 400];
+            }
+
+            $snapshot = json_decode($snapshotStr, true);
+            if (!is_array($snapshot)) {
+                return ['success' => false, 'error' => 'Ảnh chụp cấu hình không hợp lệ.', 'code' => 400];
+            }
+
+            $this->pdo->beginTransaction();
+
+            foreach ($snapshot as $key => $value) {
+                $valStr = is_array($value) ? json_encode($value, JSON_UNESCAPED_UNICODE) : (string)$value;
+                $this->updateSetting($key, $valStr);
+            }
+
+            $details = "Khôi phục cấu hình hệ thống về phiên bản ngày " . date('d/m/Y H:i:s', strtotime($history['created_at'])) . " (Thao tác bởi " . $history['changed_by'] . ")";
+            $newSnapshot = json_encode($this->getAllSettings(), JSON_UNESCAPED_UNICODE);
+            
+            $stmtHist = $this->pdo->prepare(
+                "INSERT INTO settings_history (`action`, `details`, `changed_by`, `settings_snapshot`) 
+                 VALUES ('Hoàn tác cấu hình', :details, :changed_by, :settings_snapshot)"
+            );
+            $stmtHist->execute([
+                ':details' => $details,
+                ':changed_by' => $changedBy,
+                ':settings_snapshot' => $newSnapshot
+            ]);
+
+            $this->pdo->commit();
+            return ['success' => true, 'message' => 'Hoàn tác cấu hình thành công!'];
+
+        } catch (Exception $e) {
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
+            return ['success' => false, 'error' => $e->getMessage(), 'code' => 500];
+        }
+    }
 }
+

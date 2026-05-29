@@ -1,0 +1,83 @@
+{
+    "success": true,
+    "message": "Successfully updated database brands on live server to match frontend display!",
+    "brands": [
+        {
+            "id": 1,
+            "name": "Rolex Premium",
+            "slug": "rolex",
+            "source_name": "Rolex",
+            "logo_url": null,
+            "is_active": 1,
+            "sort_order": 1,
+            "created_at": "2026-05-29 16:39:07",
+            "updated_at": "2026-05-29 16:39:07"
+        },
+        {
+            "id": 2,
+            "name": "Omega Switzerland",
+            "slug": "omega",
+            "source_name": "Omega",
+            "logo_url": null,
+            "is_active": 1,
+            "sort_order": 2,
+            "created_at": "2026-05-29 16:39:07",
+            "updated_at": "2026-05-29 16:39:07"
+        },
+        {
+            "id": 3,
+            "name": "Hublot Modern",
+            "slug": "hublot",
+            "source_name": "Hublot",
+            "logo_url": null,
+            "is_active": 1,
+            "sort_order": 3,
+            "created_at": "2026-05-29 16:39:07",
+            "updated_at": "2026-05-29 16:39:07"
+        },
+        {
+            "id": 4,
+            "name": "Tissot Luxury",
+            "slug": "tissot",
+            "source_name": "Tissot",
+            "logo_url": null,
+            "is_active": 1,
+            "sort_order": 4,
+            "created_at": "2026-05-29 16:39:07",
+            "updated_at": "2026-05-29 16:39:07"
+        },
+        {
+            "id": 5,
+            "name": "Longines Classic",
+            "slug": "longines",
+            "source_name": "Longines",
+            "logo_url": null,
+            "is_active": 1,
+            "sort_order": 5,
+            "created_at": "2026-05-29 16:39:07",
+            "updated_at": "2026-05-29 16:39:07"
+        },
+        {
+            "id": 6,
+            "name": "Patek Philippe",
+            "slug": "patek",
+            "source_name": "Patek",
+            "logo_url": null,
+            "is_active": 1,
+            "sort_order": 6,
+            "created_at": "2026-05-29 16:39:07",
+            "updated_at": "2026-05-29 16:39:07"
+        },
+        {
+            "id": 7,
+            "name": "Audemars Piguet",
+            "slug": "audemars",
+            "source_name": "Audemars",
+            "logo_url": null,
+            "is_active": 1,
+            "sort_order": 7,
+            "created_at": "2026-05-29 16:39:07",
+            "updated_at": "2026-05-29 16:39:07"
+        }
+    ]
+}

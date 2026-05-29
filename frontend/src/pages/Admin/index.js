@@ -10,8 +10,9 @@ import { renderUsers } from './Users/index.js';
 import { renderRoles } from './Roles/index.js';
 import { renderWarranties } from './Warranties/index.js';
 import { renderFlashSales } from './FlashSales/index.js';
-import { renderAnalytics } from './Analytics/index.js';
+import { renderAnalytics } from './Analytics/index.js?v=1.0.5';
 import { renderSettings } from './Settings/index.js';
+import { renderNews } from './News/index.js';
 import { API_BASE, STORAGE_KEYS } from '../../services/config.js';
 
 const routeTitles = {
@@ -25,6 +26,7 @@ const routeTitles = {
   'flash-sales': 'Flash Sale',
   roles: 'Phân Quyền',
   analytics: 'Analytics',
+  news: 'Quản Lý Tin Tức',
   settings: 'Cài Đặt Hệ Thống',
 };
 
@@ -58,6 +60,7 @@ function renderContent(route, container) {
     case 'roles': renderRoles(container); break;
     case 'analytics': renderAnalytics(container); break;
     case 'settings': renderSettings(container); break;
+    case 'news': renderNews(container); break;
     default: renderDashboard(container);
   }
 }
@@ -130,7 +133,7 @@ async function init() {
     theme_colors: {}
   };
   try {
-    const res = await fetch(`${API_BASE}/api/settings`);
+    const res = await fetch(`${API_BASE}/api/settings?t=${Date.now()}`);
     if (res.ok) {
       const json = await res.json();
       if (json.success && json.data) {

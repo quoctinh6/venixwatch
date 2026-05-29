@@ -7,7 +7,7 @@ function getAdminToken() {
   return localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN) || localStorage.getItem('dhat_token');
 }
 
-export function openQuickSettings(defaultTab = 'brand', slideIndex = 0) {
+export function openQuickSettings(defaultTab = 'brand', extraParam = 0) {
   const token = getAdminToken();
   if (!token) {
     showToast('Bạn cần đăng nhập quản trị viên để chỉnh sửa.', 'error');
@@ -20,7 +20,7 @@ export function openQuickSettings(defaultTab = 'brand', slideIndex = 0) {
   }
 
   let activeTab = defaultTab;
-  let selectedSlideIndex = slideIndex;
+  let selectedSlideIndex = typeof extraParam === 'number' ? extraParam : 0;
   let settings = window.APP_SETTINGS || {
     brand_name: 'Venix Watch',
     logo_url: '',
@@ -47,10 +47,65 @@ export function openQuickSettings(defaultTab = 'brand', slideIndex = 0) {
   renderModal();
   document.body.appendChild(modalEl);
 
+  // Helper to get nested offsetTop relative to a container
+  function getElementOffsetTop(element, container) {
+    let offsetTop = 0;
+    let el = element;
+    while (el && el !== container) {
+      offsetTop += el.offsetTop;
+      el = el.offsetParent;
+    }
+    return offsetTop;
+  }
+
+  // Auto scroll and highlight sub-section if in sections tab
+  if (activeTab === 'sections' && typeof extraParam === 'string') {
+    const targetSec = modalEl.querySelector(`#quick-sec-${extraParam}`);
+    if (targetSec) {
+      const modalBody = modalEl.querySelector('#quick-modal-body');
+      if (modalBody) {
+        setTimeout(() => {
+          const topPos = getElementOffsetTop(targetSec, modalBody);
+          modalBody.scrollTop = topPos - 12;
+          
+          // Add highlight styling
+          targetSec.classList.add('quick-sec-highlight');
+        }, 100);
+      }
+    }
+  }
+
 
   function renderModal() {
     modalEl.innerHTML = `
-      <div class="bg-white border border-gray-200 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden flex flex-col font-sans max-h-[90vh]">
+      <style>
+        #quick-modal-body::-webkit-scrollbar {
+          width: 6px;
+        }
+        #quick-modal-body::-webkit-scrollbar-track {
+          background: #f9f9f9;
+        }
+        #quick-modal-body::-webkit-scrollbar-thumb {
+          background: #d4cfc5;
+          border-radius: 3px;
+        }
+        #quick-modal-body::-webkit-scrollbar-thumb:hover {
+          background: #C9A84C;
+        }
+        .scrollbar-none::-webkit-scrollbar {
+          display: none !important;
+        }
+        .scrollbar-none {
+          -ms-overflow-style: none !important;
+          scrollbar-width: none !important;
+        }
+        .quick-sec-highlight {
+          border-left: 4px solid #C9A84C !important;
+          background-color: rgba(201, 168, 76, 0.05) !important;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+        }
+      </style>
+      <div class="bg-white border border-gray-200 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden flex flex-col font-sans max-h-[90vh]" data-lenis-prevent>
         <!-- Header -->
         <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50">
           <div class="flex items-center gap-2">
@@ -63,21 +118,36 @@ export function openQuickSettings(defaultTab = 'brand', slideIndex = 0) {
         </div>
 
         <!-- Navigation Tabs -->
-        <div class="px-5 pt-3 flex border-b border-gray-100 gap-4 text-xs font-bold text-gray-400">
-          <button id="tab-brand-trigger" class="pb-2 border-b-2 transition-all ${activeTab === 'brand' ? 'border-[#C9A84C] text-[#C9A84C]' : 'border-transparent hover:text-gray-700'}">
+        <div class="px-5 pt-3 flex items-end border-b border-gray-100 gap-3.5 text-xs font-bold text-gray-400 overflow-x-auto whitespace-nowrap scrollbar-none">
+          <button id="tab-brand-trigger" class="relative pb-2.5 transition-all shrink-0 whitespace-nowrap outline-none bg-transparent border-0 cursor-pointer ${activeTab === 'brand' ? 'text-[#C9A84C]' : 'text-gray-400 hover:text-gray-700'}">
             Thương hiệu & Logo
+            ${activeTab === 'brand' ? '<span class="absolute bottom-[3px] left-0 right-0 h-[2px] bg-[#C9A84C]"></span>' : ''}
           </button>
-          <button id="tab-banner-trigger" class="pb-2 border-b-2 transition-all ${activeTab === 'banner' ? 'border-[#C9A84C] text-[#C9A84C]' : 'border-transparent hover:text-gray-700'}">
-            Banner Trang Chủ
+          <button id="tab-menu-trigger" class="relative pb-2.5 transition-all shrink-0 whitespace-nowrap outline-none bg-transparent border-0 cursor-pointer ${activeTab === 'menu' ? 'text-[#C9A84C]' : 'text-gray-400 hover:text-gray-700'}">
+            Menu
+            ${activeTab === 'menu' ? '<span class="absolute bottom-[3px] left-0 right-0 h-[2px] bg-[#C9A84C]"></span>' : ''}
           </button>
-          <button id="tab-colors-trigger" class="pb-2 border-b-2 transition-all ${activeTab === 'colors' ? 'border-[#C9A84C] text-[#C9A84C]' : 'border-transparent hover:text-gray-700'}">
-            Màu Sắc Giao Diện
+          <button id="tab-banner-trigger" class="relative pb-2.5 transition-all shrink-0 whitespace-nowrap outline-none bg-transparent border-0 cursor-pointer ${activeTab === 'banner' ? 'text-[#C9A84C]' : 'text-gray-400 hover:text-gray-700'}">
+            Banner
+            ${activeTab === 'banner' ? '<span class="absolute bottom-[3px] left-0 right-0 h-[2px] bg-[#C9A84C]"></span>' : ''}
+          </button>
+          <button id="tab-sections-trigger" class="relative pb-2.5 transition-all shrink-0 whitespace-nowrap outline-none bg-transparent border-0 cursor-pointer ${activeTab === 'sections' ? 'text-[#C9A84C]' : 'text-gray-400 hover:text-gray-700'}">
+            Section Trang Chủ
+            ${activeTab === 'sections' ? '<span class="absolute bottom-[3px] left-0 right-0 h-[2px] bg-[#C9A84C]"></span>' : ''}
+          </button>
+          <button id="tab-colors-trigger" class="relative pb-2.5 transition-all shrink-0 whitespace-nowrap outline-none bg-transparent border-0 cursor-pointer ${activeTab === 'colors' ? 'text-[#C9A84C]' : 'text-gray-400 hover:text-gray-700'}">
+            Màu Sắc
+            ${activeTab === 'colors' ? '<span class="absolute bottom-[3px] left-0 right-0 h-[2px] bg-[#C9A84C]"></span>' : ''}
           </button>
         </div>
 
         <!-- Body Form -->
-        <div class="p-6 flex-1 overflow-y-auto space-y-5 text-xs text-gray-700">
-          ${activeTab === 'brand' ? renderBrandForm() : (activeTab === 'banner' ? renderBannerForm() : renderColorsForm())}
+        <div id="quick-modal-body" class="p-6 flex-1 overflow-y-auto space-y-5 text-xs text-gray-700 relative">
+          ${activeTab === 'brand' ? renderBrandForm() 
+            : activeTab === 'menu' ? renderMenuForm() 
+            : activeTab === 'banner' ? renderBannerForm() 
+            : activeTab === 'sections' ? renderSectionsForm() 
+            : renderColorsForm()}
         </div>
 
         <!-- Footer Actions -->
@@ -161,7 +231,7 @@ export function openQuickSettings(defaultTab = 'brand', slideIndex = 0) {
         <div>
           <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">Ảnh logo thương hiệu</label>
           <div class="flex items-center gap-4">
-            <div id="quick-logo-preview" class="w-16 h-16 border border-gray-200 rounded-xl bg-gray-50 flex items-center justify-center overflow-hidden">
+            <div id="quick-logo-preview" class="w-16 h-16 border border-gray-200 rounded-xl ${settings.logo_url ? 'bg-zinc-950 p-2' : 'bg-gray-50'} flex items-center justify-center overflow-hidden">
               ${settings.logo_url 
                 ? `<img src="${settings.logo_url}" class="max-h-full max-w-full object-contain" />` 
                 : `<span class="text-[10px] text-gray-400">Default Logo</span>`
@@ -267,6 +337,240 @@ export function openQuickSettings(defaultTab = 'brand', slideIndex = 0) {
     `;
   }
 
+  function renderMenuForm() {
+    if (!settings.navigation_menu) {
+      settings.navigation_menu = [];
+    }
+    return `
+      <div class="space-y-4">
+        <div class="flex items-center justify-between border-b pb-2.5">
+          <h4 class="text-xs font-bold text-gray-900 uppercase">Cấu hình Menu chính</h4>
+          <button type="button" id="quick-add-menu-item" class="bg-zinc-950 hover:bg-zinc-800 text-white font-semibold text-[10px] px-2.5 py-1.5 rounded-lg transition-colors flex items-center gap-1">
+            + Thêm Menu
+          </button>
+        </div>
+        <div class="space-y-4" id="quick-menu-items-list">
+          ${settings.navigation_menu.length === 0 
+            ? `<div class="text-center py-6 text-gray-400">Chưa có menu nào.</div>` 
+            : settings.navigation_menu.map((item, i) => `
+              <div class="border border-gray-100 rounded-xl p-3 bg-gray-50/50 space-y-3 relative" data-item-index="${i}">
+                <div class="flex flex-wrap items-center gap-2.5 bg-white p-2.5 border border-gray-100 rounded-lg shadow-sm">
+                  <div class="w-5 h-5 flex items-center justify-center bg-zinc-950 text-white rounded-full text-[9px] font-bold">
+                    ${i + 1}
+                  </div>
+                  <div class="flex-1 min-w-[100px]">
+                    <input type="text" class="quick-menu-label w-full px-2 py-1 border border-gray-300 rounded text-[11px] focus:outline-none" value="${item.label || ''}" placeholder="Tên menu" />
+                  </div>
+                  <div class="flex-[1.5] min-w-[120px]">
+                    <input type="text" class="quick-menu-href w-full px-2 py-1 border border-gray-300 rounded text-[11px] focus:outline-none" value="${item.href || ''}" placeholder="Liên kết" />
+                  </div>
+                  <div class="w-16">
+                    <input type="text" class="quick-menu-badge w-full px-2 py-1 border border-gray-300 rounded text-[11px] focus:outline-none" value="${item.badge || ''}" placeholder="Badge" />
+                  </div>
+                  <div class="flex items-center gap-1">
+                    <button type="button" class="quick-move-up-menu-btn p-1 border border-gray-200 hover:bg-gray-50 rounded ${i === 0 ? 'opacity-30 cursor-not-allowed' : ''}" ${i === 0 ? 'disabled' : ''}>
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>
+                    </button>
+                    <button type="button" class="quick-move-down-menu-btn p-1 border border-gray-200 hover:bg-gray-50 rounded ${i === settings.navigation_menu.length - 1 ? 'opacity-30 cursor-not-allowed' : ''}" ${i === settings.navigation_menu.length - 1 ? 'disabled' : ''}>
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <button type="button" class="quick-add-child-menu-btn px-2 py-1 border border-[#C9A84C] text-[#C9A84C] hover:bg-[#C9A84C]/5 text-[10px] font-semibold rounded">
+                      + Con
+                    </button>
+                    <button type="button" class="quick-delete-menu-btn p-1 border border-red-50 hover:bg-red-50 text-red-500 rounded">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>
+                    </button>
+                  </div>
+                </div>
+                <!-- Submenu -->
+                <div class="pl-6 border-l border-gray-200/80 ml-2.5 space-y-1.5">
+                  ${(item.children || []).map((child, j) => `
+                    <div class="flex items-center gap-2 bg-white p-1.5 border border-gray-100 rounded shadow-sm" data-child-index="${j}">
+                      <div class="flex-1">
+                        <input type="text" class="quick-child-label w-full px-1.5 py-0.5 border border-gray-200 rounded text-[10px] focus:outline-none" value="${child.label || ''}" placeholder="Tên con" />
+                      </div>
+                      <div class="flex-[1.5]">
+                        <input type="text" class="quick-child-href w-full px-1.5 py-0.5 border border-gray-200 rounded text-[10px] focus:outline-none" value="${child.href || ''}" placeholder="Liên kết" />
+                      </div>
+                      <div class="flex items-center gap-1">
+                        <button type="button" class="quick-move-up-child-btn p-0.5 border border-gray-200 rounded ${j === 0 ? 'opacity-30' : ''}" ${j === 0 ? 'disabled' : ''}>
+                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>
+                        </button>
+                        <button type="button" class="quick-move-down-child-btn p-0.5 border border-gray-200 rounded ${j === item.children.length - 1 ? 'opacity-30' : ''}" ${j === item.children.length - 1 ? 'disabled' : ''}>
+                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                        </button>
+                        <button type="button" class="quick-delete-child-btn p-0.5 border border-red-50 text-red-500 rounded">
+                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>
+                        </button>
+                      </div>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            `).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  function renderSectionsForm() {
+    if (!settings.home_sections) settings.home_sections = {};
+    if (!settings.home_sections.announcement_bar) settings.home_sections.announcement_bar = { messages: [] };
+    if (!settings.home_sections.promo_banner) settings.home_sections.promo_banner = { title: '', code: '', buttons: [] };
+    if (!settings.home_sections.category_banners) {
+      settings.home_sections.category_banners = [
+        { img: '', title: 'Đồng Hồ Nam', subtitle: 'Mạnh mẽ. Lịch lãm. Đẳng cấp.', href: '/nam' },
+        { img: '', title: 'Đồng Hồ Nữ', subtitle: 'Thanh lịch. Tinh tế. Quyến rũ.', href: '/nu' },
+        { img: '', title: 'Phụ Kiện', subtitle: 'Dây đeo. Hộp đựng. Phụ kiện cao cấp.', href: '/phu-kien' }
+      ];
+    }
+    if (!settings.home_sections.brand_story) settings.home_sections.brand_story = { title: '', subtitle: '', description: '', button_label: '', button_href: '', image_url: '' };
+    if (!settings.home_sections.newsletter) settings.home_sections.newsletter = { title: '', description: '', button_label: '' };
+
+    const sec = settings.home_sections;
+    const ab = sec.announcement_bar;
+    const pb = sec.promo_banner;
+    const cb = sec.category_banners;
+    const bs = sec.brand_story;
+    const nl = sec.newsletter;
+
+    return `
+      <div class="space-y-6 font-sans text-xs">
+        <!-- 1. Announcement Bar -->
+        <div id="quick-sec-announcement_bar" class="border border-gray-100 rounded-xl p-3 bg-gray-50/50 space-y-3 scroll-mt-2 transition-all duration-300">
+          <div class="flex items-center justify-between border-b pb-2 border-gray-200">
+            <span class="font-bold text-gray-800">1. Dòng chạy thông báo</span>
+            <button type="button" id="quick-add-announcement-msg" class="bg-zinc-950 hover:bg-zinc-800 text-white font-semibold text-[9px] px-2 py-1 rounded transition-colors">
+              + Thêm tin
+            </button>
+          </div>
+          <div class="space-y-2" id="quick-announcement-msgs-list">
+            ${ab.messages.map((msg, i) => `
+              <div class="flex items-center gap-1.5" data-msg-index="${i}">
+                <input type="text" class="quick-announcement-input w-full px-2.5 py-1 border border-gray-300 rounded text-[11px] focus:outline-none" value="${msg}" />
+                <button type="button" class="quick-delete-announcement-msg-btn p-1 border border-red-50 text-red-500 rounded">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>
+                </button>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+        <!-- 2. Promo Banner Strip -->
+        <div id="quick-sec-promo_banner" class="border border-gray-100 rounded-xl p-3 bg-gray-50/50 space-y-3 scroll-mt-2 transition-all duration-300">
+          <span class="block font-bold text-gray-800 border-b pb-2 border-gray-200">2. Banner Khuyến Mãi</span>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[9px] font-bold text-gray-400 uppercase mb-0.5">Tiêu đề</label>
+              <input type="text" id="quick-promo-title" class="w-full px-2.5 py-1 border border-gray-300 rounded text-[11px] focus:outline-none" value="${pb.title || ''}" />
+            </div>
+            <div>
+              <label class="block text-[9px] font-bold text-gray-400 uppercase mb-0.5">Mã Code</label>
+              <input type="text" id="quick-promo-code" class="w-full px-2.5 py-1 border border-gray-300 rounded text-[11px] focus:outline-none" value="${pb.code || ''}" />
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Category Banners (Sub-banners) -->
+        <div id="quick-sec-category_banners" class="border border-gray-100 rounded-xl p-3 bg-gray-50/50 space-y-3 scroll-mt-2 transition-all duration-300">
+          <span class="block font-bold text-gray-800 border-b pb-2 border-gray-200">3. Danh Mục Nổi Bật / Banner Con</span>
+          <div class="space-y-3" id="quick-category-banners-list">
+            ${cb.map((cat, i) => {
+              const defaultImg = i === 0 ? 'https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg' :
+                                 i === 1 ? 'https://images.pexels.com/photos/1536619/pexels-photo-1536619.jpeg' :
+                                           'https://images.pexels.com/photos/277390/pexels-photo-277390.jpeg';
+              const displayImg = cat.img || defaultImg;
+              return `
+                <div class="bg-white p-3 border border-gray-100 rounded-lg space-y-2" data-cat-index="${i}">
+                  <div class="text-[10px] font-bold text-[#C9A84C] uppercase">Banner #${i + 1}</div>
+                  <div class="grid grid-cols-2 gap-2">
+                    <div>
+                      <input type="text" class="quick-cat-title w-full px-2 py-1 border border-gray-300 rounded text-[10px] focus:outline-none" value="${cat.title || ''}" placeholder="Tiêu đề" />
+                    </div>
+                    <div>
+                      <input type="text" class="quick-cat-href w-full px-2 py-1 border border-gray-300 rounded text-[10px] focus:outline-none" value="${cat.href || ''}" placeholder="Liên kết" />
+                    </div>
+                  </div>
+                  <div>
+                    <input type="text" class="quick-cat-subtitle w-full px-2 py-1 border border-gray-300 rounded text-[10px] focus:outline-none" value="${cat.subtitle || ''}" placeholder="Mô tả phụ" />
+                  </div>
+                  <div class="flex items-center gap-3">
+                    <div class="w-14 h-9 border rounded bg-zinc-950 overflow-hidden relative shrink-0">
+                      <img class="quick-cat-image-preview w-full h-full object-cover opacity-60" src="${displayImg}" />
+                    </div>
+                    <div class="flex-1 space-y-1">
+                      <input type="file" class="quick-cat-file-input hidden" accept="image/*" />
+                      <button type="button" class="quick-upload-cat-image-btn bg-zinc-950 hover:bg-zinc-800 text-white font-semibold text-[9px] px-2.5 py-1 rounded transition-colors">Tải ảnh</button>
+                      <input type="text" class="quick-cat-img-url w-full px-2 py-0.5 border border-gray-200 rounded text-[9px] text-gray-500 focus:outline-none" value="${cat.img || ''}" placeholder="URL ảnh" />
+                    </div>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+
+        <!-- 4. Brand Story -->
+        <div id="quick-sec-brand_story" class="border border-gray-100 rounded-xl p-3 bg-gray-50/50 space-y-3 scroll-mt-2 transition-all duration-300">
+          <span class="block font-bold text-gray-800 border-b pb-2 border-gray-200">4. Câu Chuyện Thương Hiệu</span>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[9px] font-bold text-gray-400 uppercase mb-0.5">Tiêu đề lớn</label>
+              <input type="text" id="quick-brandstory-title" class="w-full px-2.5 py-1 border border-gray-300 rounded text-[11px] focus:outline-none" value="${bs.title || ''}" />
+            </div>
+            <div>
+              <label class="block text-[9px] font-bold text-gray-400 uppercase mb-0.5">Tiêu đề phụ</label>
+              <input type="text" id="quick-brandstory-subtitle" class="w-full px-2.5 py-1 border border-gray-300 rounded text-[11px] focus:outline-none" value="${bs.subtitle || ''}" />
+            </div>
+          </div>
+          <div>
+            <label class="block text-[9px] font-bold text-gray-400 uppercase mb-0.5">Mô tả (Description)</label>
+            <textarea id="quick-brandstory-description" class="w-full px-2.5 py-1 border border-gray-300 rounded text-[10px] focus:outline-none h-14 resize-none">${bs.description || ''}</textarea>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[9px] font-bold text-gray-400 uppercase mb-0.5">Nút bấm</label>
+              <input type="text" id="quick-brandstory-btn-label" class="w-full px-2.5 py-1 border border-gray-300 rounded text-[11px] focus:outline-none" value="${bs.button_label || ''}" />
+            </div>
+            <div>
+              <label class="block text-[9px] font-bold text-gray-400 uppercase mb-0.5">Liên kết nút</label>
+              <input type="text" id="quick-brandstory-btn-href" class="w-full px-2.5 py-1 border border-gray-300 rounded text-[11px] focus:outline-none" value="${bs.button_href || ''}" />
+            </div>
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="w-14 h-9 border rounded bg-zinc-950 overflow-hidden relative shrink-0">
+              <img id="quick-brandstory-image-preview" class="w-full h-full object-cover opacity-60" src="${bs.image_url || ''}" />
+            </div>
+            <div class="flex-1 space-y-1">
+              <input type="file" id="quick-brandstory-file-input" class="hidden" accept="image/*" />
+              <button type="button" id="quick-upload-brandstory-img-btn" class="bg-zinc-950 hover:bg-zinc-800 text-white font-semibold text-[9px] px-2.5 py-1 rounded transition-colors">Tải ảnh</button>
+              <input type="text" id="quick-brandstory-image-url" class="w-full px-2 py-0.5 border border-gray-200 rounded text-[9px] text-gray-500 focus:outline-none" value="${bs.image_url || ''}" placeholder="URL ảnh" />
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. Newsletter -->
+        <div id="quick-sec-newsletter" class="border border-gray-100 rounded-xl p-3 bg-gray-50/50 space-y-3 scroll-mt-2 transition-all duration-300">
+          <span class="block font-bold text-gray-800 border-b pb-2 border-gray-200">5. Đăng Ký Bản Tin (Newsletter)</span>
+          <div class="grid grid-cols-3 gap-2">
+            <div class="col-span-1">
+              <label class="block text-[9px] font-bold text-gray-400 uppercase mb-0.5">Tiêu đề</label>
+              <input type="text" id="quick-newsletter-title" class="w-full px-2 py-1 border border-gray-300 rounded text-[10px] focus:outline-none" value="${nl.title || ''}" />
+            </div>
+            <div class="col-span-1">
+              <label class="block text-[9px] font-bold text-gray-400 uppercase mb-0.5">Mô tả</label>
+              <input type="text" id="quick-newsletter-description" class="w-full px-2 py-1 border border-gray-300 rounded text-[10px] focus:outline-none" value="${nl.description || ''}" />
+            </div>
+            <div class="col-span-1">
+              <label class="block text-[9px] font-bold text-gray-400 uppercase mb-0.5">Nút</label>
+              <input type="text" id="quick-newsletter-btn-label" class="w-full px-2 py-1 border border-gray-300 rounded text-[10px] focus:outline-none" value="${nl.button_label || ''}" />
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
   function bindEvents() {
     // Close / Cancel
     modalEl.querySelector('#close-quick-modal').addEventListener('click', () => restoreInitialColors());
@@ -277,8 +581,16 @@ export function openQuickSettings(defaultTab = 'brand', slideIndex = 0) {
       activeTab = 'brand';
       renderModal();
     });
+    modalEl.querySelector('#tab-menu-trigger')?.addEventListener('click', () => {
+      activeTab = 'menu';
+      renderModal();
+    });
     modalEl.querySelector('#tab-banner-trigger').addEventListener('click', () => {
       activeTab = 'banner';
+      renderModal();
+    });
+    modalEl.querySelector('#tab-sections-trigger')?.addEventListener('click', () => {
+      activeTab = 'sections';
       renderModal();
     });
     modalEl.querySelector('#tab-colors-trigger')?.addEventListener('click', () => {
@@ -468,6 +780,276 @@ export function openQuickSettings(defaultTab = 'brand', slideIndex = 0) {
           }
         });
       }
+    }
+
+    // -------------------------------------------------------------
+    // QUICK MENU TAB BINDINGS
+    // -------------------------------------------------------------
+    if (activeTab === 'menu') {
+      const menuList = modalEl.querySelector('#quick-menu-items-list');
+      
+      menuList?.querySelectorAll('[data-item-index]').forEach(itemRow => {
+        const itemIdx = parseInt(itemRow.dataset.itemIndex, 10);
+        const item = settings.navigation_menu[itemIdx];
+
+        itemRow.querySelector('.quick-menu-label')?.addEventListener('input', (e) => {
+          item.label = e.target.value.trim();
+        });
+        itemRow.querySelector('.quick-menu-href')?.addEventListener('input', (e) => {
+          item.href = e.target.value.trim();
+        });
+        itemRow.querySelector('.quick-menu-badge')?.addEventListener('input', (e) => {
+          const val = e.target.value.trim();
+          if (val) item.badge = val; else delete item.badge;
+        });
+
+        // Add child menu
+        itemRow.querySelector('.quick-add-child-menu-btn')?.addEventListener('click', () => {
+          if (!item.children) item.children = [];
+          item.children.push({ label: 'Menu Con Mới', href: '#' });
+          showToast('Đã thêm một menu con.', 'success');
+          renderModal();
+        });
+
+        // Delete main menu
+        itemRow.querySelector('.quick-delete-menu-btn')?.addEventListener('click', () => {
+          if (confirm('Xóa menu này sẽ xóa cả menu con?')) {
+            settings.navigation_menu.splice(itemIdx, 1);
+            showToast('Đã xóa menu chính.', 'info');
+            renderModal();
+          }
+        });
+
+        // Move main menu up
+        itemRow.querySelector('.quick-move-up-menu-btn')?.addEventListener('click', () => {
+          if (itemIdx === 0) return;
+          const temp = settings.navigation_menu[itemIdx];
+          settings.navigation_menu[itemIdx] = settings.navigation_menu[itemIdx - 1];
+          settings.navigation_menu[itemIdx - 1] = temp;
+          renderModal();
+        });
+
+        // Move main menu down
+        itemRow.querySelector('.quick-move-down-menu-btn')?.addEventListener('click', () => {
+          if (itemIdx === settings.navigation_menu.length - 1) return;
+          const temp = settings.navigation_menu[itemIdx];
+          settings.navigation_menu[itemIdx] = settings.navigation_menu[itemIdx + 1];
+          settings.navigation_menu[itemIdx + 1] = temp;
+          renderModal();
+        });
+
+        // Child menu bindings
+        itemRow.querySelectorAll('[data-child-index]').forEach(childRow => {
+          const childIdx = parseInt(childRow.dataset.childIndex, 10);
+          const child = item.children[childIdx];
+
+          childRow.querySelector('.quick-child-label')?.addEventListener('input', (e) => {
+            child.label = e.target.value.trim();
+          });
+          childRow.querySelector('.quick-child-href')?.addEventListener('input', (e) => {
+            child.href = e.target.value.trim();
+          });
+
+          // Move child up
+          childRow.querySelector('.quick-move-up-child-btn')?.addEventListener('click', () => {
+            if (childIdx === 0) return;
+            const temp = item.children[childIdx];
+            item.children[childIdx] = item.children[childIdx - 1];
+            item.children[childIdx - 1] = temp;
+            renderModal();
+          });
+
+          // Move child down
+          childRow.querySelector('.quick-move-down-child-btn')?.addEventListener('click', () => {
+            if (childIdx === item.children.length - 1) return;
+            const temp = item.children[childIdx];
+            item.children[childIdx] = item.children[childIdx + 1];
+            item.children[childIdx + 1] = temp;
+            renderModal();
+          });
+
+          // Delete child
+          childRow.querySelector('.quick-delete-child-btn')?.addEventListener('click', () => {
+            item.children.splice(childIdx, 1);
+            showToast('Đã xóa menu con.', 'info');
+            renderModal();
+          });
+        });
+      });
+
+      // Add main menu item
+      modalEl.querySelector('#quick-add-menu-item')?.addEventListener('click', () => {
+        settings.navigation_menu.push({ label: 'Menu Mới', href: '#', children: [] });
+        showToast('Đã thêm một menu chính.', 'success');
+        renderModal();
+      });
+    }
+
+    // -------------------------------------------------------------
+    // QUICK SECTIONS TAB BINDINGS
+    // -------------------------------------------------------------
+    if (activeTab === 'sections') {
+      const sec = settings.home_sections;
+
+      // 1. Announcement Bar
+      const abMsgsList = modalEl.querySelector('#quick-announcement-msgs-list');
+      abMsgsList?.querySelectorAll('[data-msg-index]').forEach(msgRow => {
+        const idx = parseInt(msgRow.dataset.msgIndex, 10);
+        msgRow.querySelector('.quick-announcement-input').addEventListener('input', (e) => {
+          sec.announcement_bar.messages[idx] = e.target.value.trim();
+        });
+        msgRow.querySelector('.quick-delete-announcement-msg-btn').addEventListener('click', () => {
+          sec.announcement_bar.messages.splice(idx, 1);
+          showToast('Đã xóa dòng thông báo.', 'info');
+          renderModal();
+        });
+      });
+
+      modalEl.querySelector('#quick-add-announcement-msg')?.addEventListener('click', () => {
+        sec.announcement_bar.messages.push('Thông báo mới');
+        showToast('Đã thêm thông báo.', 'success');
+        renderModal();
+      });
+
+      // 2. Promo Banner
+      modalEl.querySelector('#quick-promo-title')?.addEventListener('input', (e) => {
+        sec.promo_banner.title = e.target.value.trim();
+      });
+      modalEl.querySelector('#quick-promo-code')?.addEventListener('input', (e) => {
+        sec.promo_banner.code = e.target.value.trim();
+      });
+
+      // 3. Category Banners
+      const cbList = modalEl.querySelector('#quick-category-banners-list');
+      cbList?.querySelectorAll('[data-cat-index]').forEach(catRow => {
+        const index = parseInt(catRow.dataset.catIndex, 10);
+        
+        catRow.querySelector('.quick-cat-title').addEventListener('input', (e) => {
+          sec.category_banners[index].title = e.target.value.trim();
+        });
+        catRow.querySelector('.quick-cat-subtitle').addEventListener('input', (e) => {
+          sec.category_banners[index].subtitle = e.target.value.trim();
+        });
+        catRow.querySelector('.quick-cat-href').addEventListener('input', (e) => {
+          sec.category_banners[index].href = e.target.value.trim();
+        });
+        catRow.querySelector('.quick-cat-img-url').addEventListener('input', (e) => {
+          const url = e.target.value.trim();
+          sec.category_banners[index].img = url;
+          catRow.querySelector('.quick-cat-image-preview').src = url || (index === 0 ? 'https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg' : index === 1 ? 'https://images.pexels.com/photos/1536619/pexels-photo-1536619.jpeg' : 'https://images.pexels.com/photos/277390/pexels-photo-277390.jpeg');
+        });
+
+        // Image upload
+        const fileInput = catRow.querySelector('.quick-cat-file-input');
+        const uploadBtn = catRow.querySelector('.quick-upload-cat-image-btn');
+        uploadBtn.addEventListener('click', () => fileInput.click());
+
+        fileInput.addEventListener('change', async (e) => {
+          const file = e.target.files[0];
+          if (!file) return;
+
+          const formData = new FormData();
+          formData.append('banner', file);
+
+          uploadBtn.textContent = 'Đang tải...';
+          uploadBtn.disabled = true;
+
+          try {
+            const res = await fetch(`${API_BASE}/api/admin/settings/upload-banner`, {
+              method: 'POST',
+              headers: { Authorization: `Bearer ${token}` },
+              body: formData
+            });
+            const data = await res.json();
+            if (res.ok && data.success) {
+              const url = data.data.url;
+              sec.category_banners[index].img = url;
+              catRow.querySelector('.quick-cat-img-url').value = url;
+              catRow.querySelector('.quick-cat-image-preview').src = url;
+              showToast(`Tải lên ảnh banner con #${index + 1} thành công!`, 'success');
+            } else {
+              showToast(data.error || 'Lỗi tải ảnh.', 'error');
+            }
+          } catch {
+            showToast('Lỗi kết nối khi tải ảnh.', 'error');
+          } finally {
+            uploadBtn.textContent = 'Tải ảnh';
+            uploadBtn.disabled = false;
+          }
+        });
+      });
+
+      // 4. Brand Story
+      modalEl.querySelector('#quick-brandstory-title')?.addEventListener('input', (e) => {
+        sec.brand_story.title = e.target.value.trim();
+      });
+      modalEl.querySelector('#quick-brandstory-subtitle')?.addEventListener('input', (e) => {
+        sec.brand_story.subtitle = e.target.value.trim();
+      });
+      modalEl.querySelector('#quick-brandstory-description')?.addEventListener('input', (e) => {
+        sec.brand_story.description = e.target.value.trim();
+      });
+      modalEl.querySelector('#quick-brandstory-btn-label')?.addEventListener('input', (e) => {
+        sec.brand_story.button_label = e.target.value.trim();
+      });
+      modalEl.querySelector('#quick-brandstory-btn-href')?.addEventListener('input', (e) => {
+        sec.brand_story.button_href = e.target.value.trim();
+      });
+      modalEl.querySelector('#quick-brandstory-image-url')?.addEventListener('input', (e) => {
+        const url = e.target.value.trim();
+        sec.brand_story.image_url = url;
+        const imgPrev = modalEl.querySelector('#quick-brandstory-image-preview');
+        if (imgPrev) imgPrev.src = url;
+      });
+
+      const bsFileInput = modalEl.querySelector('#quick-brandstory-file-input');
+      const bsUploadBtn = modalEl.querySelector('#quick-upload-brandstory-img-btn');
+      bsUploadBtn?.addEventListener('click', () => bsFileInput.click());
+
+      bsFileInput?.addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('banner', file);
+
+        bsUploadBtn.textContent = 'Đang tải...';
+        bsUploadBtn.disabled = true;
+
+        try {
+          const res = await fetch(`${API_BASE}/api/admin/settings/upload-banner`, {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${token}` },
+            body: formData
+          });
+          const data = await res.json();
+          if (res.ok && data.success) {
+            const url = data.data.url;
+            sec.brand_story.image_url = url;
+            modalEl.querySelector('#quick-brandstory-image-url').value = url;
+            modalEl.querySelector('#quick-brandstory-image-preview').src = url;
+            showToast('Tải ảnh giới thiệu thương hiệu thành công!', 'success');
+          } else {
+            showToast(data.error || 'Lỗi tải ảnh.', 'error');
+          }
+        } catch {
+          showToast('Lỗi kết nối khi tải ảnh.', 'error');
+        } finally {
+          bsUploadBtn.textContent = 'Tải ảnh';
+          bsUploadBtn.disabled = false;
+        }
+      });
+
+      // 5. Newsletter
+      modalEl.querySelector('#quick-newsletter-title')?.addEventListener('input', (e) => {
+        sec.newsletter.title = e.target.value.trim();
+      });
+      modalEl.querySelector('#quick-newsletter-description')?.addEventListener('input', (e) => {
+        sec.newsletter.description = e.target.value.trim();
+      });
+      modalEl.querySelector('#quick-newsletter-btn-label')?.addEventListener('input', (e) => {
+        sec.newsletter.button_label = e.target.value.trim();
+      });
     }
 
     if (activeTab === 'colors') {

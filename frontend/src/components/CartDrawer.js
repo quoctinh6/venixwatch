@@ -76,6 +76,7 @@ export class CartDrawer {
     const itemsWrap = document.createElement('div');
     itemsWrap.id = 'cart-items-wrap';
     itemsWrap.style.cssText = 'flex:1;overflow-y:auto;padding:16px 24px;';
+    itemsWrap.setAttribute('data-lenis-prevent', '');
     this._drawer.appendChild(itemsWrap);
 
     // Footer

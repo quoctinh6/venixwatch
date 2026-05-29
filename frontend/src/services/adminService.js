@@ -61,6 +61,12 @@ export const createCategory = (d) => api('POST', '/api/admin/categories', d);
 export const updateCategory = (id, d) => api('PUT', `/api/admin/categories/${id}`, d);
 export const deleteCategory = (id) => api('DELETE', `/api/admin/categories/${id}`);
 
+// Subcategories
+export const getSubcategories = () => api('GET', '/api/admin/subcategories');
+export const createSubcategory = (d) => api('POST', '/api/admin/subcategories', d);
+export const updateSubcategory = (id, d) => api('PUT', `/api/admin/subcategories/${id}`, d);
+export const deleteSubcategory = (id) => api('DELETE', `/api/admin/subcategories/${id}`);
+
 // Brands
 export const getBrands = () => api('GET', '/api/admin/brands');
 export const createBrand = (d) => api('POST', '/api/admin/brands', d);
