@@ -269,7 +269,7 @@ export function renderSettings(container) {
           </div>
         `;
 
-      case 'colors':
+      case 'colors': {
         const defaultColors = {
           primary: '#1a1a1a',
           secondary: '#ffffff',
@@ -288,14 +288,14 @@ export function renderSettings(container) {
         };
 
         const colorFields = [
-          { key: 'primary', label: 'Nền tối chính', desc: 'Sử dụng cho Header, Footer, và các dải banner màu tối.' },
-          { key: 'primary-gold', label: 'Vàng nhấn chính', desc: 'Màu nhấn thương hiệu chính cho nút bấm nổi bật, viền hoạt ảnh.' },
-          { key: 'accent-gold', label: 'Vàng nhấn phụ', desc: 'Màu sắc phụ cho liên kết Navbar khi hover, icon nhỏ, kim đồng hồ.' },
-          { key: 'primary-gold-dark', label: 'Vàng nhấn tối', desc: 'Trạng thái khi hover của nút bấm hoặc dải màu.' },
-          { key: 'paper-warm', label: 'Nền giấy ấm', desc: 'Màu nền kem nhạt ở khối Đăng ký Email hoặc khối giới thiệu thương hiệu.' },
-          { key: 'ink', label: 'Chữ chính', desc: 'Màu sắc chính cho văn bản, tiêu đề sản phẩm trên nền sáng.' },
-          { key: 'sale-red', label: 'Màu Khuyến Mãi', desc: 'Màu sắc nổi bật của nhãn SALE, nhãn tag giảm giá.' },
-          { key: 'secondary', label: 'Nền sáng chính', desc: 'Màu nền mặc định cho trang chủ và các khối.' },
+          { key: 'primary', label: 'Màu nền tối chính', desc: 'Màu nền của phần đầu trang (Header), chân trang (Footer) và các khung biểu ngữ tối màu.' },
+          { key: 'primary-gold', label: 'Màu vàng nổi bật chính', desc: 'Dùng cho các nút bấm chính cần gây chú ý (như nút Mua ngay, Thêm vào giỏ) và các đường viền hiệu ứng.' },
+          { key: 'accent-gold', label: 'Màu vàng trang trí phụ', desc: 'Dùng khi di chuột vào danh mục menu, các biểu tượng nhỏ hoặc kim giây đồng hồ.' },
+          { key: 'primary-gold-dark', label: 'Màu vàng khi di chuột', desc: 'Màu sắc hiển thị của các nút bấm màu vàng chính khi bạn rê con trỏ chuột vào.' },
+          { key: 'paper-warm', label: 'Màu nền ấm', desc: 'Màu nền hơi ngả vàng ấm áp, dùng cho phần đăng ký nhận tin hoặc khối giới thiệu thương hiệu.' },
+          { key: 'ink', label: 'Màu chữ chính', desc: 'Màu sắc chủ đạo cho toàn bộ chữ viết, mô tả sản phẩm và tiêu đề chính trên trang.' },
+          { key: 'sale-red', label: 'Màu thông báo giảm giá', desc: 'Màu đỏ rực rỡ dùng để hiển thị nhãn giảm giá (ví dụ: -20%) và giá khuyến mãi.' },
+          { key: 'secondary', label: 'Màu nền sáng chính', desc: 'Màu nền chủ đạo của toàn bộ trang web (phần nền phía sau các sản phẩm và nội dung).' },
         ];
 
         return `
@@ -403,6 +403,7 @@ export function renderSettings(container) {
             </div>
           </div>
         `;
+      }
 
       case 'history':
         return `

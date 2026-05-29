@@ -20,36 +20,67 @@ export default class ProductInfo {
     const user = authService.getUser();
     const canQuickEdit = user && user.permissions && user.permissions.includes('products:quick_edit');
 
-    const layoutDescFirst = this._product.layout_desc_first !== false;
+    const brandLower = String(this._product.brand || '').toLowerCase();
+    const isPremiumLayout = brandLower === 'carnival' || brandLower === 'casio';
+    let specsHtml = '';
 
-    const descHtml = this._product.description ? `
-      <div class="space-y-3 border-t border-gray-100 pt-5">
-        <div class="flex items-center gap-2">
-          <span class="w-1.5 h-3 bg-[#C9A961] rounded-full"></span>
-          <h4 class="text-[13px] font-bold uppercase tracking-wider text-[#0A0A0A]">Thông tin cơ bản</h4>
+    if (isPremiumLayout) {
+      const excludedLabels = ['Thương hiệu', 'Bộ sưu tập', 'Mã sản phẩm', 'Loại máy'];
+      const specs = (this._product.specs || []).filter(spec => !excludedLabels.includes(spec.label));
+      specsHtml = specs.length > 0 ? `
+        <div class="space-y-4 border-t border-gray-100 pt-5">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="w-[5px] h-[18px] bg-[#C9A961] rounded-full"></span>
+            <h4 class="text-[13px] font-bold uppercase tracking-wider text-[#0A0A0A]">Thông số kỹ thuật</h4>
+          </div>
+          <div class="bg-[#FAF8F3] rounded-xl p-5 border border-[#E8E4DC] grid grid-cols-2 gap-x-8 gap-y-4 text-[13px]">
+            ${specs.map((spec, index) => {
+              const isLastRow = index >= specs.length - (specs.length % 2 === 0 ? 2 : 1);
+              const borderClass = isLastRow ? '' : 'border-b border-[#E8E4DC] pb-2.5';
+              return `
+                <div class="${borderClass}">
+                  <span class="font-semibold text-[#8E8E8E] block mb-1 text-[10px] uppercase tracking-wider">${spec.label}</span>
+                  <span class="text-[#0A0A0A] font-bold leading-normal block text-sm">${spec.value}</span>
+                </div>
+              `;
+            }).join('')}
+          </div>
         </div>
-        <div class="text-[14px] leading-7 text-[#4B5563] whitespace-pre-wrap pl-3.5 border-l border-gray-100">${this._product.description}</div>
-      </div>
-    ` : '';
+      ` : '';
+    } else {
+      const layoutDescFirst = this._product.layout_desc_first !== false;
 
-    const excludedLabels = ['Thương hiệu', 'Bộ sưu tập', 'Mã sản phẩm', 'Loại máy'];
-    const specs = (this._product.specs || []).filter(spec => !excludedLabels.includes(spec.label));
-    const specsHtml = specs.length > 0 ? `
-      <div class="space-y-4 border-t border-gray-100 pt-5">
-        <div class="flex items-center gap-2">
-          <span class="w-1.5 h-3 bg-[#C9A961] rounded-full"></span>
-          <h4 class="text-[13px] font-bold uppercase tracking-wider text-[#0A0A0A]">Thông số kỹ thuật</h4>
+      const descHtml = this._product.description ? `
+        <div class="space-y-3 border-t border-gray-100 pt-5">
+          <div class="flex items-center gap-2">
+            <span class="w-1.5 h-3 bg-[#C9A961] rounded-full"></span>
+            <h4 class="text-[13px] font-bold uppercase tracking-wider text-[#0A0A0A]">Thông tin cơ bản</h4>
+          </div>
+          <div class="text-[14px] leading-7 text-[#4B5563] whitespace-pre-wrap pl-3.5 border-l border-gray-100">${this._product.description}</div>
         </div>
-        <div class="bg-[#FAF8F3] rounded-xl p-4 border border-[#E8E4DC]/60 grid grid-cols-2 gap-x-6 gap-y-4 text-[13px]">
-          ${specs.map(spec => `
-            <div class="border-b border-[#E8E4DC] last:border-b-0 pb-2">
-              <span class="font-semibold text-gray-500 block mb-0.5 text-[11px] uppercase tracking-wider">${spec.label}</span>
-              <span class="text-[#0A0A0A] font-medium leading-relaxed block">${spec.value}</span>
-            </div>
-          `).join('')}
+      ` : '';
+
+      const excludedLabels = ['Thương hiệu', 'Bộ sưu tập', 'Mã sản phẩm', 'Loại máy'];
+      const specs = (this._product.specs || []).filter(spec => !excludedLabels.includes(spec.label));
+      const childSpecsHtml = specs.length > 0 ? `
+        <div class="space-y-4 border-t border-gray-100 pt-5">
+          <div class="flex items-center gap-2">
+            <span class="w-1.5 h-3 bg-[#C9A961] rounded-full"></span>
+            <h4 class="text-[13px] font-bold uppercase tracking-wider text-[#0A0A0A]">Thông số kỹ thuật</h4>
+          </div>
+          <div class="bg-[#FAF8F3] rounded-xl p-4 border border-[#E8E4DC]/60 grid grid-cols-2 gap-x-6 gap-y-4 text-[13px]">
+            ${specs.map(spec => `
+              <div class="border-b border-[#E8E4DC] last:border-b-0 pb-2">
+                <span class="font-semibold text-gray-500 block mb-0.5 text-[11px] uppercase tracking-wider">${spec.label}</span>
+                <span class="text-[#0A0A0A] font-medium leading-relaxed block">${spec.value}</span>
+              </div>
+            `).join('')}
+          </div>
         </div>
-      </div>
-    ` : '';
+      ` : '';
+
+      specsHtml = layoutDescFirst ? `${descHtml} ${childSpecsHtml}` : `${childSpecsHtml} ${descHtml}`;
+    }
 
     wrap.innerHTML = `
       <div class="space-y-4 rounded-[12px] border border-[#E8E4DC] bg-white p-5 shadow-sm lg:p-7">
@@ -94,8 +125,49 @@ export default class ProductInfo {
         <div class="space-y-3">
           <p class="inline-flex items-center gap-2 rounded-full bg-[#FEF2F2] px-3 py-1.5 text-sm font-semibold text-[#DC2626]">⚡ Còn 3 sản phẩm cuối</p>
         </div>
-        
-        ${layoutDescFirst ? `${descHtml} ${specsHtml}` : `${specsHtml} ${descHtml}`}
+
+        <div class="grid grid-cols-2 gap-x-4 gap-y-3 border-t border-[#E8E4DC] pt-4 text-[12px]">
+          <div class="flex items-center gap-2.5">
+            <span class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#FAF8F3] text-[#C9A961]">
+              ${icon('truck', 'h-4 w-4')}
+            </span>
+            <div>
+              <p class="font-bold text-[#0A0A0A] leading-none">Miễn Phí Vận Chuyển</p>
+              <p class="text-[10px] text-zinc-400 mt-1">Đơn trên 500.000đ</p>
+            </div>
+          </div>
+          
+          <div class="flex items-center gap-2.5">
+            <span class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#FAF8F3] text-[#C9A961]">
+              ${icon('rotate', 'h-4 w-4')}
+            </span>
+            <div>
+              <p class="font-bold text-[#0A0A0A] leading-none">Đổi Trả Dễ Dàng</p>
+              <p class="text-[10px] text-zinc-400 mt-1">Trong vòng 30 ngày</p>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2.5">
+            <span class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#FAF8F3] text-[#C9A961]">
+              ${icon('shield', 'h-4 w-4')}
+            </span>
+            <div>
+              <p class="font-bold text-[#0A0A0A] leading-none">Bảo Hành 2 Năm</p>
+              <p class="text-[10px] text-zinc-400 mt-1">Chính hãng tuyệt đối</p>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2.5">
+            <span class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#FAF8F3] text-[#C9A961]">
+              ${icon('star', 'h-4 w-4')}
+            </span>
+            <div>
+              <p class="font-bold text-[#0A0A0A] leading-none">Chính Hãng 100%</p>
+              <p class="text-[10px] text-zinc-400 mt-1">Cam kết uy tín</p>
+            </div>
+          </div>
+        </div>
+        ${specsHtml}
 
         <div class="flex items-center gap-3 border-t border-[#E8E4DC] pt-4">
           <span class="text-sm font-semibold uppercase tracking-[0.08em] text-[#0A0A0A]">Số lượng</span>
@@ -174,14 +246,28 @@ export default class ProductInfo {
       </div>
     `;
     document.body.appendChild(bar);
-    const toggle = () => bar.classList.toggle('translate-y-full', window.scrollY < 200);
-    window.addEventListener('scroll', toggle, { passive: true });
-    window.addEventListener('page-rendered', () => {
+    this._toggleMobileBar = () => bar.classList.toggle('translate-y-full', window.scrollY < 200);
+    window.addEventListener('scroll', this._toggleMobileBar, { passive: true });
+    this._onPageRendered = () => {
       if (!window.location.pathname.startsWith('/san-pham/')) bar.remove();
-    });
-    toggle();
+    };
+    window.addEventListener('page-rendered', this._onPageRendered);
+    this._toggleMobileBar();
     bar.querySelector('[data-mobile-cart]')?.addEventListener('click', () => this._addToCart());
     bar.querySelector('[data-mobile-buy]')?.addEventListener('click', () => { this._addToCart(); navigate('/thanh-toan'); });
+  }
+
+  destroy() {
+    if (this._toggleMobileBar) {
+      window.removeEventListener('scroll', this._toggleMobileBar);
+      this._toggleMobileBar = null;
+    }
+    if (this._onPageRendered) {
+      window.removeEventListener('page-rendered', this._onPageRendered);
+      this._onPageRendered = null;
+    }
+    const bar = document.getElementById('pdp-mobile-bar');
+    if (bar) bar.remove();
   }
 
   _addToCart() {

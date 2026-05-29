@@ -20,18 +20,26 @@ export default class ProductDetailPage {
     const wrap = document.createElement('div');
     wrap.className = 'bg-white pb-20 md:pb-0';
     const payload = await this._loadPayload();
+    if (this.aborted) {
+      return wrap;
+    }
     const { product } = payload;
 
-    // Parse specs from description if present in HTML (dynamic client-side migration)
-    if (product.description && product.description.includes('Thông số kỹ thuật')) {
-      const parsed = parseSpecsFromDescription(product.description);
-      product.description = parsed.description;
-      const existingLabels = new Set((product.specs || []).map(s => s.label.toLowerCase().trim()));
-      parsed.specs.forEach(spec => {
-        if (!existingLabels.has(spec.label.toLowerCase().trim())) {
-          product.specs.push(spec);
-        }
-      });
+    // Parse specs from description if present in HTML (dynamic client-side migration) for Carnival and Casio
+    const brandLower = String(product.brand || '').toLowerCase();
+    const isPremiumLayout = brandLower === 'carnival' || brandLower === 'casio';
+    if (isPremiumLayout) {
+      const descLower = (product.description || '').toLowerCase();
+      if (descLower.includes('thông số kỹ thuật') || descLower.includes('thông số kĩ thuật') || descLower.includes('hông số kỹ thuật') || descLower.includes('hông số kĩ thuật')) {
+        const parsed = parseSpecsFromDescription(product.description);
+        product.description = parsed.description;
+        const existingLabels = new Set((product.specs || []).map(s => s.label.toLowerCase().trim()));
+        parsed.specs.forEach(spec => {
+          if (!existingLabels.has(spec.label.toLowerCase().trim())) {
+            product.specs.push(spec);
+          }
+        });
+      }
     }
 
     setProductMeta(product);
@@ -39,10 +47,12 @@ export default class ProductDetailPage {
     trackProductView(product.id, getSessionId()).catch(() => { });
 
     const gallery = new ProductGallery(product);
+    this._gallery = gallery;
     const tabs = new ProductTabs(payload);
     const info = new ProductInfo(product, {
       onReviewJump: () => tabs.activate('reviews'),
     });
+    this._info = info;
     const related = new RelatedProducts({ related: payload.related, crossSell: payload.crossSell, recently: payload.recently });
 
     wrap.innerHTML = this._headerHtml(product);
@@ -60,6 +70,18 @@ export default class ProductDetailPage {
     if (related._sections.length) content.appendChild(related.render());
     wrap.appendChild(content);
     return wrap;
+  }
+
+  destroy() {
+    this.aborted = true;
+    if (this._gallery && typeof this._gallery.destroy === 'function') {
+      try { this._gallery.destroy(); } catch (e) { }
+    }
+    if (this._info && typeof this._info.destroy === 'function') {
+      try { this._info.destroy(); } catch (e) { }
+    }
+    const bar = document.getElementById('pdp-mobile-bar');
+    if (bar) bar.remove();
   }
 
   async _loadPayload() {
@@ -84,8 +106,8 @@ export default class ProductDetailPage {
       reviews: this._pick(reviews, this._mockReviews()),
       reviewMeta: reviews.status === 'fulfilled' ? reviews.value.meta : { total: 3, page: 1, total_pages: 1, summary: product.rating || {} },
       questions: this._pick(questions, this._mockQuestions()),
-      related: this._pick(related, []).slice(0, 8),
-      crossSell: this._pick(crossSell, []).slice(0, 8),
+      related: this._pick(related, []).slice(0, 10),
+      crossSell: this._pick(crossSell, []).slice(0, 10),
       recently: this._mergeRecently(this._pick(recent, []), product),
     };
   }
@@ -149,30 +171,59 @@ function parseSpecsFromDescription(html) {
   doc.innerHTML = html;
 
   const specs = [];
-  const tds = doc.querySelectorAll('td');
-  
-  tds.forEach(td => {
-    const strong = td.querySelector('strong');
-    if (strong) {
-      const label = strong.textContent.trim();
-      let valText = td.innerHTML.replace(strong.outerHTML, '').replace(/<br\s*\/?>/gi, '\n');
-      const temp = document.createElement('div');
-      temp.innerHTML = valText;
-      const value = temp.textContent.trim().replace(/\s+/g, ' ');
-      
+
+  // 1. Try WooCommerce format: Table rows with th (label) and td (value)
+  const rows = doc.querySelectorAll('tr');
+  rows.forEach(row => {
+    const th = row.querySelector('th');
+    const td = row.querySelector('td');
+    if (th && td) {
+      const label = th.textContent.trim().replace(/:$/, '');
+      const value = td.textContent.trim();
       if (label && value) {
         specs.push({ label, value });
       }
     }
   });
 
+  // 2. Fallback to td with strong element format
+  if (specs.length === 0) {
+    const tds = doc.querySelectorAll('td');
+    tds.forEach(td => {
+      const strong = td.querySelector('strong');
+      if (strong) {
+        const label = strong.textContent.trim().replace(/:$/, '');
+        let valText = td.innerHTML.replace(strong.outerHTML, '').replace(/<br\s*\/?>/gi, '\n');
+        const temp = document.createElement('div');
+        temp.innerHTML = valText;
+        const value = temp.textContent.trim().replace(/\s+/g, ' ');
+        
+        if (label && value) {
+          specs.push({ label, value });
+        }
+      }
+    });
+  }
+
+  // 3. Remove all specification tables from description HTML
   const tables = doc.querySelectorAll('table');
   tables.forEach(table => table.remove());
 
-  const h3s = doc.querySelectorAll('h3');
-  h3s.forEach(h3 => {
-    if (h3.textContent.includes('Thông số kỹ thuật')) {
-      h3.remove();
+  // 4. Remove headings or paragraphs introducing the specifications
+  const headers = doc.querySelectorAll('h1, h2, h3, h4, p, strong, span');
+  headers.forEach(el => {
+    const text = el.textContent.toLowerCase().trim();
+    if (
+      text === 'thông số kỹ thuật' || text === 'thông số kĩ thuật' ||
+      text === 'hông số kỹ thuật' || text === 'hông số kĩ thuật' ||
+      text.includes('thông số kỹ thuật') || text.includes('thông số kĩ thuật')
+    ) {
+      const parentP = el.closest('p') || el.closest('h1') || el.closest('h2') || el.closest('h3') || el.closest('h4');
+      if (parentP) {
+        parentP.remove();
+      } else {
+        el.remove();
+      }
     }
   });
 

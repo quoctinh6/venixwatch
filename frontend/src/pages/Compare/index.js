@@ -134,7 +134,13 @@ export default class ComparePage {
     // Spec rows
     const tbody = document.createElement('tbody');
     SPEC_ROWS.forEach((row) => {
-      const values = products.map(p => row.format ? row.format(p[row.key] || p.price) : (p[row.key] || '—'));
+      const values = products.map(p => {
+        if (row.key === 'price') {
+          const displayPrice = p.sale_price && p.sale_price < p.price ? p.sale_price : p.price;
+          return row.format(displayPrice);
+        }
+        return p[row.key] || '—';
+      });
       const allSame = values.every(v => v === values[0]);
       const tr = document.createElement('tr');
       tr.style.cssText = 'border-bottom:1px solid #f0f0f0;transition:background .15s;';

@@ -35,30 +35,59 @@ function parseSpecsFromDescription(html) {
   doc.innerHTML = html;
 
   const specs = [];
-  const tds = doc.querySelectorAll('td');
-  
-  tds.forEach(td => {
-    const strong = td.querySelector('strong');
-    if (strong) {
-      const label = strong.textContent.trim();
-      let valText = td.innerHTML.replace(strong.outerHTML, '').replace(/<br\s*\/?>/gi, '\n');
-      const temp = document.createElement('div');
-      temp.innerHTML = valText;
-      const value = temp.textContent.trim().replace(/\s+/g, ' ');
-      
+
+  // 1. Try WooCommerce format: Table rows with th (label) and td (value)
+  const rows = doc.querySelectorAll('tr');
+  rows.forEach(row => {
+    const th = row.querySelector('th');
+    const td = row.querySelector('td');
+    if (th && td) {
+      const label = th.textContent.trim().replace(/:$/, '');
+      const value = td.textContent.trim();
       if (label && value) {
         specs.push({ label, value });
       }
     }
   });
 
+  // 2. Fallback to td with strong element format
+  if (specs.length === 0) {
+    const tds = doc.querySelectorAll('td');
+    tds.forEach(td => {
+      const strong = td.querySelector('strong');
+      if (strong) {
+        const label = strong.textContent.trim().replace(/:$/, '');
+        let valText = td.innerHTML.replace(strong.outerHTML, '').replace(/<br\s*\/?>/gi, '\n');
+        const temp = document.createElement('div');
+        temp.innerHTML = valText;
+        const value = temp.textContent.trim().replace(/\s+/g, ' ');
+        
+        if (label && value) {
+          specs.push({ label, value });
+        }
+      }
+    });
+  }
+
+  // 3. Remove all specification tables from description HTML
   const tables = doc.querySelectorAll('table');
   tables.forEach(table => table.remove());
 
-  const h3s = doc.querySelectorAll('h3');
-  h3s.forEach(h3 => {
-    if (h3.textContent.includes('Thông số kỹ thuật')) {
-      h3.remove();
+  // 4. Remove headings or paragraphs introducing the specifications
+  const headers = doc.querySelectorAll('h1, h2, h3, h4, p, strong, span');
+  headers.forEach(el => {
+    const text = el.textContent.toLowerCase().trim();
+    if (
+      text === 'thông số kỹ thuật' || text === 'thông số kĩ thuật' ||
+      text === 'hông số kỹ thuật' || text === 'hông số kĩ thuật' ||
+      text.includes('thông số kỹ thuật') || text.includes('thông số kĩ thuật')
+    ) {
+      const parentP = el.closest('p') || el.closest('h1') || el.closest('h2') || el.closest('h3') || el.closest('h4');
+      if (parentP) {
+        parentP.remove();
+      } else {
+        el.remove();
+      }
     }
   });
 
@@ -72,7 +101,10 @@ export function openProductForm(product, onSaved) {
   let initialDescription = product?.description || '';
   let parsedSpecsObj = {};
   
-  if (product && initialDescription.includes('Thông số kỹ thuật')) {
+  const brandLower = String(product?.brand || '').toLowerCase();
+  const isPremiumLayout = brandLower === 'carnival' || brandLower === 'casio';
+  const descLower = initialDescription.toLowerCase();
+  if (product && isPremiumLayout && (descLower.includes('thông số kỹ thuật') || descLower.includes('thông số kĩ thuật') || descLower.includes('hông số kỹ thuật') || descLower.includes('hông số kĩ thuật'))) {
     const parsed = parseSpecsFromDescription(initialDescription);
     initialDescription = parsed.description;
     parsedSpecsObj = normalizeSpecs(parsed.specs);

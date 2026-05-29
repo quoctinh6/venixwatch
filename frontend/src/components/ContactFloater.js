@@ -1,6 +1,7 @@
 const PHONE = '0929000063';
 const ZALO_URL = `https://zalo.me/${PHONE}`;
 const PHONE_URL = `tel:${PHONE}`;
+const FB_URL = 'https://facebook.com/donghoatuan';
 
 export class ContactFloater {
   mount() {
@@ -18,6 +19,10 @@ export class ContactFloater {
         flex-direction: column;
         gap: 12px;
         align-items: center;
+        transition: right 0.35s cubic-bezier(.4,0,.2,1), opacity 0.3s ease, transform 0.3s ease;
+      }
+      body.cart-drawer-open #contact-floater {
+        right: calc(404px + env(safe-area-inset-right, 0px));
       }
       .contact-btn {
         position: relative;
@@ -38,6 +43,7 @@ export class ContactFloater {
         box-shadow: 0 14px 28px rgba(0, 0, 0, 0.16);
       }
       .contact-btn-zalo { background: #0068FF; }
+      .contact-btn-facebook { background: #1877F2; }
       .contact-btn-phone { background: #C9A961; }
       .contact-label {
         position: absolute;
@@ -65,6 +71,12 @@ export class ContactFloater {
           right: calc(16px + env(safe-area-inset-right, 0px));
           bottom: calc(16px + env(safe-area-inset-bottom, 0px));
         }
+        body.cart-drawer-open #contact-floater {
+          right: calc(16px + env(safe-area-inset-right, 0px));
+          opacity: 0;
+          pointer-events: none;
+          transform: translateX(30px);
+        }
         .contact-btn {
           width: 44px;
           height: 44px;
@@ -91,6 +103,19 @@ export class ContactFloater {
       </svg>
     `;
 
+    const facebookBtn = document.createElement('a');
+    facebookBtn.href = FB_URL;
+    facebookBtn.target = '_blank';
+    facebookBtn.rel = 'noopener noreferrer';
+    facebookBtn.title = 'Facebook Fanpage';
+    facebookBtn.className = 'contact-btn contact-btn-facebook';
+    facebookBtn.innerHTML = `
+      <span class="contact-label">Facebook</span>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="white" aria-hidden="true">
+        <path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.95c4.56-.93 8-4.96 8-9.75z"/>
+      </svg>
+    `;
+
     const phoneBtn = document.createElement('a');
     phoneBtn.href = PHONE_URL;
     phoneBtn.title = `Gọi ${PHONE}`;
@@ -102,6 +127,7 @@ export class ContactFloater {
       </svg>
     `;
 
+    floater.appendChild(facebookBtn);
     floater.appendChild(zaloBtn);
     floater.appendChild(phoneBtn);
     document.body.appendChild(floater);

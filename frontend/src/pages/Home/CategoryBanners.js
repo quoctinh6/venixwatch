@@ -81,7 +81,7 @@ export class CategoryBanners {
 
   _initParallax(section) {
     if (window.innerWidth <= 1024) return;
-    const onScroll = throttle(() => {
+    this._onScroll = throttle(() => {
       const rect = section.getBoundingClientRect();
       const inView = rect.top < window.innerHeight && rect.bottom > 0;
       if (!inView) return;
@@ -94,6 +94,13 @@ export class CategoryBanners {
         img.style.transform = `translateY(${relativeScroll - 16}px) scale(1.1)`;
       });
     }, 16);
-    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('scroll', this._onScroll, { passive: true });
+  }
+
+  destroy() {
+    if (this._onScroll) {
+      window.removeEventListener('scroll', this._onScroll);
+      this._onScroll = null;
+    }
   }
 }

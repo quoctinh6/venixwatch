@@ -134,7 +134,7 @@ export default class ProductGallery {
       });
     }
 
-    document.addEventListener('keydown', (e) => {
+    this._onKeyDown = (e) => {
       if (!lightbox || lightbox.classList.contains('hidden')) return;
       if (e.key === 'Escape') closeLightbox();
       if (e.key === 'ArrowLeft') {
@@ -145,7 +145,19 @@ export default class ProductGallery {
         this._index = (this._index + 1) % this._images.length;
         refresh();
       }
-    });
+    };
+    document.addEventListener('keydown', this._onKeyDown);
+  }
+
+  destroy() {
+    if (this._onKeyDown) {
+      document.removeEventListener('keydown', this._onKeyDown);
+      this._onKeyDown = null;
+    }
+    const lightbox = document.querySelector('[data-lightbox]');
+    if (lightbox) {
+      lightbox.remove();
+    }
 
     stage?.addEventListener('mousemove', (e) => {
       if (window.innerWidth < 1024) return;

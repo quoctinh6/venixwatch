@@ -46,7 +46,10 @@ function initLenis() {
 
   requestAnimationFrame(raf);
   window.addEventListener('popstate', () => {
-    lenis.scrollTo(0, { immediate: true });
+    const hasSavedScroll = history.state && typeof history.state.scrollY === 'number';
+    if (!hasSavedScroll) {
+      lenis.scrollTo(0, { immediate: true });
+    }
   });
 }
 
@@ -75,6 +78,18 @@ function initScrollToTop() {
       setTimeout(() => {
         if (!btn.classList.contains('show')) btn.classList.add('hidden');
       }, 300);
+    }
+
+    try {
+      const currentState = history.state || {};
+      if (currentState.scrollY !== window.scrollY) {
+        history.replaceState({ ...currentState, scrollY: window.scrollY }, '');
+      }
+      const currentKey = window.location.pathname + window.location.search;
+      sessionStorage.setItem(`dhat_scroll_${currentKey}`, String(window.scrollY));
+      localStorage.setItem('dhat_last_left_path', currentKey);
+    } catch (e) {
+      // Ignore
     }
   }, 100), { passive: true });
 
@@ -234,6 +249,20 @@ function initModalScrollLockObserver() {
 }
 
 async function boot() {
+  // Redirect to last page if new session
+  try {
+    const isNewSession = !sessionStorage.getItem('dhat_session_active');
+    sessionStorage.setItem('dhat_session_active', 'true');
+    if (isNewSession && window.location.pathname === '/') {
+      const lastPath = localStorage.getItem('dhat_last_left_path');
+      if (lastPath && lastPath !== '/') {
+        history.replaceState({}, '', lastPath);
+      }
+    }
+  } catch (err) {
+    console.warn('[App] Failed to restore last path:', err);
+  }
+
   // Load dynamic settings on startup
   let settings = {
     brand_name: 'Venix Watch',
@@ -311,9 +340,87 @@ async function boot() {
     initCompareBar();
   } catch { }
 
+  // Helper for smart scroll restoration retry
+  const restoreScrollWithRetry = (targetScroll) => {
+    if (targetScroll <= 0) return;
+
+    let userInteracted = false;
+    const cancelEvents = ['wheel', 'touchmove', 'pointerdown', 'keydown'];
+    const cancelRestoration = () => {
+      userInteracted = true;
+      cancelEvents.forEach((evt) => window.removeEventListener(evt, cancelRestoration));
+    };
+    cancelEvents.forEach((evt) => window.addEventListener(evt, cancelRestoration, { passive: true }));
+
+    // Allow external cancellation (e.g. from a new page-rendered event)
+    window.cancelOngoingScrollRestoration = () => {
+      userInteracted = true;
+      cancelEvents.forEach((evt) => window.removeEventListener(evt, cancelRestoration));
+    };
+
+    const startTime = Date.now();
+    const maxDuration = 4000; // 4 seconds timeout
+
+    const performScroll = () => {
+      if (userInteracted) return;
+
+      if (window.lenis) {
+        window.lenis.scrollTo(targetScroll, { immediate: true });
+      } else {
+        window.scrollTo(0, targetScroll);
+      }
+
+      const currentScroll = window.scrollY;
+      const reachedTarget = Math.abs(currentScroll - targetScroll) <= 15;
+      const timedOut = (Date.now() - startTime) > maxDuration;
+
+      if (reachedTarget) {
+        cancelEvents.forEach((evt) => window.removeEventListener(evt, cancelRestoration));
+        if (window.cancelOngoingScrollRestoration === window.cancelOngoingScrollRestoration) {
+          window.cancelOngoingScrollRestoration = null;
+        }
+        return;
+      }
+
+      if (!timedOut) {
+        setTimeout(performScroll, 100);
+      } else {
+        cancelEvents.forEach((evt) => window.removeEventListener(evt, cancelRestoration));
+        if (window.cancelOngoingScrollRestoration === window.cancelOngoingScrollRestoration) {
+          window.cancelOngoingScrollRestoration = null;
+        }
+      }
+    };
+
+    setTimeout(performScroll, 50);
+  };
+
   window.addEventListener('page-rendered', () => {
     if (window.lenis) {
+      window.lenis.start();
       window.lenis.resize();
+    }
+
+    const currentKey = window.location.pathname + window.location.search;
+    let targetScroll = 0;
+
+    // Restore scroll position if saved in history state or sessionStorage
+    const state = history.state;
+    if (state && typeof state.scrollY === 'number' && state.scrollY > 0) {
+      targetScroll = state.scrollY;
+    } else {
+      const saved = sessionStorage.getItem(`dhat_scroll_${currentKey}`);
+      if (saved) {
+        targetScroll = parseInt(saved, 10) || 0;
+      }
+    }
+
+    if (targetScroll > 0) {
+      // Cancel any ongoing restoration first
+      if (typeof window.cancelOngoingScrollRestoration === 'function') {
+        window.cancelOngoingScrollRestoration();
+      }
+      restoreScrollWithRetry(targetScroll);
     }
   });
 
@@ -333,7 +440,26 @@ async function boot() {
     if (anchor.target === '_blank') return;
 
     e.preventDefault();
-    history.pushState({}, '', href);
+
+    // Cancel any ongoing scroll restoration on navigation
+    if (typeof window.cancelOngoingScrollRestoration === 'function') {
+      window.cancelOngoingScrollRestoration();
+    }
+
+    // Save scroll position for the current page before navigating away
+    const currentKey = window.location.pathname + window.location.search;
+    sessionStorage.setItem(`dhat_scroll_${currentKey}`, String(window.scrollY));
+    try {
+      const currentState = history.state || {};
+      history.replaceState({ ...currentState, scrollY: window.scrollY }, '');
+    } catch (err) {
+      // Ignore
+    }
+
+    // Clear target scroll position so forward navigation starts at the top
+    sessionStorage.removeItem(`dhat_scroll_${href}`);
+
+    history.pushState({ isForward: true }, '', href);
     window.dispatchEvent(new PopStateEvent('popstate'));
   });
 }

@@ -1,5 +1,6 @@
 import { cartService } from '../../services/cartService.js';
 import { formatPrice, navigate } from '../../utils/helpers.js';
+import { resolveImageUrl } from '../../services/config.js';
 
 export default class CartPage {
   render() {
@@ -34,7 +35,7 @@ export default class CartPage {
             <path d="M16 10a4 4 0 0 1-8 0"/>
           </svg>
           <h2 class="mt-6 text-xl font-bold text-zinc-700">Giỏ hàng của bạn đang trống</h2>
-          <button data-nav="/" class="mt-6 inline-flex h-12 items-center justify-center rounded-xl bg-zinc-950 px-8 text-xs font-bold uppercase tracking-[0.12em] text-white transition hover:bg-amber-500 hover:text-zinc-950">
+          <button data-nav="/" class="mt-6 inline-flex h-12 items-center justify-center rounded-xl bg-zinc-950 px-8 text-xs font-bold uppercase tracking-[0.12em] text-white transition hover:bg-primary-gold hover:text-zinc-950">
             Tiếp Tục Mua Sắm
           </button>
         </div>
@@ -72,20 +73,20 @@ export default class CartPage {
           <div class="my-5 border-y border-zinc-200 py-4">
             <div class="flex items-center justify-between text-base font-black text-zinc-950">
               <span>Tổng Cộng</span>
-              <span class="text-amber-500">${formatPrice(total + (total >= 500000 ? 0 : 30000))}</span>
+              <span class="text-primary-gold">${formatPrice(total + (total >= 500000 ? 0 : 30000))}</span>
             </div>
           </div>
 
           <div class="flex flex-col gap-3">
             <div class="flex flex-col gap-2 sm:flex-row">
               <input id="coupon-input" type="text" placeholder="Mã giảm giá"
-                class="h-11 flex-1 rounded-xl border border-zinc-200 px-3 text-sm outline-none transition focus:border-amber-500" />
+                class="h-11 flex-1 rounded-xl border border-zinc-200 px-3 text-sm outline-none transition focus:border-primary-gold" />
               <button id="coupon-btn" class="inline-flex h-11 items-center justify-center rounded-xl bg-zinc-950 px-4 text-xs font-bold uppercase tracking-[0.12em] text-white transition hover:bg-zinc-800">
                 Áp Dụng
               </button>
             </div>
             <p id="coupon-msg" class="hidden text-xs"></p>
-            <button id="checkout-page-btn" class="inline-flex h-12 w-full items-center justify-center rounded-xl bg-zinc-950 px-4 text-xs font-bold uppercase tracking-[0.12em] text-white transition hover:bg-amber-500 hover:text-zinc-950">
+            <button id="checkout-page-btn" class="inline-flex h-12 w-full items-center justify-center rounded-xl bg-zinc-950 px-4 text-xs font-bold uppercase tracking-[0.12em] text-white transition hover:bg-primary-gold hover:text-zinc-950">
               Tiến Hành Thanh Toán
             </button>
             <button data-nav="/nam" class="inline-flex h-12 w-full items-center justify-center rounded-xl border border-zinc-200 bg-white px-4 text-xs font-bold uppercase tracking-[0.12em] text-zinc-900 transition hover:border-zinc-400 hover:bg-zinc-50">
@@ -99,7 +100,7 @@ export default class CartPage {
 
   _itemRow(item) {
     const price = item.sale_price && item.sale_price < item.price ? item.sale_price : item.price;
-    const img = item.image || 'https://images.pexels.com/photos/236915/pexels-photo-236915.jpeg?auto=compress&cs=tinysrgb&w=400';
+    const img = resolveImageUrl(item.image) || 'https://images.pexels.com/photos/236915/pexels-photo-236915.jpeg?auto=compress&cs=tinysrgb&w=400';
 
     return `
       <div class="cart-item-row rounded-2xl border border-zinc-100 p-4 md:grid md:grid-cols-[minmax(0,1fr),120px,120px,120px] md:items-center md:gap-4" data-id="${item.id}">
@@ -133,7 +134,7 @@ export default class CartPage {
 
         <div class="mt-4 flex items-center justify-between md:mt-0 md:block md:text-right">
           <span class="text-xs font-semibold uppercase tracking-[0.05em] text-zinc-400 md:hidden">Tổng</span>
-          <span class="text-base font-bold text-amber-500">${formatPrice(price * item.qty)}</span>
+          <span class="text-base font-bold text-primary-gold">${formatPrice(price * item.qty)}</span>
         </div>
       </div>
     `;
@@ -167,13 +168,14 @@ export default class CartPage {
       }
     });
 
-    window.addEventListener('cart-updated', () => refresh(), { once: true });
+    this._onCartUpdated = () => refresh();
+    window.addEventListener('cart-updated', this._onCartUpdated);
   }
 
   _bindItemEvents(wrap) {
     wrap.querySelectorAll('.remove-btn').forEach((btn) => {
       btn.addEventListener('click', () => {
-        cartService.removeItem(Number(btn.dataset.id));
+        cartService.removeItem(btn.dataset.id);
         const row = wrap.querySelector(`.cart-item-row[data-id="${btn.dataset.id}"]`);
         row?.remove();
         if (cartService.getCart().length === 0) {
@@ -186,8 +188,8 @@ export default class CartPage {
 
     wrap.querySelectorAll('.qty-dec').forEach((btn) => {
       btn.addEventListener('click', () => {
-        const id = Number(btn.dataset.id);
-        const item = cartService.getCart().find((entry) => entry.id === id);
+        const id = btn.dataset.id;
+        const item = cartService.getCart().find((entry) => String(entry.id) === String(id));
         if (item) {
           cartService.updateQty(id, item.qty - 1);
           btn.closest('.cart-item-row')?.querySelector('.qty-val').textContent = Math.max(0, item.qty - 1);
@@ -204,8 +206,8 @@ export default class CartPage {
 
     wrap.querySelectorAll('.qty-inc').forEach((btn) => {
       btn.addEventListener('click', () => {
-        const id = Number(btn.dataset.id);
-        const item = cartService.getCart().find((entry) => entry.id === id);
+        const id = btn.dataset.id;
+        const item = cartService.getCart().find((entry) => String(entry.id) === String(id));
         if (item) {
           cartService.updateQty(id, item.qty + 1);
           btn.closest('.cart-item-row')?.querySelector('.qty-val').textContent = item.qty + 1;
@@ -218,5 +220,12 @@ export default class CartPage {
         if (el.dataset.slug) navigate(`/san-pham/${el.dataset.slug}`);
       });
     });
+  }
+
+  destroy() {
+    if (this._onCartUpdated) {
+      window.removeEventListener('cart-updated', this._onCartUpdated);
+      this._onCartUpdated = null;
+    }
   }
 }

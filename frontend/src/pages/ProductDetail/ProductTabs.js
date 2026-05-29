@@ -111,27 +111,82 @@ export default class ProductTabs {
       { key: 'specs', label: 'Thông số', html: this._specsHtml() },
       { key: 'reviews', label: `Đánh giá (${this._reviewMeta.total || this._reviews.length})`, html: this._reviewsHtml() },
       { key: 'qa', label: 'Hỏi đáp', html: this._qaHtml() },
-      { key: 'policy', label: 'Chính sách', html: this._policyHtml() },
+      // { key: 'policy', label: 'Chính sách', html: this._policyHtml() },
     ];
   }
 
   _descriptionHtml() {
-    return `<div class="space-y-6 p-5 lg:p-7"><div><h2 class="text-2xl font-bold text-[#0A0A0A]">Về ${this._product.name}</h2><p class="mt-4 max-w-4xl text-[15px] leading-8 text-[#4B5563]">${this._product.long_description || 'Mẫu đồng hồ này cân bằng giữa độ hoàn thiện, cảm giác đeo và tính thẩm mỹ để sử dụng bền lâu trong nhiều bối cảnh.'}</p></div><div class="grid gap-4 md:grid-cols-3">${(this._product.images || []).slice(0, 3).map((src) => `<img src="${src}" alt="${this._product.name}" class="aspect-[4/5] w-full rounded-[10px] object-cover"/>`).join('')}</div></div>`;
+    const isPremiumLayout = ['carnival', 'casio'].includes(String(this._product.brand || '').toLowerCase());
+    if (isPremiumLayout) {
+      const desc = this._product.description || 'Mẫu đồng hồ này cân bằng giữa độ hoàn thiện, cảm giác đeo và tính thẩm mỹ để sử dụng bền lâu trong nhiều bối cảnh.';
+      return `
+        <div class="space-y-6 p-5 lg:p-7">
+          <div>
+            <h2 class="text-2xl font-bold text-[#0A0A0A]">Về ${this._product.name}</h2>
+            <div class="pdp-description-content mt-4 max-w-4xl text-[15px] leading-8 text-[#4B5563]">
+              ${desc}
+            </div>
+          </div>
+          <div class="grid gap-4 md:grid-cols-3">
+            ${(this._product.images || []).slice(0, 3).map((src) => `
+              <img src="${src}" alt="${this._product.name}" class="aspect-[4/5] w-full rounded-[10px] object-cover"/>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    } else {
+      return `
+        <div class="space-y-6 p-5 lg:p-7">
+          <div>
+            <h2 class="text-2xl font-bold text-[#0A0A0A]">Về ${this._product.name}</h2>
+            <p class="mt-4 max-w-4xl text-[15px] leading-8 text-[#4B5563]">${this._product.long_description || 'Mẫu đồng hồ này cân bằng giữa độ hoàn thiện, cảm giác đeo và tính thẩm mỹ để sử dụng bền lâu trong nhiều bối cảnh.'}</p>
+          </div>
+          <div class="grid gap-4 md:grid-cols-3">
+            ${(this._product.images || []).slice(0, 3).map((src) => `
+              <img src="${src}" alt="${this._product.name}" class="aspect-[4/5] w-full rounded-[10px] object-cover"/>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
   }
 
   _specsHtml() {
-    return `
-      <div class="overflow-hidden p-1 lg:p-2">
-        <table class="w-full border-separate border-spacing-0 text-sm">
-          ${(this._product.specs || []).map((spec, index) => `
-            <tr class="${index % 2 === 1 ? 'bg-[#FAF8F3]' : 'bg-white'} hover:bg-gray-50/50 transition-colors">
-              <td class="w-[38%] border-b border-[#F0EBE0] px-4 py-3.5 font-semibold text-[#0A0A0A]">${spec.label}</td>
-              <td class="border-b border-[#F0EBE0] px-4 py-3.5 text-[#0A0A0A] font-medium">${spec.value}</td>
-            </tr>
-          `).join('')}
-        </table>
-      </div>
-    `;
+    const isPremiumLayout = ['carnival', 'casio'].includes(String(this._product.brand || '').toLowerCase());
+    const specs = this._product.specs || [];
+    if (isPremiumLayout) {
+      return `
+        <div class="overflow-hidden">
+          <table class="w-full border-collapse text-sm">
+            <tbody>
+              ${specs.map((spec, index) => {
+                const isLast = index === specs.length - 1;
+                const borderClass = isLast ? '' : 'border-b border-[#F0EBE0]';
+                return `
+                  <tr class="${index % 2 === 1 ? 'bg-[#FAF8F3]' : 'bg-white'} hover:bg-gray-50/50 transition-colors">
+                    <td class="w-[35%] ${borderClass} px-6 py-4 font-semibold text-[#0A0A0A]">${spec.label}</td>
+                    <td class="${borderClass} px-6 py-4 text-[#0A0A0A] font-medium">${spec.value}</td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    } else {
+      return `
+        <div class="overflow-hidden p-1 lg:p-2">
+          <table class="w-full border-separate border-spacing-0 text-sm">
+            ${specs.map((spec, index) => `
+              <tr class="${index % 2 === 1 ? 'bg-[#FAF8F3]' : 'bg-white'} hover:bg-gray-50/50 transition-colors">
+                <td class="w-[38%] border-b border-[#F0EBE0] px-4 py-3.5 font-semibold text-[#0A0A0A]">${spec.label}</td>
+                <td class="border-b border-[#F0EBE0] px-4 py-3.5 text-[#0A0A0A] font-medium">${spec.value}</td>
+              </tr>
+            `).join('')}
+          </table>
+        </div>
+      `;
+    }
   }
 
   _reviewsHtml() {

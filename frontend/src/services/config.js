@@ -20,6 +20,25 @@ export const API_BASE = window.location.hostname === 'localhost' || window.locat
   ? 'https://venixwatchvn464.mbws.vn/backend/public'
   : `${window.location.origin}${resolveProjectPrefix()}/backend/public`;
 
+export function resolveImageUrl(path) {
+  if (!path) return '';
+  if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:')) {
+    return path;
+  }
+  
+  let cleanPath = path.replace(/^\//, ''); // remove leading slash
+  const apiBaseUrl = API_BASE.endsWith('/') ? API_BASE.slice(0, -1) : API_BASE;
+  const apiBaseRoot = apiBaseUrl.replace(/\/backend\/public$/, '');
+  
+  if (cleanPath.startsWith('backend/public/') || cleanPath.includes('/backend/public/')) {
+    const index = cleanPath.indexOf('backend/public/');
+    cleanPath = cleanPath.substring(index);
+    return `${apiBaseRoot}/${cleanPath}`;
+  }
+  
+  return `${apiBaseUrl}/${cleanPath}`;
+}
+
 export const STORAGE_KEYS = {
   CART: 'dhat_cart',
   RECENTLY_VIEWED: 'dhat_recently_viewed',

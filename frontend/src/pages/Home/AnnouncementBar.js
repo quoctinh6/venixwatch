@@ -19,7 +19,7 @@ export class AnnouncementBar {
     bar.className = 'relative flex min-h-10 items-center justify-center overflow-hidden bg-zinc-800 px-10 py-2 text-center font-sans text-xs font-medium tracking-[0.05em] text-white sm:px-12';
 
     const accent = document.createElement('div');
-    accent.className = 'absolute inset-y-0 left-0 w-1 bg-amber-500';
+    accent.className = 'absolute inset-y-0 left-0 w-1 bg-primary-gold';
 
     const text = document.createElement('span');
     text.id = 'announcement-text';
@@ -65,5 +65,9 @@ export class AnnouncementBar {
       clearInterval(this._interval);
       this._interval = null;
     }
+  }
+
+  destroy() {
+    this._stopRotation();
   }
 }
