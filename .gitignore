@@ -1,0 +1,14 @@
+# Ignore product images directory
+backend/public/image/product/
+
+# Ignore environment configuration files
+backend/.env
+.env
+
+# Ignore OS files
+.DS_Store
+Thumbs.db
+
+# Ignore IDE settings
+.vscode/
+.idea/

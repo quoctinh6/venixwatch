@@ -1,0 +1,20 @@
+Options -Indexes
+RewriteEngine On
+
+# Pass Authorization header to PHP
+RewriteCond %{HTTP:Authorization} .
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+# Let backend/ requests pass through to backend's own .htaccess + index.php
+RewriteRule ^backend/ - [L]
+
+# Admin panel — serve frontend/admin.html
+RewriteRule ^admin/?$ frontend/admin.html [L]
+
+# Let real FILES pass through (CSS, JS, images, fonts...)
+# Do NOT pass directories — this lets the root / redirect to frontend/index.html
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^ - [L]
+
+# All other routes (SPA) -> frontend/index.html
+RewriteRule ^ frontend/index.html [L]
