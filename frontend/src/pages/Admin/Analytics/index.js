@@ -18,15 +18,15 @@ export function renderAnalytics(container) {
       <!-- Header -->
       <div class="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h2 class="text-xl font-bold text-gray-900 tracking-tight">Analytics</h2>
-          <p class="text-xs text-gray-500 mt-0.5">Phân tích lượng truy cập & hiệu quả kinh doanh</p>
+          <h2 class="text-xl font-black text-zinc-900 tracking-tight uppercase">Báo cáo Analytics</h2>
+          <p class="text-[11px] font-semibold text-zinc-400 mt-0.5 uppercase tracking-wider">Phân tích lượng truy cập & hiệu quả kinh doanh</p>
         </div>
         <div class="flex flex-wrap items-center gap-3">
           <!-- Preset buttons and Custom date inputs wrapper -->
           <div class="flex flex-wrap items-center gap-2 bg-white p-1.5 rounded-xl border border-gray-150 shadow-sm">
             <div class="flex gap-1">
               ${[['today', 'Hôm nay'], ['7', '7 ngày'], ['30', '30 ngày'], ['90', '90 ngày']].map(([value, label]) => `
-                <button class="range-btn px-3.5 py-1.5 rounded-lg text-xs font-bold border transition-all duration-200 cursor-pointer ${value === '30' ? 'bg-zinc-900 text-white border-zinc-900 shadow-sm' : 'border-gray-100 text-gray-500 hover:text-[#C9A84C] hover:border-[#C9A84C]/30 hover:bg-amber-50/20'}" data-range="${value}">${label}</button>
+                <button class="range-btn px-3.5 py-1.5 rounded-lg text-xs font-bold border transition-all duration-200 cursor-pointer ${value === '30' ? 'bg-zinc-950 text-white border-zinc-950 shadow-md shadow-zinc-950/10' : 'border-transparent text-gray-500 hover:text-[#C9A84C] hover:bg-amber-50/30'}" data-range="${value}">${label}</button>
               `).join('')}
             </div>
             <div class="h-4 w-px bg-gray-200 hidden md:block"></div>
@@ -217,8 +217,8 @@ export function renderAnalytics(container) {
       container.querySelectorAll('.range-btn').forEach((item) => {
         item.className = `range-btn px-3.5 py-1.5 rounded-lg text-xs font-bold border transition-all duration-200 cursor-pointer ${
           item.dataset.range === currentRange 
-            ? 'bg-zinc-900 text-white border-zinc-900 shadow-sm' 
-            : 'border-gray-100 text-gray-500 hover:text-[#C9A84C] hover:border-[#C9A84C]/30 hover:bg-amber-50/20'
+            ? 'bg-zinc-950 text-white border-zinc-950 shadow-md shadow-zinc-950/10' 
+            : 'border-transparent text-gray-500 hover:text-[#C9A84C] hover:bg-amber-50/30'
         }`;
       });
       loadData();
@@ -245,7 +245,7 @@ export function renderAnalytics(container) {
 
     // Clear active preset buttons styling
     container.querySelectorAll('.range-btn').forEach((item) => {
-      item.className = 'range-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold border border-gray-100 text-gray-500 hover:text-[#C9A84C] hover:border-[#C9A84C]/30 hover:bg-amber-50/20 transition-all duration-200 cursor-pointer';
+      item.className = 'range-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold border border-transparent text-gray-500 hover:text-[#C9A84C] hover:bg-amber-50/30 transition-all duration-200 cursor-pointer';
     });
 
     loadData();
@@ -321,63 +321,101 @@ function renderSummary(container, summary) {
       label: 'Tổng lượt truy cập', 
       value: Number(summary.total_visits || 0).toLocaleString('vi-VN'),
       icon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M2 12h22"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`,
-      iconBg: 'bg-amber-50/60 text-[#C9A84C] group-hover:bg-[#C9A84C] group-hover:text-white',
+      iconBg: 'bg-blue-50/80 text-blue-600 group-hover:bg-blue-600 group-hover:text-white',
+      accentClass: 'before:bg-blue-500',
+      hoverBorderClass: 'hover:border-blue-500/30',
     },
     {
       label: 'Khách hàng độc nhất', 
       value: Number(summary.unique_visitors || 0).toLocaleString('vi-VN'),
       icon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
-      iconBg: 'bg-amber-50/60 text-[#C9A84C] group-hover:bg-[#C9A84C] group-hover:text-white',
+      iconBg: 'bg-indigo-50/80 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white',
+      accentClass: 'before:bg-indigo-500',
+      hoverBorderClass: 'hover:border-indigo-500/30',
     },
     {
       label: 'Thời gian lưu lại TB', 
       value: formatDuration(summary.avg_time_on_page || 0),
       icon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
-      iconBg: 'bg-amber-50/60 text-[#C9A84C] group-hover:bg-[#C9A84C] group-hover:text-white',
+      iconBg: 'bg-cyan-50/80 text-cyan-600 group-hover:bg-cyan-600 group-hover:text-white',
+      accentClass: 'before:bg-cyan-500',
+      hoverBorderClass: 'hover:border-cyan-500/30',
     },
     {
       label: 'Doanh thu (Ước tính)', 
       value: Number(summary.total_revenue || 0).toLocaleString('vi-VN') + 'đ',
       icon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>`,
-      iconBg: 'bg-amber-50/60 text-[#C9A84C] group-hover:bg-[#C9A84C] group-hover:text-white',
+      iconBg: 'bg-amber-50/80 text-[#C9A84C] group-hover:bg-[#C9A84C] group-hover:text-white',
+      accentClass: 'before:bg-[#C9A84C]',
+      hoverBorderClass: 'hover:border-[#C9A84C]/45',
+      cardBg: 'bg-gradient-to-br from-amber-500/[0.03] via-white to-white',
     },
     {
       label: 'Tổng số đơn hàng', 
       value: Number(summary.total_orders || 0).toLocaleString('vi-VN'),
       icon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>`,
-      iconBg: 'bg-amber-50/60 text-[#C9A84C] group-hover:bg-[#C9A84C] group-hover:text-white',
+      iconBg: 'bg-emerald-50/80 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white',
+      accentClass: 'before:bg-emerald-500',
+      hoverBorderClass: 'hover:border-emerald-500/30',
     },
     {
       label: 'Đơn hàng trung bình (AOV)', 
       value: Number(summary.aov || 0).toLocaleString('vi-VN') + 'đ',
       icon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>`,
-      iconBg: 'bg-amber-50/60 text-[#C9A84C] group-hover:bg-[#C9A84C] group-hover:text-white',
+      iconBg: 'bg-teal-50/80 text-teal-600 group-hover:bg-teal-600 group-hover:text-white',
+      accentClass: 'before:bg-teal-500',
+      hoverBorderClass: 'hover:border-teal-500/30',
     },
     {
       label: 'Lượt xem trang (Views)', 
       value: Number(summary.page_views || 0).toLocaleString('vi-VN'),
       icon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`,
-      iconBg: 'bg-amber-50/60 text-[#C9A84C] group-hover:bg-[#C9A84C] group-hover:text-white',
+      iconBg: 'bg-purple-50/80 text-purple-600 group-hover:bg-purple-600 group-hover:text-white',
+      accentClass: 'before:bg-purple-500',
+      hoverBorderClass: 'hover:border-purple-500/30',
     },
     {
       label: 'Hoạt động trực tiếp', 
       value: `${summary.active_users || 0} online`,
       icon: `<span class="relative flex h-3.5 w-3.5"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span><span class="relative inline-flex rounded-full h-3.5 w-3.5 bg-green-500"></span></span>`,
-      iconBg: 'bg-green-50 text-green-500 group-hover:bg-green-100 group-hover:text-green-600',
+      iconBg: 'bg-green-50 text-green-500 group-hover:bg-green-500 group-hover:text-white',
+      accentClass: 'before:bg-green-500',
+      hoverBorderClass: 'hover:border-green-500/30',
+      cardBg: 'bg-gradient-to-br from-green-500/[0.02] via-white to-white',
     }
   ];
 
-  wrap.innerHTML = cards.map(c => `
-    <div class="bg-white rounded-2xl border border-gray-150 p-5.5 shadow-sm hover:shadow-md hover:border-[#C9A84C]/45 transition-all duration-300 hover:-translate-y-0.5 flex items-center justify-between group">
-      <div class="space-y-2">
-        <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">${c.label}</div>
-        <div class="text-xl font-extrabold text-gray-900 tracking-tight leading-none sm:text-2xl">${c.value}</div>
+  wrap.innerHTML = cards.map(c => {
+    const valStr = String(c.value);
+    let formattedValue = valStr;
+
+    // Split out currency symbol to style it with gold/accent color and smaller size
+    if (valStr.endsWith('đ')) {
+      formattedValue = valStr.slice(0, -1) + `<span class="text-sm font-bold text-[#C9A84C] ml-0.5">đ</span>`;
+    }
+
+    const valLen = valStr.length;
+    let fontSizeClass = 'text-xl sm:text-2xl';
+    if (valLen > 16) {
+      fontSizeClass = 'text-base sm:text-lg';
+    } else if (valLen > 12) {
+      fontSizeClass = 'text-lg sm:text-xl';
+    }
+
+    const cardBg = c.cardBg || 'bg-white';
+
+    return `
+      <div class="${cardBg} rounded-2xl border border-gray-150 p-6 shadow-sm hover:shadow-md hover:scale-[1.02] ${c.hoverBorderClass} transition-all duration-300 before:absolute before:top-0 before:left-0 before:right-0 before:h-[3px] before:rounded-t-2xl relative overflow-hidden flex items-center justify-between group ${c.accentClass}">
+        <div class="space-y-2 min-w-0 pr-2">
+          <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest truncate">${c.label}</div>
+          <div class="${fontSizeClass} font-extrabold text-gray-900 tracking-tight leading-none truncate">${formattedValue}</div>
+        </div>
+        <div class="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 ${c.iconBg}">
+          ${c.icon}
+        </div>
       </div>
-      <div class="w-11 h-11 rounded-xl flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 ${c.iconBg}">
-        ${c.icon}
-      </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 }
 
 function renderVisitorsChart(container, data, params) {
