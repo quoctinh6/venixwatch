@@ -2,6 +2,7 @@
  * recentlyViewed.js — Track and display recently viewed products
  */
 import { formatPrice, navigate } from './helpers.js';
+import { resolveImageUrl } from '../services/config.js';
 
 const STORAGE_KEY = 'dhat_recently_viewed';
 const MAX_ITEMS = 8;
@@ -81,7 +82,7 @@ export class RecentlyViewed {
 
   _cardHTML(p) {
     const displayPrice = p.sale_price && p.sale_price < p.price ? p.sale_price : p.price;
-    const imgSrc = p.image ||
+    const imgSrc = resolveImageUrl(p.image) ||
       'https://images.pexels.com/photos/236915/pexels-photo-236915.jpeg?auto=compress&cs=tinysrgb&w=400';
     return `
       <div data-rv-slug="${p.slug}" style="

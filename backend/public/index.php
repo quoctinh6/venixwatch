@@ -248,6 +248,17 @@ function dispatch(string $method, string $path): void
         ['PUT',    '/admin/settings',                     'App\Modules\Admin\Settings\SettingController', 'update'],
         ['POST',   '/admin/settings/upload-logo',         'App\Modules\Admin\Settings\SettingController', 'uploadLogo'],
         ['POST',   '/admin/settings/upload-banner',       'App\Modules\Admin\Settings\SettingController', 'uploadBanner'],
+        ['POST',   '/admin/settings/rollback',            'App\Modules\Admin\Settings\SettingController', 'rollback'],
+
+        // ---- NEWS / BLOG ----
+        ['GET',    '/news',                               'App\Modules\Admin\News\NewsController', 'index'],
+        ['GET',    '/news/{slug}',                        'App\Modules\Admin\News\NewsController', 'show'],
+        ['GET',    '/admin/news',                         'App\Modules\Admin\News\NewsController', 'adminIndex'],
+        ['GET',    '/admin/news/{id}',                    'App\Modules\Admin\News\NewsController', 'adminShow'],
+        ['POST',   '/admin/news',                         'App\Modules\Admin\News\NewsController', 'store'],
+        ['PUT',    '/admin/news/{id}',                    'App\Modules\Admin\News\NewsController', 'update'],
+        ['DELETE', '/admin/news/{id}',                    'App\Modules\Admin\News\NewsController', 'destroy'],
+        ['POST',   '/admin/news/upload-image',            'App\Modules\Admin\News\NewsController', 'uploadImage'],
     ];
 
     $methodMatches = false;

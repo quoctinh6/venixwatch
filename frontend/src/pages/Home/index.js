@@ -13,7 +13,9 @@ import { Newsletter } from './Newsletter.js';
 import { getProducts, getMockProducts } from '../../services/productService.js';
 
 export default class HomePage {
-  constructor() { }
+  constructor() {
+    this.components = [];
+  }
 
   async render() {
     const wrap = document.createElement('div');
@@ -22,29 +24,52 @@ export default class HomePage {
     // Mount sections in order
     const announcementBar = new AnnouncementBar();
     wrap.appendChild(announcementBar.render());
+    this.components.push(announcementBar);
 
     const hero = new Hero();
     wrap.appendChild(hero.render());
+    this.components.push(hero);
 
-    wrap.appendChild(new PromoBanner().render());
-    wrap.appendChild(new TrustBadges().render());
+    const promoBanner = new PromoBanner();
+    wrap.appendChild(promoBanner.render());
+    this.components.push(promoBanner);
+
+    const trustBadges = new TrustBadges();
+    wrap.appendChild(trustBadges.render());
+    this.components.push(trustBadges);
 
     // Placeholder grids while products load
     const bestSellersPlaceholder = this._createPlaceholder('BestSellers');
     wrap.appendChild(bestSellersPlaceholder);
 
-    wrap.appendChild(new CategoryBanners().render());
+    const categoryBanners = new CategoryBanners();
+    wrap.appendChild(categoryBanners.render());
+    this.components.push(categoryBanners);
 
     const newArrivalsPlaceholder = this._createPlaceholder('NewArrivals');
     wrap.appendChild(newArrivalsPlaceholder);
 
-    wrap.appendChild(new BrandStory().render());
-    wrap.appendChild(new Newsletter().render());
+    const brandStory = new BrandStory();
+    wrap.appendChild(brandStory.render());
+    this.components.push(brandStory);
+
+    const newsletter = new Newsletter();
+    wrap.appendChild(newsletter.render());
+    this.components.push(newsletter);
 
     // Fetch products asynchronously and replace placeholders
     this._loadProducts(wrap, bestSellersPlaceholder, newArrivalsPlaceholder);
 
     return wrap;
+  }
+
+  destroy() {
+    this.aborted = true;
+    this.components.forEach((comp) => {
+      if (comp && typeof comp.destroy === 'function') {
+        try { comp.destroy(); } catch (e) { }
+      }
+    });
   }
 
   _createPlaceholder(id) {
@@ -76,9 +101,11 @@ export default class HomePage {
         getProducts({ sort: 'bestseller', limit: 10 }),
         getProducts({ sort: 'new', limit: 10 }),
       ]);
+      if (this.aborted) return;
       bsProducts = bsRes.data || bsRes || [];
       naProducts = naRes.data || naRes || [];
     } catch (err) {
+      if (this.aborted) return;
       console.warn('Failed to load real products, using mock:', err);
       bsProducts = getMockProducts(10);
       naProducts = getMockProducts(10);

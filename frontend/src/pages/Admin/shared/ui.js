@@ -169,7 +169,7 @@ export function formatDate(isoStr) {
 }
 
 export function formatDuration(seconds) {
-  const value = Number(seconds || 0);
+  const value = Math.round(Number(seconds || 0));
   if (!value) return '0s';
   const mins = Math.floor(value / 60);
   const secs = value % 60;

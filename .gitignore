@@ -12,3 +12,7 @@ Thumbs.db
 # Ignore IDE settings
 .vscode/
 .idea/
+
+# Ignore large archives
+product.tar
+

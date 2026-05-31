@@ -28,6 +28,7 @@ export default class ProductListPage {
     this._paginationEl = null;
     this._header = null;
     this._filters = null;
+    this._isInitialLoad = true;
   }
 
   async render() {
@@ -82,6 +83,7 @@ export default class ProductListPage {
       onSortChange: (sort) => {
         this._sort = sort;
         this._page = 1;
+        this._scrollToTop();
         this._loadProducts();
       },
       onViewChange: (view) => this._changeView(view),
@@ -114,6 +116,7 @@ export default class ProductListPage {
     history.pushState({}, '', `/${slug}`);
     this._filters.rebuildCategories({ slug: this._slug, childSlug: '' });
     this._header.updateTitle(this._buildHeaderMeta());
+    this._scrollToTop();
     this._loadProducts();
   }
 
@@ -125,6 +128,7 @@ export default class ProductListPage {
     this._activeChild = this._activeTop?.children?.find((c) => c.slug === child) || null;
     this._filters.rebuildCategories({ slug: this._slug, childSlug: this._childSlug });
     this._header.updateTitle(this._buildHeaderMeta());
+    this._scrollToTop();
     this._loadProducts();
   }
 
@@ -143,6 +147,7 @@ export default class ProductListPage {
     localStorage.setItem('dhat_view_mode', this._viewMode);
     this._page = 1;
     this._header.syncViewMode(this._viewMode);
+    this._scrollToTop();
     this._loadProducts();
   }
 
@@ -151,6 +156,7 @@ export default class ProductListPage {
     this._priceMax = priceMax;
     this._page = 1;
     if (closeDrawer) this._filters.closeDrawer();
+    this._scrollToTop();
     this._loadProducts();
   }
 
@@ -166,6 +172,7 @@ export default class ProductListPage {
       this._filters.rebuildCategories({ slug: this._slug, childSlug: '' });
     }
 
+    this._scrollToTop();
     this._loadProducts();
   }
 
@@ -181,7 +188,14 @@ export default class ProductListPage {
   }
 
   _replaceUrl() {
-    history.replaceState({}, '', this._buildUrl());
+    const currentState = history.state || {};
+    if (this._isInitialLoad) {
+      history.replaceState({ ...currentState }, '', this._buildUrl());
+    } else {
+      const newState = { ...currentState };
+      delete newState.scrollY;
+      history.replaceState(newState, '', this._buildUrl());
+    }
   }
 
   _updateGridLayout() {
@@ -191,8 +205,17 @@ export default class ProductListPage {
       : 'mt-5 grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4 lg:gap-6';
   }
 
+  _scrollToTop() {
+    if (window.lenis) {
+      window.lenis.scrollTo(0, { immediate: true });
+    } else {
+      window.scrollTo(0, 0);
+    }
+  }
+
   async _loadProducts() {
     if (!this._gridEl) return;
+    if (this.aborted) return;
     this._replaceUrl();
     this._updateGridLayout();
 
@@ -205,11 +228,13 @@ export default class ProductListPage {
 
     try {
       const res = await getProducts(this._buildProductParams());
+      if (this.aborted) return;
       this._products = Array.isArray(res) ? res : (res.data || res.products || []);
       const meta = res.meta || {};
       this._totalPages = res.last_page || meta.total_pages || res.total_pages || 1;
       this._totalCount = res.total || meta.total || this._products.length;
     } catch {
+      if (this.aborted) return;
       this._products = getMockProducts(9);
       this._totalPages = 1;
       this._totalCount = this._products.length;
@@ -232,12 +257,19 @@ export default class ProductListPage {
     this._gridEl.classList.remove('opacity-30', 'pointer-events-none', 'blur-[0.5px]');
     window.dispatchEvent(new CustomEvent('page-rendered'));
 
-    // Scroll to the top of the page after products render
-    if (window.lenis) {
-      window.lenis.scrollTo(0, { immediate: true });
-    } else {
-      window.scrollTo(0, 0);
+    // Scroll to the top of the page after products render if not restoring scroll position
+    const currentKey = window.location.pathname + window.location.search;
+    const hasSavedScroll = (history.state && typeof history.state.scrollY === 'number' && history.state.scrollY > 0)
+      || !!sessionStorage.getItem(`dhat_scroll_${currentKey}`);
+    if (!hasSavedScroll) {
+      if (window.lenis) {
+        window.lenis.scrollTo(0, { immediate: true });
+      } else {
+        window.scrollTo(0, 0);
+      }
     }
+
+    this._isInitialLoad = false;
   }
 
   _buildProductParams() {
@@ -314,6 +346,7 @@ export default class ProductListPage {
     prevButton.addEventListener('click', () => {
       if (this._page > 1) {
         this._page -= 1;
+        this._scrollToTop();
         this._loadProducts();
       }
     });
@@ -337,6 +370,7 @@ export default class ProductListPage {
         button.textContent = item;
         button.addEventListener('click', () => {
           this._page = item;
+          this._scrollToTop();
           this._loadProducts();
         });
         this._paginationEl.appendChild(button);
@@ -357,9 +391,14 @@ export default class ProductListPage {
     nextButton.addEventListener('click', () => {
       if (this._page < this._totalPages) {
         this._page += 1;
+        this._scrollToTop();
         this._loadProducts();
       }
     });
     this._paginationEl.appendChild(nextButton);
+  }
+
+  destroy() {
+    this.aborted = true;
   }
 }

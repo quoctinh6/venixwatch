@@ -14,7 +14,8 @@ export default class AccountPage {
     wrap.style.cssText = 'font-family:Montserrat,sans-serif;min-height:60vh;';
     this._wrap = wrap;
     isLoggedIn() ? this._renderDashboard(wrap) : this._renderAuth(wrap);
-    window.addEventListener('auth-changed', () => isLoggedIn() ? this._renderDashboard(wrap) : this._renderAuth(wrap), { once: true });
+    this._onAuthChanged = () => isLoggedIn() ? this._renderDashboard(wrap) : this._renderAuth(wrap);
+    window.addEventListener('auth-changed', this._onAuthChanged, { once: true });
     return wrap;
   }
 
@@ -197,5 +198,12 @@ export default class AccountPage {
     if (!redirect) return;
     localStorage.removeItem(POST_LOGIN_KEY);
     navigate(redirect);
+  }
+
+  destroy() {
+    if (this._onAuthChanged) {
+      window.removeEventListener('auth-changed', this._onAuthChanged);
+      this._onAuthChanged = null;
+    }
   }
 }

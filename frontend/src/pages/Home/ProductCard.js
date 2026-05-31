@@ -1,5 +1,6 @@
 import { formatPrice, navigate } from '../../utils/helpers.js';
 import { cartService } from '../../services/cartService.js';
+import { resolveImageUrl } from '../../services/config.js';
 
 const FALLBACK_IMG = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="100%" height="100%"><rect width="100%" height="100%" fill="%23F3F4F6"/><g transform="translate(160, 140)" stroke="%239CA3AF" stroke-width="2" fill="none"><circle cx="40" cy="40" r="30"/><line x1="40" y1="40" x2="40" y2="22"/><line x1="40" y1="40" x2="52" y2="40"/><path d="M40 10 V 2 M40 70 V 78 M10 40 H 2 M70 40 H 78"/></g><text x="50%" y="240" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="600" fill="%239CA3AF" text-anchor="middle">Hình ảnh đang cập nhật</text></svg>`;
 const FALLBACK_IMAGES = [
@@ -85,7 +86,7 @@ export class ProductCard {
     const hasSale = !!(p.sale_price && p.sale_price < p.price);
     const discountPercent = getDiscountPercent(p.price, p.sale_price);
     const fallbackIndex = Math.abs(Number(p.id || 0)) % FALLBACK_IMAGES.length;
-    const img = p.image || p.images?.[0] || p.og_image || FALLBACK_IMAGES[fallbackIndex];
+    const img = resolveImageUrl(p.image || p.images?.[0] || p.og_image) || FALLBACK_IMAGES[fallbackIndex];
     const storedCompare = getCompareItems();
     const isCompared = storedCompare.some((item) => String(item.id) === String(p.id));
     const showNewBadge = String(p.badge || '').toUpperCase() === 'NEW';
@@ -224,12 +225,21 @@ export class ProductCard {
     const onCompareUpdated = (e) => {
       if (!document.body.contains(card)) {
         window.removeEventListener('compare-updated', onCompareUpdated);
+        window.removeEventListener('page-rendered', onPageRendered);
         return;
       }
       syncCompareState(e.detail || []);
     };
 
+    const onPageRendered = () => {
+      if (!document.body.contains(card)) {
+        window.removeEventListener('compare-updated', onCompareUpdated);
+        window.removeEventListener('page-rendered', onPageRendered);
+      }
+    };
+
     window.addEventListener('compare-updated', onCompareUpdated);
+    window.addEventListener('page-rendered', onPageRendered);
 
     compareBtn?.addEventListener('click', (e) => {
       e.stopPropagation();

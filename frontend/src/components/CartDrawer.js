@@ -3,6 +3,7 @@
  */
 import { cartService } from '../services/cartService.js';
 import { formatPrice, navigate } from '../utils/helpers.js';
+import { resolveImageUrl } from '../services/config.js';
 
 export class CartDrawer {
   constructor() {
@@ -24,10 +25,11 @@ export class CartDrawer {
     const drawer = document.createElement('div');
     drawer.id = 'cart-drawer';
     Object.assign(drawer.style, {
-      position: 'fixed', top: '0', right: '-400px', width: '384px', height: '100vh',
+      position: 'fixed', top: '0', right: '0', width: '384px', height: '100vh',
       background: '#fff', zIndex: '101', display: 'flex', flexDirection: 'column',
-      boxShadow: '-4px 0 24px rgba(0,0,0,0.15)', transition: 'right 0.35s cubic-bezier(.4,0,.2,1)',
-      fontFamily: 'Montserrat, sans-serif',
+      boxShadow: '-4px 0 24px rgba(0,0,0,0.15)', transform: 'translateX(100%)',
+      transition: 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+      fontFamily: 'Montserrat, sans-serif', willChange: 'transform',
     });
     document.body.appendChild(drawer);
     this._drawer = drawer;
@@ -40,16 +42,18 @@ export class CartDrawer {
   open() {
     this._render();
     this._overlay.classList.add('active');
-    setTimeout(() => { this._drawer.style.right = '0'; }, 10);
+    setTimeout(() => { this._drawer.style.transform = 'translateX(0)'; }, 10);
     this._isOpen = true;
     document.body.style.overflow = 'hidden';
+    document.body.classList.add('cart-drawer-open');
   }
 
   close() {
-    this._drawer.style.right = '-400px';
+    this._drawer.style.transform = 'translateX(100%)';
     this._overlay.classList.remove('active');
     this._isOpen = false;
     document.body.style.overflow = '';
+    document.body.classList.remove('cart-drawer-open');
   }
 
   _render() {
@@ -72,6 +76,7 @@ export class CartDrawer {
     const itemsWrap = document.createElement('div');
     itemsWrap.id = 'cart-items-wrap';
     itemsWrap.style.cssText = 'flex:1;overflow-y:auto;padding:16px 24px;';
+    itemsWrap.setAttribute('data-lenis-prevent', '');
     this._drawer.appendChild(itemsWrap);
 
     // Footer
@@ -112,20 +117,20 @@ export class CartDrawer {
 
     wrap.innerHTML = items.map(item => this._itemHTML(item)).join('');
     wrap.querySelectorAll('[data-remove]').forEach(btn => {
-      btn.addEventListener('click', () => { cartService.removeItem(Number(btn.dataset.remove)); this._renderItems(); });
+      btn.addEventListener('click', () => { cartService.removeItem(btn.dataset.remove); this._renderItems(); });
     });
     wrap.querySelectorAll('[data-qty-dec]').forEach(btn => {
       btn.addEventListener('click', () => {
-        const id = Number(btn.dataset.qtyDec);
-        const item = cartService.getCart().find(i => i.id === id);
+        const id = btn.dataset.qtyDec;
+        const item = cartService.getCart().find(i => String(i.id) === String(id));
         if (item) cartService.updateQty(id, item.qty - 1);
         this._renderItems();
       });
     });
     wrap.querySelectorAll('[data-qty-inc]').forEach(btn => {
       btn.addEventListener('click', () => {
-        const id = Number(btn.dataset.qtyInc);
-        const item = cartService.getCart().find(i => i.id === id);
+        const id = btn.dataset.qtyInc;
+        const item = cartService.getCart().find(i => String(i.id) === String(id));
         if (item) cartService.updateQty(id, item.qty + 1);
         this._renderItems();
       });
@@ -149,7 +154,7 @@ export class CartDrawer {
 
   _itemHTML(item) {
     const price = item.sale_price && item.sale_price < item.price ? item.sale_price : item.price;
-    const img = item.image || 'https://images.pexels.com/photos/236915/pexels-photo-236915.jpeg?auto=compress&cs=tinysrgb&w=400';
+    const img = resolveImageUrl(item.image) || 'https://images.pexels.com/photos/236915/pexels-photo-236915.jpeg?auto=compress&cs=tinysrgb&w=400';
     return `
       <div style="display:flex;gap:12px;padding:12px 0;border-bottom:1px solid #f5f5f5;align-items:flex-start;">
         <div style="width:72px;height:72px;background:#f8f8f8;flex-shrink:0;border-radius:2px;overflow:hidden;">

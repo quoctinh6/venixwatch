@@ -1,6 +1,7 @@
 import { cartService } from '../../services/cartService.js';
 import { createOrder } from '../../services/orderService.js';
 import { formatPrice, navigate } from '../../utils/helpers.js';
+import { resolveImageUrl } from '../../services/config.js';
 
 export default class CheckoutPage {
   constructor() {
@@ -16,7 +17,7 @@ export default class CheckoutPage {
       wrap.innerHTML = `
         <div class="flex flex-col items-center px-4 py-20 text-center sm:px-6">
           <h2 class="text-2xl font-bold text-zinc-900">Giỏ hàng trống</h2>
-          <button data-nav="/nam" class="mt-6 inline-flex h-12 items-center justify-center rounded-xl bg-zinc-950 px-8 text-xs font-bold uppercase tracking-[0.12em] text-white transition hover:bg-amber-500 hover:text-zinc-950">
+          <button data-nav="/nam" class="mt-6 inline-flex h-12 items-center justify-center rounded-xl bg-zinc-950 px-8 text-xs font-bold uppercase tracking-[0.12em] text-white transition hover:bg-primary-gold hover:text-zinc-950">
             Tiếp Tục Mua Sắm
           </button>
         </div>
@@ -32,9 +33,9 @@ export default class CheckoutPage {
       <div class="border-b border-zinc-200 bg-zinc-50">
         <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
           <nav class="mb-3 flex flex-wrap items-center gap-2 text-xs tracking-[0.05em] text-zinc-500">
-            <span data-nav="/" class="cursor-pointer transition hover:text-amber-600">Trang chủ</span>
+            <span data-nav="/" class="cursor-pointer transition hover:text-primary-gold">Trang chủ</span>
             <span>›</span>
-            <span data-nav="/gio-hang" class="cursor-pointer transition hover:text-amber-600">Giỏ hàng</span>
+            <span data-nav="/gio-hang" class="cursor-pointer transition hover:text-primary-gold">Giỏ hàng</span>
             <span>›</span>
             <span class="font-semibold text-zinc-900">Thanh Toán</span>
           </nav>
@@ -60,9 +61,24 @@ export default class CheckoutPage {
                 ${this._field('Địa Chỉ *', 'text', 'cust-address', 'Số nhà, đường...', true)}
               </div>
               <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-                ${this._field('Tỉnh / Thành Phố *', 'text', 'cust-city', 'TP. Hồ Chí Minh', true)}
-                ${this._field('Quận / Huyện *', 'text', 'cust-district', 'Quận 1', true)}
-                ${this._field('Phường / Xã', 'text', 'cust-ward', 'Phường Bến Nghé')}
+                <div class="mb-4">
+                  <label for="cust-city" class="mb-2 block text-xs font-bold uppercase tracking-[0.05em] text-zinc-700">Tỉnh / Thành Phố *</label>
+                  <select id="cust-city" required class="h-11 w-full rounded-xl border border-zinc-200 px-3 text-sm outline-none transition focus:border-primary-gold bg-white">
+                    <option value="">Chọn Tỉnh / Thành Phố</option>
+                  </select>
+                </div>
+                <div class="mb-4">
+                  <label for="cust-district" class="mb-2 block text-xs font-bold uppercase tracking-[0.05em] text-zinc-700">Quận / Huyện *</label>
+                  <select id="cust-district" required disabled class="h-11 w-full rounded-xl border border-zinc-200 px-3 text-sm outline-none transition focus:border-primary-gold bg-white disabled:opacity-50">
+                    <option value="">Chọn Quận / Huyện</option>
+                  </select>
+                </div>
+                <div class="mb-4">
+                  <label for="cust-ward" class="mb-2 block text-xs font-bold uppercase tracking-[0.05em] text-zinc-700">Phường / Xã *</label>
+                  <select id="cust-ward" required disabled class="h-11 w-full rounded-xl border border-zinc-200 px-3 text-sm outline-none transition focus:border-primary-gold bg-white disabled:opacity-50">
+                    <option value="">Chọn Phường / Xã</option>
+                  </select>
+                </div>
               </div>
               ${this._field('Ghi Chú', 'text', 'cust-note', 'Giao giờ hành chính, gói trước khi giao...')}
             </div>
@@ -75,8 +91,8 @@ export default class CheckoutPage {
         { id: 'pm-bank', value: 'bank', label: 'Chuyển khoản ngân hàng' },
         { id: 'pm-momo', value: 'momo', label: 'Vi MoMo' },
       ].map((pm) => `
-                  <label class="pm-label flex cursor-pointer items-center gap-3 rounded-2xl border border-zinc-200 px-4 py-4 transition has-[input:checked]:border-amber-500 has-[input:checked]:bg-amber-50/50">
-                    <input type="radio" id="${pm.id}" name="payment_method" value="${pm.value}" ${pm.checked ? 'checked' : ''} class="h-4 w-4 accent-amber-500" />
+                  <label class="pm-label flex cursor-pointer items-center gap-3 rounded-2xl border border-zinc-200 px-4 py-4 transition has-[input:checked]:border-primary-gold has-[input:checked]:bg-primary-gold/10">
+                    <input type="radio" id="${pm.id}" name="payment_method" value="${pm.value}" ${pm.checked ? 'checked' : ''} class="h-4 w-4 accent-primary-gold" />
                     <span class="text-sm font-medium text-zinc-900">${pm.label}</span>
                   </label>
                 `).join('')}
@@ -84,7 +100,7 @@ export default class CheckoutPage {
             </div>
 
             <p id="checkout-error" class="hidden text-sm text-red-600"></p>
-            <button type="submit" id="place-order-btn" class="inline-flex h-12 w-full items-center justify-center rounded-xl bg-amber-500 px-4 text-xs font-black uppercase tracking-[0.12em] text-zinc-950 transition hover:bg-amber-600">
+            <button type="submit" id="place-order-btn" class="inline-flex h-12 w-full items-center justify-center rounded-xl bg-primary-gold px-4 text-xs font-black uppercase tracking-[0.12em] text-zinc-950 transition hover:bg-primary-gold-dark">
               Đặt Hàng Ngay
             </button>
           </form>
@@ -98,7 +114,7 @@ export default class CheckoutPage {
         return `
                 <div class="flex items-center gap-3">
                   <div class="relative h-16 w-16 shrink-0 overflow-hidden rounded-2xl bg-zinc-50">
-                    <img src="${item.image || 'https://images.pexels.com/photos/236915/pexels-photo-236915.jpeg?auto=compress&cs=tinysrgb&w=400'}" class="h-full w-full object-contain p-2" />
+                    <img src="${resolveImageUrl(item.image) || 'https://images.pexels.com/photos/236915/pexels-photo-236915.jpeg?auto=compress&cs=tinysrgb&w=400'}" class="h-full w-full object-contain p-2" />
                     <span class="absolute -right-1 -top-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-zinc-950 px-1 text-[10px] font-bold text-white">${item.qty}</span>
                   </div>
                   <div class="min-w-0 flex-1">
@@ -122,7 +138,7 @@ export default class CheckoutPage {
             </div>
             <div class="flex items-center justify-between border-t border-zinc-200 pt-4 text-base font-black text-zinc-950">
               <span>Tổng Cộng</span>
-              <span class="text-amber-500">${formatPrice(total + shipping)}</span>
+              <span class="text-primary-gold">${formatPrice(total + shipping)}</span>
             </div>
           </div>
         </div>
@@ -135,7 +151,7 @@ export default class CheckoutPage {
         <h2 class="text-3xl font-black uppercase tracking-[0.05em] text-zinc-950">Đặt Hàng Thành Công</h2>
         <p class="mt-4 text-sm leading-7 text-zinc-600">Cảm ơn bạn đã mua sắm tại <strong>Venix Watch</strong>.</p>
         <p id="order-id-display" class="mt-2 text-sm text-zinc-500"></p>
-        <button data-nav="/" class="mt-8 inline-flex h-12 items-center justify-center rounded-xl bg-zinc-950 px-8 text-xs font-bold uppercase tracking-[0.12em] text-white transition hover:bg-amber-500 hover:text-zinc-950">
+        <button data-nav="/" class="mt-8 inline-flex h-12 items-center justify-center rounded-xl bg-zinc-950 px-8 text-xs font-bold uppercase tracking-[0.12em] text-white transition hover:bg-primary-gold hover:text-zinc-950">
           Về Trang Chủ
         </button>
       </div>
@@ -150,7 +166,7 @@ export default class CheckoutPage {
       <div class="mb-4">
         <label for="${id}" class="mb-2 block text-xs font-bold uppercase tracking-[0.05em] text-zinc-700">${label}</label>
         <input type="${type}" id="${id}" placeholder="${placeholder}" ${required ? 'required' : ''}
-          class="h-11 w-full rounded-xl border border-zinc-200 px-3 text-sm outline-none transition focus:border-amber-500" />
+          class="h-11 w-full rounded-xl border border-zinc-200 px-3 text-sm outline-none transition focus:border-primary-gold" />
       </div>
     `;
   }
@@ -159,6 +175,85 @@ export default class CheckoutPage {
     wrap.querySelectorAll('[data-nav]').forEach((btn) => {
       btn.addEventListener('click', () => navigate(btn.dataset.nav));
     });
+
+    const initDivisions = async () => {
+      const citySelect = wrap.querySelector('#cust-city');
+      const districtSelect = wrap.querySelector('#cust-district');
+      const wardSelect = wrap.querySelector('#cust-ward');
+
+      if (!citySelect || !districtSelect || !wardSelect) return;
+
+      const fallbackProvinces = [
+        { name: 'Thành phố Hồ Chí Minh', code: 79 },
+        { name: 'Thành phố Hà Nội', code: 1 },
+        { name: 'Thành phố Đà Nẵng', code: 48 },
+        { name: 'Thành phố Hải Phòng', code: 31 },
+        { name: 'Thành phố Cần Thơ', code: 92 }
+      ];
+
+      try {
+        const res = await fetch('https://provinces.open-api.vn/api/p/');
+        if (!res.ok) throw new Error('API error');
+        const provinces = await res.json();
+        
+        citySelect.innerHTML = '<option value="">Chọn Tỉnh / Thành Phố</option>' + 
+          provinces.map(p => `<option value="${p.name}" data-code="${p.code}">${p.name}</option>`).join('');
+      } catch (err) {
+        console.warn('Failed to fetch provinces from API, using fallback:', err);
+        citySelect.innerHTML = '<option value="">Chọn Tỉnh / Thành Phố</option>' + 
+          fallbackProvinces.map(p => `<option value="${p.name}" data-code="${p.code}">${p.name}</option>`).join('');
+      }
+
+      citySelect.addEventListener('change', async () => {
+        const selected = citySelect.options[citySelect.selectedIndex];
+        const code = selected?.getAttribute('data-code');
+
+        districtSelect.innerHTML = '<option value="">Chọn Quận / Huyện</option>';
+        districtSelect.disabled = true;
+        wardSelect.innerHTML = '<option value="">Chọn Phường / Xã</option>';
+        wardSelect.disabled = true;
+
+        if (!code) return;
+
+        try {
+          const res = await fetch(`https://provinces.open-api.vn/api/p/${code}?depth=2`);
+          if (!res.ok) throw new Error('API error');
+          const data = await res.json();
+          const districts = data.districts || [];
+          
+          districtSelect.innerHTML = '<option value="">Chọn Quận / Huyện</option>' + 
+            districts.map(d => `<option value="${d.name}" data-code="${d.code}">${d.name}</option>`).join('');
+          districtSelect.disabled = false;
+        } catch (err) {
+          console.error('Failed to fetch districts:', err);
+        }
+      });
+
+      districtSelect.addEventListener('change', async () => {
+        const selected = districtSelect.options[districtSelect.selectedIndex];
+        const code = selected?.getAttribute('data-code');
+
+        wardSelect.innerHTML = '<option value="">Chọn Phường / Xã</option>';
+        wardSelect.disabled = true;
+
+        if (!code) return;
+
+        try {
+          const res = await fetch(`https://provinces.open-api.vn/api/d/${code}?depth=2`);
+          if (!res.ok) throw new Error('API error');
+          const data = await res.json();
+          const wards = data.wards || [];
+          
+          wardSelect.innerHTML = '<option value="">Chọn Phường / Xã</option>' + 
+            wards.map(w => `<option value="${w.name}" data-code="${w.code}">${w.name}</option>`).join('');
+          wardSelect.disabled = false;
+        } catch (err) {
+          console.error('Failed to fetch wards:', err);
+        }
+      });
+    };
+
+    initDivisions();
 
     const form = wrap.querySelector('#checkout-form');
     form?.addEventListener('submit', async (e) => {
@@ -171,9 +266,10 @@ export default class CheckoutPage {
       const address = get('cust-address');
       const city = get('cust-city');
       const district = get('cust-district');
+      const ward = get('cust-ward');
       const errEl = wrap.querySelector('#checkout-error');
 
-      if (!name || !phone || !address || !city || !district) {
+      if (!name || !phone || !address || !city || !district || !ward) {
         errEl.textContent = 'Vui lòng điền đầy đủ thông tin bắt buộc.';
         errEl.classList.remove('hidden');
         return;
@@ -193,7 +289,7 @@ export default class CheckoutPage {
           customer_name: name,
           customer_email: get('cust-email'),
           customer_phone: phone,
-          shipping_address: `${address}, ${district}, ${city}`,
+          shipping_address: ward ? `${address}, ${ward}, ${district}, ${city}` : `${address}, ${district}, ${city}`,
           note: get('cust-note'),
           payment_method: paymentMethod,
           items: items.map((item) => ({ product_id: item.id, quantity: item.qty, price: item.sale_price || item.price })),

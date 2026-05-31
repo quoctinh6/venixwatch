@@ -83,6 +83,26 @@ class SettingController
     }
 
     /**
+     * POST /api/admin/settings/rollback (Protected)
+     */
+    public function rollback(): void
+    {
+        $user = RBACMiddleware::require('settings:write');
+        $changedBy = $user['email'] ?? $user['name'] ?? 'Admin';
+
+        $input = json_decode(file_get_contents('php://input'), true);
+        $historyId = isset($input['history_id']) ? (int)$input['history_id'] : 0;
+
+        if ($historyId <= 0) {
+            $this->respond(['success' => false, 'error' => 'ID lịch sử không hợp lệ.', 'code' => 400]);
+            return;
+        }
+
+        $result = $this->service->rollbackTo($historyId, $changedBy);
+        $this->respond($result);
+    }
+
+    /**
      * POST /api/admin/settings/upload-banner (Protected)
      * Uploads temporary banner image for hero slider
      */
@@ -101,6 +121,10 @@ class SettingController
 
     private function respond(array $result, int $successCode = 200): void
     {
+        header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+        header('Cache-Control: post-check=0, pre-check=0', false);
+        header('Pragma: no-cache');
+
         if (!($result['success'] ?? false)) {
             http_response_code($result['code'] ?? 400);
             echo json_encode([

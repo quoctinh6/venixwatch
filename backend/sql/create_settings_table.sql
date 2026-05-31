@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS settings_history (
   `action` VARCHAR(100) NOT NULL,
   `details` TEXT NOT NULL,
   `changed_by` VARCHAR(150) NOT NULL,
+  `settings_snapshot` LONGTEXT DEFAULT NULL,
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

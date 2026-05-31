@@ -36,7 +36,7 @@ export const cartService = {
 
   addItem(product, qty = 1) {
     const items = load();
-    const idx = items.findIndex(i => i.id === product.id);
+    const idx = items.findIndex(i => String(i.id) === String(product.id));
     if (idx > -1) {
       items[idx].qty = (items[idx].qty || 1) + qty;
     } else {
@@ -56,14 +56,14 @@ export const cartService = {
   },
 
   removeItem(productId) {
-    const items = load().filter(i => i.id !== productId);
+    const items = load().filter(i => String(i.id) !== String(productId));
     save(items);
     return items;
   },
 
   updateQty(productId, qty) {
     const items = load();
-    const idx = items.findIndex(i => i.id === productId);
+    const idx = items.findIndex(i => String(i.id) === String(productId));
     if (idx === -1) return items;
     if (qty <= 0) {
       items.splice(idx, 1);

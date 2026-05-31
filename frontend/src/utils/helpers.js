@@ -133,7 +133,27 @@ export function getDeviceType() {
  * Navigate using pushState (for SPA routing)
  */
 export function navigate(path) {
-  history.pushState({}, '', path);
+  if (window.lenis) window.lenis.start();
+  
+  // Cancel any ongoing scroll restoration on navigation
+  if (typeof window.cancelOngoingScrollRestoration === 'function') {
+    window.cancelOngoingScrollRestoration();
+  }
+  
+  // Save scroll position for the current page before navigating away
+  const currentKey = window.location.pathname + window.location.search;
+  sessionStorage.setItem(`dhat_scroll_${currentKey}`, String(window.scrollY));
+  try {
+    const currentState = history.state || {};
+    history.replaceState({ ...currentState, scrollY: window.scrollY }, '');
+  } catch (e) {
+    // Ignore
+  }
+
+  // Clear target scroll position so forward navigation starts at the top
+  sessionStorage.removeItem(`dhat_scroll_${path}`);
+
+  history.pushState({ isForward: true }, '', path);
   window.dispatchEvent(new PopStateEvent('popstate'));
 }
 

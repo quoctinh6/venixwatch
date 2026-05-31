@@ -14,6 +14,8 @@ const routes = [
   { path: '/tai-khoan', component: () => import('../pages/Account/index.js') },
   { path: '/so-sanh', component: () => import('../pages/Compare/index.js') },
   { path: '/san-pham/:slug', component: () => import('../pages/ProductDetail/index.js') },
+  { path: '/tin-tuc', component: () => import('../pages/NewsList/index.js') },
+  { path: '/tin-tuc/:slug', component: () => import('../pages/NewsDetail/index.js') },
 ];
 
 function matchRoute(pathname) {
@@ -42,6 +44,8 @@ function matchRoute(pathname) {
 
 let _mainNavbar = null;
 let _mainFooter = null;
+let _currentPageInstance = null;
+let _loadingPageInstance = null;
 
 export async function initRouter() {
   // Lazy-load persistent layout components
@@ -61,6 +65,23 @@ let routeSeq = 0;
 async function handleRoute() {
   routeSeq++;
   const localSeq = routeSeq;
+
+  // Clean up previous loading and active pages
+  if (_loadingPageInstance) {
+    _loadingPageInstance.aborted = true;
+    if (typeof _loadingPageInstance.destroy === 'function') {
+      try { _loadingPageInstance.destroy(); } catch (err) { console.warn('[Router] Failed to destroy loading page:', err); }
+    }
+    _loadingPageInstance = null;
+  }
+
+  if (_currentPageInstance) {
+    _currentPageInstance.aborted = true;
+    if (typeof _currentPageInstance.destroy === 'function') {
+      try { _currentPageInstance.destroy(); } catch (err) { console.warn('[Router] Failed to destroy current page:', err); }
+    }
+    _currentPageInstance = null;
+  }
 
   const pathname = window.location.pathname;
 
@@ -102,21 +123,41 @@ async function handleRoute() {
     const pageWrapper = document.createElement('div');
     pageWrapper.className = 'page-enter';
     pageWrapper.id = 'page-content';
+    // Show spinner inside page content wrapper while loading the page content
+    pageWrapper.innerHTML = `
+      <div style="display:flex;align-items:center;justify-content:center;min-height:60vh;">
+        <div class="spinner"></div>
+      </div>`;
     app.appendChild(pageWrapper);
 
     // Mount page
     const page = new PageClass(match.params);
+    _loadingPageInstance = page;
     const pageEl = await page.render();
-    if (localSeq !== routeSeq) return; // Bỏ qua nếu đã có lệnh chuyển trang mới hơn
+    if (localSeq !== routeSeq) {
+      if (typeof page.destroy === 'function') {
+        try { page.destroy(); } catch (e) { console.warn('[Router] Failed to destroy page:', e); }
+      }
+      return; // Bỏ qua nếu đã có lệnh chuyển trang mới hơn
+    }
 
+    // Clear spinner and mount page content
+    pageWrapper.innerHTML = '';
     if (pageEl) pageWrapper.appendChild(pageEl);
+    _currentPageInstance = page;
+    _loadingPageInstance = null;
 
     // Footer
     const footerEl = _mainFooter.render();
     app.appendChild(footerEl);
 
-    // Scroll to top on navigation
-    window.scrollTo({ top: 0, behavior: 'instant' });
+    // Scroll to top on navigation if not restoring scroll position
+    const currentKey = window.location.pathname + window.location.search;
+    const hasSavedScroll = (history.state && typeof history.state.scrollY === 'number' && history.state.scrollY > 0)
+      || !!sessionStorage.getItem(`dhat_scroll_${currentKey}`);
+    if (!hasSavedScroll) {
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
 
     // Re-init navbar cart count
     _mainNavbar.updateCartCount();

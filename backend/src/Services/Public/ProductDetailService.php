@@ -69,7 +69,7 @@ class ProductDetailService
         $items = $this->products->findAll([
             'category_id' => (int)$product['category_id'],
             'is_active' => 1,
-            'limit' => 12,
+            'limit' => 20,
             'sort' => $mode === 'cross_sell' ? 'bestseller' : 'price_asc',
         ])['data'];
 
@@ -81,7 +81,7 @@ class ProductDetailService
             return $itemPrice >= $basePrice * 0.7 && $itemPrice <= $basePrice * 1.3;
         }));
 
-        return ['success' => true, 'data' => array_slice($filtered, 0, 8)];
+        return ['success' => true, 'data' => array_slice($filtered, 0, 10)];
     }
 
     public function trackView(int $id, string $sessionId): array

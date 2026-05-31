@@ -1,7 +1,7 @@
 import { navigate, throttle } from '../../utils/helpers.js';
 import { PEXELS } from '../../services/config.js';
 import { authService } from '../../services/authService.js';
-import { openQuickSettings } from '../../components/QuickSettingsModal.js';
+import { openQuickSettings } from '../../components/QuickSettingsModal.js?v=1.0.3';
 
 const SLIDES = [
   {
@@ -122,7 +122,7 @@ export class Hero {
     dots.className = 'absolute bottom-6 left-1/2 z-10 flex -translate-x-1/2 gap-2 sm:bottom-8';
     this._slides.forEach((_, i) => {
       const dot = document.createElement('button');
-      dot.className = `${i === 0 ? 'w-6 bg-amber-500' : 'w-2 bg-white/60'} h-2 rounded-full transition-all`;
+      dot.className = `${i === 0 ? 'w-6 bg-[#C9A961]' : 'w-2 bg-white/60'} h-2 rounded-full transition-all`;
       dot.addEventListener('click', () => this._goTo(i));
       dots.appendChild(dot);
     });
@@ -210,14 +210,29 @@ export class Hero {
   }
 
   _initParallax() {
-    const onScroll = throttle(() => {
+    this._onScroll = throttle(() => {
       const offset = window.scrollY;
       this._slideEls.forEach((slide) => {
         const img = slide.querySelector('img');
         if (img) img.style.transform = `translateY(${offset * 0.18}px) scale(1.02)`;
       });
     }, 16);
-    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('scroll', this._onScroll, { passive: true });
+  }
+
+  destroy() {
+    if (this._autoplayTimer) {
+      clearInterval(this._autoplayTimer);
+      this._autoplayTimer = null;
+    }
+    if (this._clockTimer) {
+      clearInterval(this._clockTimer);
+      this._clockTimer = null;
+    }
+    if (this._onScroll) {
+      window.removeEventListener('scroll', this._onScroll);
+      this._onScroll = null;
+    }
   }
 
   _buildWatchFace() {
