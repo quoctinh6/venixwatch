@@ -20,21 +20,21 @@ class AuthService
     public function login(string $email, string $password): array
     {
         if (empty($email) || empty($password)) {
-            return ['success' => false, 'error' => 'Email and password are required.', 'code' => 400];
+            return ['success' => false, 'error' => 'Email và mật khẩu là bắt buộc.', 'code' => 400];
         }
 
         $user = $this->userModel->findByEmail($email);
 
         if (!$user) {
-            return ['success' => false, 'error' => 'Invalid credentials.', 'code' => 401];
+            return ['success' => false, 'error' => 'Thông tin đăng nhập không chính xác.', 'code' => 401];
         }
 
         if (!$user['is_active']) {
-            return ['success' => false, 'error' => 'Account is deactivated.', 'code' => 403];
+            return ['success' => false, 'error' => 'Tài khoản đã bị vô hiệu hóa.', 'code' => 403];
         }
 
         if (!password_verify($password, $user['password_hash'])) {
-            return ['success' => false, 'error' => 'Invalid credentials.', 'code' => 401];
+            return ['success' => false, 'error' => 'Thông tin đăng nhập không chính xác.', 'code' => 401];
         }
 
         $roles = $this->userModel->getRoles((int)$user['id']);
@@ -72,21 +72,21 @@ class AuthService
         $required = ['email', 'password', 'full_name'];
         foreach ($required as $field) {
             if (empty($data[$field])) {
-                return ['success' => false, 'error' => "Field '{$field}' is required.", 'code' => 400];
+                return ['success' => false, 'error' => "Trường '{$field}' là bắt buộc.", 'code' => 400];
             }
         }
 
         if (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
-            return ['success' => false, 'error' => 'Invalid email format.', 'code' => 400];
+            return ['success' => false, 'error' => 'Định dạng email không hợp lệ.', 'code' => 400];
         }
 
         if (strlen($data['password']) < 8) {
-            return ['success' => false, 'error' => 'Password must be at least 8 characters.', 'code' => 400];
+            return ['success' => false, 'error' => 'Mật khẩu phải có ít nhất 8 ký tự.', 'code' => 400];
         }
 
         $existing = $this->userModel->findByEmail($data['email']);
         if ($existing) {
-            return ['success' => false, 'error' => 'Email already registered.', 'code' => 409];
+            return ['success' => false, 'error' => 'Email đã được đăng ký trước đó.', 'code' => 409];
         }
 
         $userId = $this->userModel->create([
@@ -114,7 +114,7 @@ class AuthService
         // Stateless JWT — instruct client to discard token
         return [
             'success' => true,
-            'data'    => ['message' => 'Logged out successfully.'],
+            'data'    => ['message' => 'Đăng xuất thành công.'],
         ];
     }
 
@@ -122,12 +122,12 @@ class AuthService
     {
         $payload = AuthMiddleware::validateJWT($token);
         if (!$payload) {
-            return ['success' => false, 'error' => 'Invalid or expired token.', 'code' => 401];
+            return ['success' => false, 'error' => 'Token không hợp lệ hoặc đã hết hạn.', 'code' => 401];
         }
 
         $user = $this->userModel->findById((int)$payload['user_id']);
         if (!$user || !$user['is_active']) {
-            return ['success' => false, 'error' => 'User not found or inactive.', 'code' => 401];
+            return ['success' => false, 'error' => 'Không tìm thấy người dùng hoặc tài khoản bị vô hiệu hóa.', 'code' => 401];
         }
 
         $roles = $this->userModel->getRoles((int)$user['id']);

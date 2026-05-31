@@ -4,7 +4,7 @@
 -- Associate products with brands & subcategories
 -- ============================================================
 
-USE dong_ho_a_tuan;
+USE db_4ed5c239;
 
 -- 1. Create subcategories table
 CREATE TABLE IF NOT EXISTS subcategories (

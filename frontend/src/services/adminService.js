@@ -3,7 +3,10 @@ import { API_BASE, STORAGE_KEYS } from './config.js';
 function headers() {
   const token = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN) || localStorage.getItem('dhat_token');
   const h = { 'Content-Type': 'application/json' };
-  if (token) h.Authorization = `Bearer ${token}`;
+  if (token) {
+    h.Authorization = `Bearer ${token}`;
+    h['X-Authorization'] = `Bearer ${token}`;
+  }
   return h;
 }
 
@@ -86,6 +89,8 @@ export const deleteUser = (id) => api('DELETE', `/api/admin/users/${id}`);
 
 // Roles
 export const getRoles = () => api('GET', '/api/admin/roles');
+export const createRole = (d) => api('POST', '/api/admin/roles', d);
+export const deleteRole = (id) => api('DELETE', `/api/admin/roles/${id}`);
 export const getPermissions = () => api('GET', '/api/admin/permissions');
 export const updateRolePermissions = (id, permIds) =>
   api('PUT', `/api/admin/roles/${id}/permissions`, { permission_ids: permIds });
@@ -101,6 +106,8 @@ export const getFlashSales = () => api('GET', '/api/admin/flash-sales');
 export const createFlashSale = (d) => api('POST', '/api/admin/flash-sales', d);
 export const updateFlashSale = (id, d) => api('PUT', `/api/admin/flash-sales/${id}`, d);
 export const deleteFlashSale = (id) => api('DELETE', `/api/admin/flash-sales/${id}`);
+export const bulkDeleteFlashSales = (ids) => api('POST', '/api/admin/flash-sales/bulk-delete', { ids });
+export const bulkToggleFlashSales = (ids, isActive) => api('POST', '/api/admin/flash-sales/bulk-toggle', { ids, is_active: isActive });
 
 // Analytics
 export const getAnalytics = (params = {}) => api('GET', `/api/admin/visitors${buildQuery(params)}`);

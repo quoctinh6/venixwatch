@@ -3,11 +3,12 @@
 -- MySQL 8.x | utf8mb4_unicode_ci
 -- ============================================================
 
-CREATE DATABASE IF NOT EXISTS dong_ho_a_tuan
+CREATE DATABASE IF NOT EXISTS db_4ed5c239
   CHARACTER SET utf8mb4
   COLLATE utf8mb4_unicode_ci;
 
-USE dong_ho_a_tuan;
+USE db_4ed5c239;
+
 
 -- ============================================================
 -- ROLES & PERMISSIONS

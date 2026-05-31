@@ -51,6 +51,33 @@ class FlashSaleController
         $this->respond($this->service->delete($id));
     }
 
+    /** POST /api/admin/flash-sales/bulk-delete */
+    public function bulkDestroy(): void
+    {
+        RBACMiddleware::require('flash_sales:manage');
+        $body = $this->body();
+        $ids = $body['ids'] ?? [];
+        if (empty($ids) || !is_array($ids)) {
+            $this->respond(['success' => false, 'error' => 'Danh sách ID không hợp lệ.', 'code' => 400]);
+            return;
+        }
+        $this->respond($this->service->bulkDelete($ids));
+    }
+
+    /** POST /api/admin/flash-sales/bulk-toggle */
+    public function bulkToggle(): void
+    {
+        RBACMiddleware::require('flash_sales:manage');
+        $body = $this->body();
+        $ids = $body['ids'] ?? [];
+        $isActive = isset($body['is_active']) ? (int)$body['is_active'] : 1;
+        if (empty($ids) || !is_array($ids)) {
+            $this->respond(['success' => false, 'error' => 'Danh sách ID không hợp lệ.', 'code' => 400]);
+            return;
+        }
+        $this->respond($this->service->bulkToggle($ids, $isActive));
+    }
+
     private function body(): array
     {
         $raw = file_get_contents('php://input');

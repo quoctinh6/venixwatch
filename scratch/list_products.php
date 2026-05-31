@@ -1,6 +1,6 @@
 <?php
 try {
-    $pdo = new PDO('mysql:host=127.0.0.1;port=3306;dbname=dong_ho_a_tuan', 'root', '');
+    $pdo = new PDO('mysql:host=127.0.0.1;port=3306;dbname=db_4ed5c239', 'root', '');
     $stmt = $pdo->query("SELECT brand, COUNT(*) as count FROM products GROUP BY brand");
     echo "=== LOCAL PRODUCTS BY BRAND ===\n";
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {

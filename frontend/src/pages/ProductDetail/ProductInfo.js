@@ -5,6 +5,7 @@ import {
 } from './ProductDetailShared.js';
 import { authService } from '../../services/authService.js';
 import { openProductForm } from '../Admin/Products/ProductForm.js';
+import { createCountdownTimer } from '../../components/ui/CountdownTimer.js';
 
 export default class ProductInfo {
   constructor(product, options = {}) {
@@ -112,6 +113,18 @@ export default class ProductInfo {
           </button>
           <span>${this._product.sold_count || 126} đã bán</span>
         </div>
+        ${this._product.is_flash_sale ? `
+          <div class="flash-sale-banner bg-red-50 border border-red-100 p-3 rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+            <div>
+              <div class="text-[#DC2626] text-xs font-bold uppercase tracking-widest flex items-center gap-1.5">
+                <span class="inline-block w-2.5 h-2.5 rounded-full bg-[#DC2626] animate-ping"></span>
+                Đang Flash Sale!
+              </div>
+              <p class="text-[10px] text-zinc-500 font-medium mt-0.5">Số lượng có hạn, hãy nhanh tay đặt hàng</p>
+            </div>
+            <div id="detail-flash-countdown" class="shrink-0"></div>
+          </div>
+        ` : ''}
         <div class="space-y-2 border-y border-[#E8E4DC] py-5">
           <div class="flex flex-wrap items-end gap-x-4 gap-y-2">
             <span class="text-[32px] font-bold ${this._product.sale_price ? 'text-[#DC2626]' : 'text-[#0A0A0A]'}">${formatPrice(this._product.sale_price || this._product.price)}</span>
@@ -208,6 +221,14 @@ export default class ProductInfo {
   }
 
   _bind(root) {
+    if (this._product.is_flash_sale && this._product.flash_sale_end) {
+      const cdContainer = root.querySelector('#detail-flash-countdown');
+      if (cdContainer) {
+        const timerEl = createCountdownTimer(this._product.flash_sale_end);
+        cdContainer.appendChild(timerEl);
+      }
+    }
+
     root.querySelector('[data-copy-ref]')?.addEventListener('click', async () => {
       await navigator.clipboard?.writeText(this._product.ref_number || this._product.slug || '');
       showToast('Đã sao chép mã sản phẩm', 'success');

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Public;
 
+use PDO;
 use App\Config\Database;
 use App\Models\Product;
 use App\Models\RecentlyViewed;
@@ -11,16 +12,17 @@ use App\Models\Review;
 
 class ProductDetailService
 {
+    private PDO $pdo;
     private Product $products;
     private Review $reviews;
     private RecentlyViewed $recentlyViewed;
 
     public function __construct()
     {
-        $pdo = Database::getInstance();
-        $this->products = new Product($pdo);
-        $this->reviews = new Review($pdo);
-        $this->recentlyViewed = new RecentlyViewed($pdo);
+        $this->pdo = Database::getInstance();
+        $this->products = new Product($this->pdo);
+        $this->reviews = new Review($this->pdo);
+        $this->recentlyViewed = new RecentlyViewed($this->pdo);
     }
 
     public function getDetail(string $slug): array
@@ -28,6 +30,27 @@ class ProductDetailService
         $product = $this->products->findBySlug($slug);
         if (!$product || !(int)$product['is_active']) {
             return ['success' => false, 'error' => 'Product not found.', 'code' => 404];
+        }
+
+        // Check active flash sale
+        $stmtFlash = $this->pdo->prepare("
+            SELECT sale_price, ends_at FROM flash_sales 
+            WHERE product_id = :product_id AND is_active = 1 AND starts_at <= NOW() AND ends_at >= NOW() 
+            ORDER BY id DESC LIMIT 1
+        ");
+        $stmtFlash->execute([':product_id' => (int)$product['id']]);
+        $flash = $stmtFlash->fetch(PDO::FETCH_ASSOC);
+        if ($flash) {
+            $product['is_flash_sale'] = 1;
+            $product['original_price'] = (float)$product['price'];
+            $product['sale_price'] = (float)$flash['sale_price'];
+            $product['price'] = (float)$product['price'];
+            $product['flash_sale_end'] = $flash['ends_at'];
+        } else {
+            $product['is_flash_sale'] = 0;
+            $product['original_price'] = (float)$product['price'];
+            $product['sale_price'] = $product['sale_price'] ? (float)$product['sale_price'] : null;
+            $product['price'] = (float)$product['price'];
         }
 
         $product['category_slug'] = $product['category_slug'] ?? $this->guessCategorySlug((string)($product['category_name'] ?? ''));

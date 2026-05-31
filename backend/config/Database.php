@@ -29,7 +29,7 @@ class Database
         Config::load();
 
         $host   = Config::get('DB_HOST', 'localhost');
-        $dbName = Config::get('DB_NAME', 'dong_ho_a_tuan');
+        $dbName = Config::get('DB_NAME', 'db_4ed5c239');
         $user   = Config::get('DB_USER', 'root');
         $pass   = Config::get('DB_PASS', '');
         $port   = Config::get('DB_PORT', '3306');

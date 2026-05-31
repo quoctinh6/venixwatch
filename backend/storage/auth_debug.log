@@ -1,0 +1,986 @@
+[2026-05-31 14:07:34] GET /api/admin/test-log -> AUTH FAILED (401)
+ - Token Extracted: invalid_te...[redacted]
+ - Cookie dhat_auth_token: cookie_tok...[redacted]
+ - Cookie venix_auth_token: cookie_tok...[redacted]
+[2026-05-31 14:08:04] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:08:04] GET /backend/public/api/admin/dashboard/stats -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOi...[redacted]
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:08:04] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:08:04] GET /backend/public/api/admin/settings/history?t=1780236484902 -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:08:05] GET /backend/public/api/admin/warranties?page=1&limit=20 -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOi...[redacted]
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:08:05] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:08:06] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:08:06] GET /backend/public/api/admin/categories -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:08:06] GET /backend/public/api/admin/products?limit=1000 -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:08:06] GET /backend/public/api/admin/flash-sales -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOi...[redacted]
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:08:06] GET /backend/public/api/admin/dashboard/stats -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOi...[redacted]
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:08:06] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:08:08] GET /backend/public/api/admin/dashboard/stats -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOi...[redacted]
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:08:08] GET /backend/public/api/admin/users?page=1&limit=20 -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:08:08] GET /backend/public/api/admin/dashboard/stats -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOi...[redacted]
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:08:09] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:08:09] GET /backend/public/api/admin/roles -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOi...[redacted]
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:08:09] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:08:10] GET /backend/public/api/admin/flash-sales -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:08:10] GET /backend/public/api/admin/products?limit=1000 -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOi...[redacted]
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:08:10] GET /backend/public/api/admin/dashboard/stats -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOi...[redacted]
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:08:10] GET /backend/public/api/admin/dashboard/stats -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOi...[redacted]
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:08:10] GET /backend/public/api/admin/categories -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOi...[redacted]
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:08:12] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:08:12] GET /backend/public/api/admin/roles -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:08:12] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:08:13] GET /backend/public/api/admin/products?limit=1000 -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:08:13] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:08:13] GET /backend/public/api/admin/categories -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:08:13] GET /backend/public/api/admin/flash-sales -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOi...[redacted]
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:08:14] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:08:15] GET /backend/public/api/admin/users?page=1&limit=20 -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOi...[redacted]
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:08:15] GET /backend/public/api/admin/dashboard/stats -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOi...[redacted]
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:08:15] GET /backend/public/api/admin/dashboard/stats -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOi...[redacted]
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:08:16] GET /backend/public/api/admin/dashboard/stats -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOi...[redacted]
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:08:16] GET /backend/public/api/admin/dashboard/stats -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOi...[redacted]
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:08:16] GET /backend/public/api/admin/warranties?page=1&limit=20 -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOi...[redacted]
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:08:17] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:08:17] GET /backend/public/api/admin/brands -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOi...[redacted]
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:08:17] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:08:18] GET /backend/public/api/admin/dashboard/stats -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOi...[redacted]
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:08:18] GET /backend/public/api/admin/orders?page=1&limit=20 -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOi...[redacted]
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:08:18] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:29:52] GET /backend/public/api/admin/users?page=1&limit=20 -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:29:52] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:29:52] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:29:53] GET /backend/public/api/admin/warranties?page=1&limit=20 -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:29:53] GET /backend/public/api/admin/dashboard/stats -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOi...[redacted]
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:29:53] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:29:54] GET /backend/public/api/admin/flash-sales -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:29:54] GET /backend/public/api/admin/products?limit=1000 -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOi...[redacted]
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:29:54] GET /backend/public/api/admin/dashboard/stats -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOi...[redacted]
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:29:54] GET /backend/public/api/admin/categories -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:29:54] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:29:55] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:29:55] GET /backend/public/api/admin/users?page=1&limit=20 -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOi...[redacted]
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:29:55] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:29:58] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:29:59] GET /backend/public/api/admin/users?page=1&limit=20 -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:29:59] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:29:59] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:30:00] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:30:00] GET /backend/public/api/admin/dashboard/stats -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOi...[redacted]
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:30:00] GET /backend/public/api/admin/users?page=1&limit=20 -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOi...[redacted]
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:30:00] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:32:27] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:32:27] GET /backend/public/api/admin/users?page=1&limit=20 -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:32:27] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:32:27] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:32:30] GET /backend/public/api/admin/dashboard/stats -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOi...[redacted]
+ - Failure Reason: Signature verification failed.
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:32:30] GET /backend/public/api/admin/warranties?page=1&limit=20 -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOi...[redacted]
+ - Failure Reason: Signature verification failed.
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:32:30] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:32:31] GET /backend/public/api/admin/users?page=1&limit=20 -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOi...[redacted]
+ - Failure Reason: Signature verification failed.
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:32:31] GET /backend/public/api/admin/dashboard/stats -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOi...[redacted]
+ - Failure Reason: Signature verification failed.
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:32:31] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:32:32] GET /backend/public/api/admin/orders?page=1&limit=20 -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:32:32] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:32:32] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:32:33] GET /backend/public/api/admin/dashboard/stats -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOi...[redacted]
+ - Failure Reason: Signature verification failed.
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:32:33] GET /backend/public/api/admin/users?page=1&limit=20 -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOi...[redacted]
+ - Failure Reason: Signature verification failed.
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:32:33] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:32:33] GET /backend/public/api/admin/orders?page=1&limit=20 -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOi...[redacted]
+ - Failure Reason: Signature verification failed.
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:32:33] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:32:35] GET /backend/public/api/admin/users?page=1&limit=20 -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:32:35] GET /backend/public/api/admin/dashboard/stats -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOi...[redacted]
+ - Failure Reason: Signature verification failed.
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:32:35] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:32:37] GET /backend/public/api/admin/dashboard/stats -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOi...[redacted]
+ - Failure Reason: Signature verification failed.
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:32:37] GET /backend/public/api/admin/brands -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOi...[redacted]
+ - Failure Reason: Signature verification failed.
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:32:37] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:32:37] GET /backend/public/api/admin/orders?page=1&limit=20 -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOi...[redacted]
+ - Failure Reason: Signature verification failed.
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:32:37] GET /backend/public/api/admin/dashboard/stats -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOi...[redacted]
+ - Failure Reason: Signature verification failed.
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:32:37] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:32:39] GET /backend/public/api/admin/dashboard/stats -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOi...[redacted]
+ - Failure Reason: Signature verification failed.
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:32:39] GET /backend/public/api/admin/users?page=1&limit=20 -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOi...[redacted]
+ - Failure Reason: Signature verification failed.
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:32:39] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:32:45] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:32:45] GET /backend/public/api/admin/users?page=1&limit=20 -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:32:45] GET /backend/public/api/admin/dashboard/stats -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOi...[redacted]
+ - Failure Reason: Signature verification failed.
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:32:45] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:32:46] GET /backend/public/api/admin/orders?page=1&limit=20 -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:32:46] GET /backend/public/api/admin/dashboard/stats -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOi...[redacted]
+ - Failure Reason: Signature verification failed.
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:32:46] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:32:47] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:32:47] GET /backend/public/api/admin/users?page=1&limit=20 -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:32:47] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:32:48] GET /backend/public/api/admin/orders?page=1&limit=20 -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOi...[redacted]
+ - Failure Reason: Signature verification failed.
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:32:48] GET /backend/public/api/admin/dashboard/stats -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOi...[redacted]
+ - Failure Reason: Signature verification failed.
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:32:48] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:32:49] GET /backend/public/api/admin/brands -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOi...[redacted]
+ - Failure Reason: Signature verification failed.
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:32:49] GET /backend/public/api/admin/dashboard/stats -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOi...[redacted]
+ - Failure Reason: Signature verification failed.
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:32:49] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:32:49] GET /backend/public/api/admin/categories -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+in
+[2026-05-31 14:32:49] GET /backend/public/api/admin/dashboard/stats -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOi...[redacted]
+ - Failure Reason: Signature verification failed.
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:32:49] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:32:51] GET /backend/public/api/admin/users?page=1&limit=20 -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOi...[redacted]
+ - Failure Reason: Signature verification failed.
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:32:51] GET /backend/public/api/admin/dashboard/stats -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOi...[redacted]
+ - Failure Reason: Signature verification failed.
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:32:51] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:34:05] GET /api/admin/test-signature-failure -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOiJIUzI1NiIsInR5cCI6Ik...[redacted]
+ - Failure Reason: Signature verification failed. Used Secret: your_jwt_secret_key_here...[redacted], Expected Sig: MV03QxLg6-wlSQluoEND_6QbY3_4Xb-bdD-dkZLE0p8, Got Sig: wrongsignature
+ - Cookie dhat_auth_token: cookie_token_abc...[redacted]
+ - Cookie venix_auth_token: cookie_token_def...[redacted]
+[2026-05-31 14:34:14] GET /backend/public/api/admin/brands -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOiJIUzI1NiIsInR5cCI6Ik...[redacted]
+ - Failure Reason: Signature verification failed. Used Secret: changeme...[redacted], Expected Sig: 8D-DNO8HFx5EgA0RrF2iRGtsAt1zKrn75SGlpma3MA8, Got Sig: 28T41EYoVyg4tE-Mh5KmW993i9CXhbgc0ZfTAqSj-6Q
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:34:14] GET /backend/public/api/admin/dashboard/stats -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOiJIUzI1NiIsInR5cCI6Ik...[redacted]
+ - Failure Reason: Signature verification failed. Used Secret: changeme...[redacted], Expected Sig: 8D-DNO8HFx5EgA0RrF2iRGtsAt1zKrn75SGlpma3MA8, Got Sig: 28T41EYoVyg4tE-Mh5KmW993i9CXhbgc0ZfTAqSj-6Q
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:34:14] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:34:14] GET /backend/public/api/admin/dashboard/stats -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOiJIUzI1NiIsInR5cCI6Ik...[redacted]
+ - Failure Reason: Signature verification failed. Used Secret: changeme...[redacted], Expected Sig: 8D-DNO8HFx5EgA0RrF2iRGtsAt1zKrn75SGlpma3MA8, Got Sig: 28T41EYoVyg4tE-Mh5KmW993i9CXhbgc0ZfTAqSj-6Q
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:34:14] GET /backend/public/api/admin/orders?page=1&limit=20 -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOiJIUzI1NiIsInR5cCI6Ik...[redacted]
+ - Failure Reason: Signature verification failed. Used Secret: changeme...[redacted], Expected Sig: 8D-DNO8HFx5EgA0RrF2iRGtsAt1zKrn75SGlpma3MA8, Got Sig: 28T41EYoVyg4tE-Mh5KmW993i9CXhbgc0ZfTAqSj-6Q
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:34:14] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:34:15] GET /backend/public/api/admin/dashboard/stats -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOiJIUzI1NiIsInR5cCI6Ik...[redacted]
+ - Failure Reason: Signature verification failed. Used Secret: changeme...[redacted], Expected Sig: 8D-DNO8HFx5EgA0RrF2iRGtsAt1zKrn75SGlpma3MA8, Got Sig: 28T41EYoVyg4tE-Mh5KmW993i9CXhbgc0ZfTAqSj-6Q
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:34:15] GET /backend/public/api/admin/brands -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOiJIUzI1NiIsInR5cCI6Ik...[redacted]
+ - Failure Reason: Signature verification failed. Used Secret: changeme...[redacted], Expected Sig: 8D-DNO8HFx5EgA0RrF2iRGtsAt1zKrn75SGlpma3MA8, Got Sig: 28T41EYoVyg4tE-Mh5KmW993i9CXhbgc0ZfTAqSj-6Q
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:34:15] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:34:31] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:34:31] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:34:31] GET /backend/public/api/admin/brands -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:34:31] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:34:32] GET /backend/public/api/admin/orders?page=1&limit=20 -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:34:32] GET /backend/public/api/admin/dashboard/stats -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOiJIUzI1NiIsInR5cCI6Ik...[redacted]
+ - Failure Reason: Signature verification failed. Used Secret: changeme...[redacted], Expected Sig: 8D-DNO8HFx5EgA0RrF2iRGtsAt1zKrn75SGlpma3MA8, Got Sig: 28T41EYoVyg4tE-Mh5KmW993i9CXhbgc0ZfTAqSj-6Q
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:34:32] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:34:33] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:34:33] GET /backend/public/api/admin/users?page=1&limit=20 -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOiJIUzI1NiIsInR5cCI6Ik...[redacted]
+ - Failure Reason: Signature verification failed. Used Secret: changeme...[redacted], Expected Sig: 8D-DNO8HFx5EgA0RrF2iRGtsAt1zKrn75SGlpma3MA8, Got Sig: 28T41EYoVyg4tE-Mh5KmW993i9CXhbgc0ZfTAqSj-6Q
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:34:33] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:34:34] GET /backend/public/api/admin/warranties?page=1&limit=20 -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:34:34] GET /backend/public/api/admin/dashboard/stats -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOiJIUzI1NiIsInR5cCI6Ik...[redacted]
+ - Failure Reason: Signature verification failed. Used Secret: changeme...[redacted], Expected Sig: 8D-DNO8HFx5EgA0RrF2iRGtsAt1zKrn75SGlpma3MA8, Got Sig: 28T41EYoVyg4tE-Mh5KmW993i9CXhbgc0ZfTAqSj-6Q
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:34:34] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:34:35] GET /backend/public/api/admin/users?page=1&limit=20 -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOiJIUzI1NiIsInR5cCI6Ik...[redacted]
+ - Failure Reason: Signature verification failed. Used Secret: changeme...[redacted], Expected Sig: 8D-DNO8HFx5EgA0RrF2iRGtsAt1zKrn75SGlpma3MA8, Got Sig: 28T41EYoVyg4tE-Mh5KmW993i9CXhbgc0ZfTAqSj-6Q
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:34:35] GET /backend/public/api/admin/dashboard/stats -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOiJIUzI1NiIsInR5cCI6Ik...[redacted]
+ - Failure Reason: Signature verification failed. Used Secret: changeme...[redacted], Expected Sig: 8D-DNO8HFx5EgA0RrF2iRGtsAt1zKrn75SGlpma3MA8, Got Sig: 28T41EYoVyg4tE-Mh5KmW993i9CXhbgc0ZfTAqSj-6Q
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:34:35] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:34:38] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:34:38] GET /backend/public/api/admin/users?page=1&limit=20 -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:34:38] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:34:38] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:34:39] GET /backend/public/api/admin/dashboard/stats -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOiJIUzI1NiIsInR5cCI6Ik...[redacted]
+ - Failure Reason: Signature verification failed. Used Secret: changeme...[redacted], Expected Sig: 8D-DNO8HFx5EgA0RrF2iRGtsAt1zKrn75SGlpma3MA8, Got Sig: 28T41EYoVyg4tE-Mh5KmW993i9CXhbgc0ZfTAqSj-6Q
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:34:39] GET /backend/public/api/admin/warranties?page=1&limit=20 -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOiJIUzI1NiIsInR5cCI6Ik...[redacted]
+ - Failure Reason: Signature verification failed. Used Secret: changeme...[redacted], Expected Sig: 8D-DNO8HFx5EgA0RrF2iRGtsAt1zKrn75SGlpma3MA8, Got Sig: 28T41EYoVyg4tE-Mh5KmW993i9CXhbgc0ZfTAqSj-6Q
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:34:39] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:34:40] GET /backend/public/api/admin/users?page=1&limit=20 -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOiJIUzI1NiIsInR5cCI6Ik...[redacted]
+ - Failure Reason: Signature verification failed. Used Secret: changeme...[redacted], Expected Sig: 8D-DNO8HFx5EgA0RrF2iRGtsAt1zKrn75SGlpma3MA8, Got Sig: 28T41EYoVyg4tE-Mh5KmW993i9CXhbgc0ZfTAqSj-6Q
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:34:40] GET /backend/public/api/admin/dashboard/stats -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOiJIUzI1NiIsInR5cCI6Ik...[redacted]
+ - Failure Reason: Signature verification failed. Used Secret: changeme...[redacted], Expected Sig: 8D-DNO8HFx5EgA0RrF2iRGtsAt1zKrn75SGlpma3MA8, Got Sig: 28T41EYoVyg4tE-Mh5KmW993i9CXhbgc0ZfTAqSj-6Q
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:34:40] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:34:41] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:34:41] GET /backend/public/api/admin/warranties?page=1&limit=20 -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOiJIUzI1NiIsInR5cCI6Ik...[redacted]
+ - Failure Reason: Signature verification failed. Used Secret: changeme...[redacted], Expected Sig: 8D-DNO8HFx5EgA0RrF2iRGtsAt1zKrn75SGlpma3MA8, Got Sig: 28T41EYoVyg4tE-Mh5KmW993i9CXhbgc0ZfTAqSj-6Q
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:34:41] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:34:41] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:34:41] GET /backend/public/api/admin/roles -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:34:41] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:34:47] GET /backend/public/api/admin/users?page=1&limit=20 -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOiJIUzI1NiIsInR5cCI6Ik...[redacted]
+ - Failure Reason: Signature verification failed. Used Secret: changeme...[redacted], Expected Sig: 8D-DNO8HFx5EgA0RrF2iRGtsAt1zKrn75SGlpma3MA8, Got Sig: 28T41EYoVyg4tE-Mh5KmW993i9CXhbgc0ZfTAqSj-6Q
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:34:47] GET /backend/public/api/admin/dashboard/stats -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOiJIUzI1NiIsInR5cCI6Ik...[redacted]
+ - Failure Reason: Signature verification failed. Used Secret: changeme...[redacted], Expected Sig: 8D-DNO8HFx5EgA0RrF2iRGtsAt1zKrn75SGlpma3MA8, Got Sig: 28T41EYoVyg4tE-Mh5KmW993i9CXhbgc0ZfTAqSj-6Q
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:34:47] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:34:49] GET /backend/public/api/admin/warranties?page=1&limit=20 -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOiJIUzI1NiIsInR5cCI6Ik...[redacted]
+ - Failure Reason: Signature verification failed. Used Secret: changeme...[redacted], Expected Sig: 8D-DNO8HFx5EgA0RrF2iRGtsAt1zKrn75SGlpma3MA8, Got Sig: 28T41EYoVyg4tE-Mh5KmW993i9CXhbgc0ZfTAqSj-6Q
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:34:49] GET /backend/public/api/admin/dashboard/stats -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOiJIUzI1NiIsInR5cCI6Ik...[redacted]
+ - Failure Reason: Signature verification failed. Used Secret: changeme...[redacted], Expected Sig: 8D-DNO8HFx5EgA0RrF2iRGtsAt1zKrn75SGlpma3MA8, Got Sig: 28T41EYoVyg4tE-Mh5KmW993i9CXhbgc0ZfTAqSj-6Q
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:34:49] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:34:52] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:34:52] GET /backend/public/api/admin/warranties?page=1&limit=20 -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOiJIUzI1NiIsInR5cCI6Ik...[redacted]
+ - Failure Reason: Signature verification failed. Used Secret: changeme...[redacted], Expected Sig: 8D-DNO8HFx5EgA0RrF2iRGtsAt1zKrn75SGlpma3MA8, Got Sig: 28T41EYoVyg4tE-Mh5KmW993i9CXhbgc0ZfTAqSj-6Q
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:34:52] GET /backend/public/api/admin/dashboard/stats -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOiJIUzI1NiIsInR5cCI6Ik...[redacted]
+ - Failure Reason: Signature verification failed. Used Secret: changeme...[redacted], Expected Sig: 8D-DNO8HFx5EgA0RrF2iRGtsAt1zKrn75SGlpma3MA8, Got Sig: 28T41EYoVyg4tE-Mh5KmW993i9CXhbgc0ZfTAqSj-6Q
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:34:52] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:34:53] GET /backend/public/api/admin/users?page=1&limit=20 -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOiJIUzI1NiIsInR5cCI6Ik...[redacted]
+ - Failure Reason: Signature verification failed. Used Secret: changeme...[redacted], Expected Sig: 8D-DNO8HFx5EgA0RrF2iRGtsAt1zKrn75SGlpma3MA8, Got Sig: 28T41EYoVyg4tE-Mh5KmW993i9CXhbgc0ZfTAqSj-6Q
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:34:53] GET /backend/public/api/admin/dashboard/stats -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOiJIUzI1NiIsInR5cCI6Ik...[redacted]
+ - Failure Reason: Signature verification failed. Used Secret: changeme...[redacted], Expected Sig: 8D-DNO8HFx5EgA0RrF2iRGtsAt1zKrn75SGlpma3MA8, Got Sig: 28T41EYoVyg4tE-Mh5KmW993i9CXhbgc0ZfTAqSj-6Q
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:34:54] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:34:56] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:34:56] GET /backend/public/api/admin/users?page=1&limit=20 -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:34:56] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:34:56] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:34:57] GET /backend/public/api/admin/orders?page=1&limit=20 -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:34:57] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:34:57] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:34:58] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:34:58] GET /backend/public/api/admin/brands -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOiJIUzI1NiIsInR5cCI6Ik...[redacted]
+ - Failure Reason: Signature verification failed. Used Secret: changeme...[redacted], Expected Sig: 8D-DNO8HFx5EgA0RrF2iRGtsAt1zKrn75SGlpma3MA8, Got Sig: 28T41EYoVyg4tE-Mh5KmW993i9CXhbgc0ZfTAqSj-6Q
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:34:58] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:34:59] GET /backend/public/api/admin/users?page=1&limit=20 -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOiJIUzI1NiIsInR5cCI6Ik...[redacted]
+ - Failure Reason: Signature verification failed. Used Secret: changeme...[redacted], Expected Sig: 8D-DNO8HFx5EgA0RrF2iRGtsAt1zKrn75SGlpma3MA8, Got Sig: 28T41EYoVyg4tE-Mh5KmW993i9CXhbgc0ZfTAqSj-6Q
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:34:59] GET /backend/public/api/admin/dashboard/stats -> AUTH FAILED (401)
+ - Token Extracted: eyJhbGciOiJIUzI1NiIsInR5cCI6Ik...[redacted]
+ - Failure Reason: Signature verification failed. Used Secret: changeme...[redacted], Expected Sig: 8D-DNO8HFx5EgA0RrF2iRGtsAt1zKrn75SGlpma3MA8, Got Sig: 28T41EYoVyg4tE-Mh5KmW993i9CXhbgc0ZfTAqSj-6Q
+ - Cookie dhat_auth_token: NOT SET
+ - Cookie venix_auth_token: NOT SET
+[2026-05-31 14:34:59] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:36:36] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:36:36] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:36:36] GET /backend/public/api/admin/users?page=1&limit=20 -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:36:36] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:36:38] GET /backend/public/api/admin/orders?page=1&limit=20 -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:36:38] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:36:38] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:36:39] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:36:39] GET /backend/public/api/admin/users?page=1&limit=20 -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:36:39] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:36:39] GET /backend/public/api/admin/orders?page=1&limit=20 -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:36:39] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:36:39] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:36:41] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:36:41] GET /backend/public/api/admin/brands -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:36:41] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:36:41] GET /backend/public/api/admin/users?page=1&limit=20 -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:36:41] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:36:41] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:36:42] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:36:42] GET /backend/public/api/admin/orders?page=1&limit=20 -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:36:42] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:36:42] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:36:43] GET /backend/public/api/admin/visitors?days=30 -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:36:43] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:36:43] GET /backend/public/api/admin/warranties?page=1&limit=20 -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:36:43] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:36:43] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:36:44] GET /backend/public/api/admin/users?page=1&limit=20 -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:36:44] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:36:44] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:36:46] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:36:46] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:36:46] GET /backend/public/api/admin/news?t=1780238206158 -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:36:47] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:36:47] GET /backend/public/api/admin/visitors?days=30 -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:36:47] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:13] GET /backend/public/api/admin/roles -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:13] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:13] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:14] GET /backend/public/api/admin/warranties?page=1&limit=20 -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:14] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:14] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:15] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:15] GET /backend/public/api/admin/users?page=1&limit=20 -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:15] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:16] GET /backend/public/api/admin/orders?page=1&limit=20 -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:16] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:16] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:17] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:17] GET /backend/public/api/admin/brands -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:17] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:18] GET /backend/public/api/admin/subcategories -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:18] GET /backend/public/api/admin/categories -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:18] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:18] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:19] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:19] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:19] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:20] GET /backend/public/api/admin/products?page=1&limit=10 -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:20] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:20] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:21] GET /backend/public/api/admin/categories -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:21] GET /backend/public/api/admin/subcategories -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:21] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:21] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:22] GET /backend/public/api/admin/warranties?page=1&limit=20 -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:22] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:22] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:23] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:23] GET /backend/public/api/admin/roles -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:23] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:24] GET /backend/public/api/admin/products?limit=1000 -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:24] GET /backend/public/api/admin/categories -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:24] GET /backend/public/api/admin/flash-sales -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:24] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:24] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:26] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:26] GET /backend/public/api/admin/visitors?days=30 -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:26] GET /backend/public/api/admin/roles -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:26] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:27] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:27] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:36] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:36] GET /backend/public/api/admin/products?limit=1000 -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:36] GET /backend/public/api/admin/categories -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:36] GET /backend/public/api/admin/flash-sales -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:36] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:38] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:38] GET /backend/public/api/admin/users?page=1&limit=20 -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:38] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:53] GET /backend/public/api/admin/products?page=1&limit=10 -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:53] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:53] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:53] GET /backend/public/api/admin/subcategories -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:53] GET /backend/public/api/admin/categories -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:54] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:54] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:54] GET /backend/public/api/admin/orders?page=1&limit=20 -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:54] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:54] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:55] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:55] GET /backend/public/api/admin/brands -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:55] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:57] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:57] GET /backend/public/api/admin/visitors?days=30 -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:58] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:58] GET /backend/public/api/admin/news?t=1780238278839 -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:58] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:37:58] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:38:00] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:38:00] GET /backend/public/api/admin/settings/history?t=1780238280640 -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:38:00] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:38:01] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:38:01] GET /backend/public/api/admin/visitors?days=30 -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:38:01] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:38:03] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:38:03] GET /backend/public/api/admin/settings/history?t=1780238283558 -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:38:03] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:38:07] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:38:07] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:38:07] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:38:08] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:38:08] GET /backend/public/api/admin/products?page=1&limit=10 -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:38:08] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:38:09] GET /backend/public/api/admin/subcategories -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:38:09] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:38:09] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:38:10] GET /backend/public/api/admin/brands -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:38:10] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:38:10] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:38:11] GET /backend/public/api/admin/warranties?page=1&limit=20 -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:38:11] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:38:11] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:38:12] GET /backend/public/api/admin/brands -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:38:12] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:38:12] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:38:13] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:38:13] GET /backend/public/api/admin/settings/history?t=1780238293351 -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:38:13] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:42:04] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:42:04] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:42:04] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:42:04] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:42:04] GET /backend/public/api/admin/products?page=1&limit=10 -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:42:04] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:42:06] GET /backend/public/api/admin/categories -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:42:06] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:42:06] GET /backend/public/api/admin/subcategories -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:42:06] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:42:08] GET /backend/public/api/admin/brands -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:42:08] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:42:08] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:42:09] GET /backend/public/api/admin/categories -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:42:09] GET /backend/public/api/admin/subcategories -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:42:09] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:42:09] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:42:10] GET /backend/public/api/admin/brands -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:42:10] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:42:11] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:42:11] GET /backend/public/api/admin/orders?page=1&limit=20 -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:42:11] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:42:11] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:42:14] GET /backend/public/api/admin/orders/6564 -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:42:17] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:42:17] GET /backend/public/api/admin/warranties?page=1&limit=20 -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:42:17] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:42:18] GET /backend/public/api/admin/users?page=1&limit=20 -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:42:18] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:42:18] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:42:23] GET /backend/public/api/admin/news?t=1780238542968 -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:42:23] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:42:23] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:42:23] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:42:23] GET /backend/public/api/admin/visitors?days=30 -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:42:24] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:42:24] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:42:24] GET /backend/public/api/admin/products?limit=1000 -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:42:24] GET /backend/public/api/admin/categories -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:42:24] GET /backend/public/api/admin/flash-sales -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:42:24] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:42:26] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:42:26] GET /backend/public/api/admin/roles -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:42:26] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:42:27] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:42:27] GET /backend/public/api/admin/news?t=1780238547368 -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:42:27] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:42:29] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:42:29] GET /backend/public/api/admin/settings/history?t=1780238549923 -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:42:29] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:42:31] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:42:31] GET /backend/public/api/admin/visitors?days=30 -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:42:31] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:44:40] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:44:40] GET /backend/public/api/admin/products?page=1&limit=10 -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:44:40] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:44:42] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:44:42] GET /backend/public/api/admin/visitors?days=30 -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:44:42] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:44:43] GET /backend/public/api/admin/news?t=1780238683774 -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:44:43] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin
+[2026-05-31 14:44:43] GET /backend/public/api/admin/dashboard/stats -> AUTH SUCCESS
+ - User ID: 1, Roles: super_admin

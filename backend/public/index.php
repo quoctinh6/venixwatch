@@ -48,7 +48,7 @@ $appEnv  = Config::get('APP_ENV', 'development');
 header('Content-Type: application/json; charset=utf-8');
 header("Access-Control-Allow-Origin: {$origin}");
 header('Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Cart-Session');
+header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Authorization, X-Cart-Session');
 header('Access-Control-Max-Age: 86400');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
@@ -227,6 +227,8 @@ function dispatch(string $method, string $path): void
         // ---- ADMIN FLASH SALES ----
         ['GET',    '/admin/flash-sales',      'App\Modules\Admin\FlashSale\FlashSaleController', 'index'],
         ['POST',   '/admin/flash-sales',      'App\Modules\Admin\FlashSale\FlashSaleController', 'store'],
+        ['POST',   '/admin/flash-sales/bulk-delete', 'App\Modules\Admin\FlashSale\FlashSaleController', 'bulkDestroy'],
+        ['POST',   '/admin/flash-sales/bulk-toggle', 'App\Modules\Admin\FlashSale\FlashSaleController', 'bulkToggle'],
         ['GET',    '/admin/flash-sales/{id}', 'App\Modules\Admin\FlashSale\FlashSaleController', 'show'],
         ['PUT',    '/admin/flash-sales/{id}', 'App\Modules\Admin\FlashSale\FlashSaleController', 'update'],
         ['DELETE', '/admin/flash-sales/{id}', 'App\Modules\Admin\FlashSale\FlashSaleController', 'destroy'],

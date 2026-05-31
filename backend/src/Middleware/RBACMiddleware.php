@@ -20,11 +20,11 @@ class RBACMiddleware
 
         $userId = (int)($user['user_id'] ?? 0);
         if ($userId === 0) {
-            self::forbidden('Invalid token payload.');
+            self::forbidden('Payload của token không hợp lệ.');
         }
 
         if (!self::userHasPermission($userId, $permission)) {
-            self::forbidden("Permission denied. Required: {$permission}");
+            self::forbidden("Không có quyền truy cập. Yêu cầu quyền: {$permission}");
         }
 
         return $user;
@@ -39,7 +39,7 @@ class RBACMiddleware
         $userId = (int)($user['user_id'] ?? 0);
 
         if ($userId === 0) {
-            self::forbidden('Invalid token payload.');
+            self::forbidden('Payload của token không hợp lệ.');
         }
 
         $userPermissions = self::getUserPermissions($userId);
@@ -50,7 +50,7 @@ class RBACMiddleware
             }
         }
 
-        self::forbidden('Permission denied. Required one of: ' . implode(', ', $permissions));
+        self::forbidden('Không có quyền truy cập. Yêu cầu một trong các quyền: ' . implode(', ', $permissions));
         return $user; // unreachable, satisfies static analysis
     }
 

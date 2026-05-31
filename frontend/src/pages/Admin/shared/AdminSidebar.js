@@ -60,10 +60,26 @@ const NAV_ITEMS = [
 export function renderSidebar(container, activeRoute) {
   const token = getAdminToken();
   let userName = 'Admin';
+  let roleText = 'Quản trị viên';
   try {
     if (token) {
       const payload = JSON.parse(atob(token.split('.')[1]));
-      userName = payload.name || payload.email || 'Admin';
+      userName = payload.full_name || payload.name || payload.email || 'Admin';
+      const displayNames = payload.role_display_names || payload.roles || [];
+      if (displayNames.length > 0) {
+        const mapping = {
+          'super_admin': 'Quản trị viên cấp cao',
+          'admin': 'Quản trị viên',
+          'editor': 'Biên tập viên',
+          'viewer': 'Người xem',
+          'user_page_editor': 'Biên tập viên trang',
+          'Super Administrator': 'Quản trị viên cấp cao',
+          'Administrator': 'Quản trị viên',
+          'Editor': 'Biên tập viên',
+          'Viewer': 'Người xem'
+        };
+        roleText = displayNames.map(r => mapping[r] || r).join(', ');
+      }
     }
   } catch { }
 
@@ -87,7 +103,7 @@ export function renderSidebar(container, activeRoute) {
           </div>
           <div class="flex-1 min-w-0">
             <div class="text-white text-sm font-medium truncate">${userName}</div>
-            <div class="text-white/40 text-xs">Quản trị viên</div>
+            <div class="text-white/40 text-xs truncate" title="${roleText}">${roleText}</div>
           </div>
         </div>
         <button id="sidebar-logout" class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-white/60 hover:text-white hover:bg-white/10 text-sm transition-colors">

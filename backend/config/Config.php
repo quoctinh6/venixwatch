@@ -7,6 +7,7 @@ namespace App\Config;
 class Config
 {
     private static bool $loaded = false;
+    private static array $data = [];
 
     public static function load(string $envFile = null): void
     {
@@ -50,7 +51,8 @@ class Config
                 $value = substr($value, 1, -1);
             }
 
-            if ($key !== '' && !array_key_exists($key, $_ENV)) {
+            if ($key !== '') {
+                self::$data[$key] = $value;
                 putenv("{$key}={$value}");
                 $_ENV[$key]    = $value;
                 $_SERVER[$key] = $value;
@@ -64,6 +66,14 @@ class Config
     {
         if (!self::$loaded) {
             self::load();
+        }
+
+        if (array_key_exists($key, self::$data)) {
+            return self::$data[$key];
+        }
+
+        if (array_key_exists($key, $_ENV)) {
+            return $_ENV[$key];
         }
 
         $value = getenv($key);

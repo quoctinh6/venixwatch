@@ -1,9 +1,44 @@
 Options -Indexes
 RewriteEngine On
 
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+
+    # Never cache HTML pages to ensure entry scripts are fresh
+    <FilesMatch "\.(html|htm)$">
+        Header set Cache-Control "no-cache, no-store, must-revalidate"
+        Header set Pragma "no-cache"
+        Header set Expires 0
+    </FilesMatch>
+
+    # Force browser to revalidate JS, CSS, and JSON files on reload/refresh
+    <FilesMatch "\.(js|css|json)$">
+        Header set Cache-Control "no-cache, max-age=0, must-revalidate"
+    </FilesMatch>
+
+    # Never cache the service worker file
+    <Files "sw.js">
+        Header set Cache-Control "no-cache, no-store, must-revalidate"
+        Header set Pragma "no-cache"
+        Header set Expires 0
+    </Files>
+</IfModule>
+
+<FilesMatch "(^\.|\.env$|\.sql$|\.zip$|\.bak$|\.log$|\.ini$|\.phar$|composer\.(json|lock)$)">
+    Require all denied
+</FilesMatch>
+
 # Pass Authorization header to PHP
 RewriteCond %{HTTP:Authorization} .
 RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+# Never expose application internals or diagnostic logs from the web root
+RewriteRule ^backend/storage/ - [F,L]
+RewriteRule ^backend/(config|src|sql)/ - [F,L]
+RewriteRule ^backend/.*\.(env|sql|zip|bak|log|ini|phar)$ - [F,L]
 
 # Let backend/ requests pass through to backend's own .htaccess + index.php
 RewriteRule ^backend/ - [L]

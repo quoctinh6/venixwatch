@@ -55,6 +55,15 @@ try {
         }
     }
 
+    // 1b. Check and alter flash_sales table
+    echo "Altering flash_sales table...\n";
+    if (!columnExists($pdo, 'flash_sales', 'is_active')) {
+        $pdo->exec("ALTER TABLE flash_sales ADD COLUMN is_active TINYINT(1) NOT NULL DEFAULT 1");
+        echo "Added column 'is_active' to flash_sales table.\n";
+    } else {
+        echo "Column 'is_active' already exists in flash_sales table.\n";
+    }
+
     // 2. Safely recreate reviews and product Q&A tables to match types
     echo "Recreating review & Q&A tables to ensure compatible foreign keys...\n";
     $pdo->exec("SET FOREIGN_KEY_CHECKS = 0;");
