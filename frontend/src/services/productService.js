@@ -26,28 +26,233 @@ function buildQuery(params = {}) {
   return q.toString() ? `?${q.toString()}` : '';
 }
 
+function normalizeLocalProduct(p) {
+  const isCo = String(p.subcategory || '').toLowerCase().includes('cơ') || String(p.movement_type || '').toLowerCase().includes('auto');
+  
+  let specsArray = [];
+  if (p.specs) {
+    if (Array.isArray(p.specs)) {
+      specsArray = p.specs;
+    } else if (typeof p.specs === 'object') {
+      specsArray = Object.entries(p.specs).map(([label, value]) => ({ label, value }));
+    } else if (typeof p.specs === 'string') {
+      try {
+        const parsed = JSON.parse(p.specs);
+        if (Array.isArray(parsed)) specsArray = parsed;
+        else if (typeof parsed === 'object') {
+          specsArray = Object.entries(parsed).map(([label, value]) => ({ label, value }));
+        }
+      } catch (e) {}
+    }
+  }
+
+  if (specsArray.length === 0) {
+    const specMapping = {
+      'Thương hiệu': p.brand || 'Kemil',
+      'Xuất xứ thương hiệu': p.origin || 'Mỹ',
+      'Đường kính mặt': p.case_size || '32mm',
+      'Chống nước': p.water_resistance || '30m (3 ATM)',
+      'Chất liệu vỏ': p.case_material || 'Thép không gỉ 316L',
+      'Loại máy': isCo ? 'AUTOMATIC' : 'QUARTZ',
+      'Giới tính': 'Nữ',
+    };
+    
+    Object.entries(specMapping).forEach(([label, value]) => {
+      if (value) {
+        specsArray.push({ label, value });
+      }
+    });
+  }
+
+  return {
+    id: p.id || Math.floor(Math.random() * 1000000),
+    name: p.name,
+    slug: p.slug,
+    description: p.description_html || p.description || '',
+    short_description: p.basic_info || '',
+    long_description: null,
+    price: p.price,
+    sale_price: p.sale_price || null,
+    stock: p.stock || 10,
+    status: p.status || 'active',
+    sku: p.sku || '',
+    ref_number: null,
+    brand: p.brand || 'Kemil',
+    case_material: p.case_material || null,
+    case_size: p.case_size || null,
+    movement_type: p.movement_type || 'quartz',
+    water_resistance: p.water_resistance || null,
+    images: Array.isArray(p.images) ? p.images : [],
+    is_active: 1,
+    is_featured: 0,
+    badge: p.sale_price ? 'SALE' : 'NEW',
+    view_count: p.view_count || 120,
+    sold_count: p.sold_count || 15,
+    rating_avg: String(p.rating_avg || '5.0'),
+    rating_count: p.rating_count || 0,
+    specs: specsArray,
+    category_id: 2,
+    subcategory_id: isCo ? 12 : 11,
+    category_name: 'Đồng Hồ Nữ',
+    subcategory_name: isCo ? 'Đồng Hồ Nữ Cơ' : 'Đồng Hồ Nữ Pin',
+    category_slug: 'nu',
+    subcategory_slug: isCo ? 'nu-co' : 'nu-thoi-trang',
+    brand_name: p.brand || 'Kemil',
+    flash_sale: null
+  };
+}
+
+export async function getProductsOffline(params = {}) {
+  try {
+    const projectPrefix = window.location.pathname.startsWith('/dong-ho-a-tuan/') ? '/dong-ho-a-tuan' : '';
+    const res = await fetch(`${window.location.origin}${projectPrefix}/kemil_products.json`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const rawData = await res.json();
+    let list = rawData.map(normalizeLocalProduct);
+
+    if (params.category_slug) {
+      list = list.filter(p => p.category_slug === params.category_slug);
+    }
+    if (params.subcategory_slug) {
+      list = list.filter(p => p.subcategory_slug === params.subcategory_slug);
+    }
+    if (params.brand) {
+      const b = String(params.brand).toLowerCase();
+      list = list.filter(p => String(p.brand || '').toLowerCase() === b);
+    }
+    if (params.search) {
+      const q = String(params.search).toLowerCase();
+      list = list.filter(p => p.name.toLowerCase().includes(q) || p.brand.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q));
+    }
+    if (params.featured !== undefined) {
+      list = list.filter(p => p.is_featured == params.featured);
+    }
+    if (params.price_min) {
+      list = list.filter(p => parseFloat(p.price) >= parseFloat(params.price_min));
+    }
+    if (params.price_max) {
+      list = list.filter(p => parseFloat(p.price) <= parseFloat(params.price_max));
+    }
+
+    const sort = params.sort || 'new';
+    if (sort === 'price_asc') {
+      list.sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
+    } else if (sort === 'price_desc') {
+      list.sort((a, b) => parseFloat(b.price) - parseFloat(a.price));
+    } else if (sort === 'bestseller') {
+      list.sort((a, b) => b.sold_count - a.sold_count);
+    } else {
+      list.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+    }
+
+    const page = parseInt(params.page) || 1;
+    const limit = parseInt(params.limit || params.per_page) || 12;
+    const startIndex = (page - 1) * limit;
+    const paginated = list.slice(startIndex, startIndex + limit);
+
+    return {
+      success: true,
+      data: paginated,
+      meta: {
+        current_page: page,
+        last_page: Math.ceil(list.length / limit),
+        per_page: limit,
+        total: list.length
+      },
+      products: paginated,
+      total: list.length,
+      last_page: Math.ceil(list.length / limit),
+    };
+  } catch (err) {
+    console.error('getProductsOffline failed:', err);
+    const mock = getMockProducts(params.limit || 8);
+    return {
+      success: true,
+      data: mock,
+      meta: { current_page: 1, last_page: 1, per_page: mock.length, total: mock.length },
+      products: mock,
+      total: mock.length,
+      last_page: 1
+    };
+  }
+}
+
+export async function getProductOffline(slug) {
+  try {
+    const projectPrefix = window.location.pathname.startsWith('/dong-ho-a-tuan/') ? '/dong-ho-a-tuan' : '';
+    const res = await fetch(`${window.location.origin}${projectPrefix}/kemil_products.json`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const rawData = await res.json();
+    const found = rawData.find(p => p.slug === slug);
+    if (!found) throw new Error(`Product not found: ${slug}`);
+    return normalizeLocalProduct(found);
+  } catch (err) {
+    console.error('getProductOffline failed:', err);
+    throw err;
+  }
+}
+
 /**
  * Get paginated/filtered products
  * @param {Object} params — category_slug, page, limit, search, featured, sort
  */
 export async function getProducts(params = {}) {
-  const url = `${API_BASE}/api/products${buildQuery(params)}`;
-  return apiFetch(url);
+  try {
+    const url = `${API_BASE}/api/products${buildQuery(params)}`;
+    return await apiFetch(url);
+  } catch (err) {
+    console.warn('getProducts api failed, falling back to offline data:', err);
+    return getProductsOffline(params);
+  }
 }
 
 /**
  * Get a single product by slug
  */
 export async function getProduct(slug) {
-  return apiFetch(`${API_BASE}/api/products/${encodeURIComponent(slug)}`);
+  try {
+    return await apiFetch(`${API_BASE}/api/products/${encodeURIComponent(slug)}`);
+  } catch (err) {
+    console.warn('getProduct api failed, falling back to offline data:', err);
+    return getProductOffline(slug);
+  }
 }
 
 export async function getProductImages(productId) {
-  return apiFetch(`${API_BASE}/api/products/${encodeURIComponent(productId)}/images`);
+  try {
+    return await apiFetch(`${API_BASE}/api/products/${encodeURIComponent(productId)}/images`);
+  } catch (err) {
+    console.warn('getProductImages failed, trying offline fallback:', err);
+    try {
+      const projectPrefix = window.location.pathname.startsWith('/dong-ho-a-tuan/') ? '/dong-ho-a-tuan' : '';
+      const res = await fetch(`${window.location.origin}${projectPrefix}/kemil_products.json`);
+      const rawData = await res.json();
+      const found = rawData.find(p => String(p.id) === String(productId));
+      if (found) {
+        return { success: true, data: Array.isArray(found.images) ? found.images : [] };
+      }
+    } catch (e) {}
+    throw err;
+  }
 }
 
 export async function getProductSpecs(productId) {
-  return apiFetch(`${API_BASE}/api/products/${encodeURIComponent(productId)}/specs`);
+  try {
+    return await apiFetch(`${API_BASE}/api/products/${encodeURIComponent(productId)}/specs`);
+  } catch (err) {
+    console.warn('getProductSpecs failed, trying offline fallback:', err);
+    try {
+      const projectPrefix = window.location.pathname.startsWith('/dong-ho-a-tuan/') ? '/dong-ho-a-tuan' : '';
+      const res = await fetch(`${window.location.origin}${projectPrefix}/kemil_products.json`);
+      const rawData = await res.json();
+      const found = rawData.find(p => String(p.id) === String(productId));
+      if (found) {
+        const normalized = normalizeLocalProduct(found);
+        return { success: true, data: normalized.specs };
+      }
+    } catch (e) {}
+    throw err;
+  }
 }
 
 export async function getProductReviews(productId, params = {}) {
@@ -79,11 +284,35 @@ export async function createProductQuestion(productId, payload) {
 }
 
 export async function getRelatedProducts(productId) {
-  return apiFetch(`${API_BASE}/api/products/${encodeURIComponent(productId)}/related`);
+  try {
+    return await apiFetch(`${API_BASE}/api/products/${encodeURIComponent(productId)}/related`);
+  } catch (err) {
+    console.warn('getRelatedProducts failed, trying offline fallback:', err);
+    try {
+      const projectPrefix = window.location.pathname.startsWith('/dong-ho-a-tuan/') ? '/dong-ho-a-tuan' : '';
+      const res = await fetch(`${window.location.origin}${projectPrefix}/kemil_products.json`);
+      const rawData = await res.json();
+      const list = rawData.map(normalizeLocalProduct).filter(p => String(p.id) !== String(productId));
+      return { success: true, data: list.slice(0, 10) };
+    } catch (e) {}
+    throw err;
+  }
 }
 
 export async function getCrossSellProducts(productId) {
-  return apiFetch(`${API_BASE}/api/products/${encodeURIComponent(productId)}/cross-sell`);
+  try {
+    return await apiFetch(`${API_BASE}/api/products/${encodeURIComponent(productId)}/cross-sell`);
+  } catch (err) {
+    console.warn('getCrossSellProducts failed, trying offline fallback:', err);
+    try {
+      const projectPrefix = window.location.pathname.startsWith('/dong-ho-a-tuan/') ? '/dong-ho-a-tuan' : '';
+      const res = await fetch(`${window.location.origin}${projectPrefix}/kemil_products.json`);
+      const rawData = await res.json();
+      const list = rawData.map(normalizeLocalProduct).filter(p => String(p.id) !== String(productId));
+      return { success: true, data: list.slice(0, 10) };
+    } catch (e) {}
+    throw err;
+  }
 }
 
 export async function trackProductView(productId, sessionId) {
@@ -151,6 +380,7 @@ export function getMockProducts(count = 8) {
 
 export const productService = {
   getProducts,
+  getProductsOffline,
   getProduct,
   getProductImages,
   getProductSpecs,

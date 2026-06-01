@@ -21,7 +21,7 @@ export default class ProductInfo {
     const canQuickEdit = user && user.permissions && user.permissions.includes('products:quick_edit');
 
     const brandLower = String(this._product.brand || '').toLowerCase();
-    const isPremiumLayout = brandLower === 'carnival' || brandLower === 'casio';
+    const isPremiumLayout = brandLower === 'carnival' || brandLower === 'casio' || brandLower === 'kemil';
     let specsHtml = '';
 
     if (isPremiumLayout) {

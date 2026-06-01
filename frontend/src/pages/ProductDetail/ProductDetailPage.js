@@ -27,7 +27,7 @@ export default class ProductDetailPage {
 
     // Parse specs from description if present in HTML (dynamic client-side migration) for Carnival and Casio
     const brandLower = String(product.brand || '').toLowerCase();
-    const isPremiumLayout = brandLower === 'carnival' || brandLower === 'casio';
+    const isPremiumLayout = brandLower === 'carnival' || brandLower === 'casio' || brandLower === 'kemil';
     if (isPremiumLayout) {
       const descLower = (product.description || '').toLowerCase();
       if (descLower.includes('thông số kỹ thuật') || descLower.includes('thông số kĩ thuật') || descLower.includes('hông số kỹ thuật') || descLower.includes('hông số kĩ thuật')) {

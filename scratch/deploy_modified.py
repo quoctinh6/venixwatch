@@ -1,12 +1,28 @@
 import os
 import ftplib
-import subprocess
 
 FTP_HOST = "203.171.31.7"
 FTP_USER = "u9837c42a"
 FTP_PASS = "wvXgFAlpdzkNPUA@1"
 FTP_PORT = 21
 REMOTE_BASE = "/httpdocs"
+
+FILES_TO_DEPLOY = [
+    "backend/public/seed_kemil_products.php",
+    "backend/public/list_brands.php",
+    "backend/public/fix_admin_brands.php",
+    "kemil_products.json",
+    "frontend/src/pages/Admin/Products/ProductForm.js",
+    "frontend/src/pages/ProductDetail/ProductDetailPage.js",
+    "frontend/src/pages/ProductDetail/ProductInfo.js",
+    "frontend/src/pages/ProductDetail/ProductTabs.js",
+    "frontend/src/services/adminService.js",
+    "frontend/src/services/productService.js",
+    "frontend/src/components/MainNavbar.js",
+    "frontend/src/pages/ProductList/ProductListFilterPanel.js",
+    "frontend/src/pages/ProductList/ProductListPage.js",
+    "frontend/src/services/brandService.js"
+]
 
 def get_ftp_connection():
     print(f"Connecting to FTP {FTP_HOST}:{FTP_PORT}...")
@@ -32,11 +48,9 @@ def create_remote_dir_recursive(ftp, remote_dir):
             ftp.mkd(current)
             print(f"Created remote directory: {current}")
         except ftplib.error_perm:
-            # Already exists or permission denied
             pass
 
 def upload_file(ftp, local_path, remote_path):
-    # Ensure remote directory exists
     remote_dir = os.path.dirname(remote_path).replace("\\", "/")
     create_remote_dir_recursive(ftp, remote_dir)
     
@@ -44,53 +58,19 @@ def upload_file(ftp, local_path, remote_path):
     with open(local_path, "rb") as f:
         ftp.storbinary(f"STOR {remote_path}", f)
 
-def get_tracked_files(local_base):
-    try:
-        # Run git ls-files to get all tracked files
-        result = subprocess.run(
-            ["git", "ls-files"],
-            cwd=local_base,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,
-            check=True
-        )
-        files = result.stdout.splitlines()
-        return files
-    except Exception as e:
-        print(f"Error running git ls-files: {e}")
-        return []
-
 def main():
     local_base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     print(f"Local project base: {local_base}")
     
-    tracked_files = get_tracked_files(local_base)
-    if not tracked_files:
-        print("No tracked files found or not a git repository.")
-        return
-        
     ftp = get_ftp_connection()
-    
     uploaded_count = 0
-    skipped_count = 0
     
-    for rel_path in tracked_files:
-        # Normalize path separators
+    for rel_path in FILES_TO_DEPLOY:
         rel_path = rel_path.replace("\\", "/")
-        
-        # Exclude deployment/utility scripts and settings to keep remote clean
-        if rel_path.startswith("scratch/") or rel_path.startswith(".vscode/"):
-            print(f"Skipping utility/setting file: {rel_path}")
-            skipped_count += 1
-            continue
-            
         local_path = os.path.join(local_base, rel_path)
         
-        # Verify if the file exists locally (in case it was deleted but still tracked)
         if not os.path.exists(local_path):
-            print(f"Skipping deleted file: {rel_path}")
-            skipped_count += 1
+            print(f"File does not exist locally: {local_path}")
             continue
             
         remote_path = f"{REMOTE_BASE}/{rel_path}"
@@ -99,9 +79,7 @@ def main():
         
     ftp.quit()
     print("\n=============================================")
-    print("Deployment finished successfully!")
-    print(f"Uploaded: {uploaded_count} files")
-    print(f"Skipped/Excluded: {skipped_count} files")
+    print(f"Fast deployment finished! Uploaded {uploaded_count} files.")
     print("=============================================")
 
 if __name__ == "__main__":

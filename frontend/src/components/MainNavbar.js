@@ -164,33 +164,17 @@ export class MainNavbar {
           <div class="h-0.5 w-6 bg-[#C9A961] mt-2"></div>
         </h4>
         <div class="space-y-1">
-          <a href="/${gender}?brand=rolex" class="group/link flex h-9 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-zinc-600 transition hover:bg-zinc-50 hover:text-[#C9A961]">
-            <svg class="w-5 h-5 text-zinc-400 group-hover/link:text-[#C9A961] group-hover/link:scale-110 transition duration-300" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M3 18l1.5-9 4.5 4 3-6 3 6 4.5-4 1.5 9H3z" stroke-linejoin="round"/></svg>
-            Rolex Premium
-          </a>
-          <a href="/${gender}?brand=omega" class="group/link flex h-9 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-zinc-600 transition hover:bg-zinc-50 hover:text-[#C9A961]">
-            <svg class="w-5 h-5 text-zinc-400 group-hover/link:text-[#C9A961] group-hover/link:scale-110 transition duration-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 19h4c.3 0 1-.2 1-.8A4.5 4.5 0 0 1 12 4.5a4.5 4.5 0 0 1 2 13.7c0 .6.7.8 1 .8h4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            Omega Switzerland
-          </a>
-          <a href="/${gender}?brand=hublot" class="group/link flex h-9 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-zinc-600 transition hover:bg-zinc-50 hover:text-[#C9A961]">
-            <svg class="w-5 h-5 text-zinc-400 group-hover/link:text-[#C9A961] group-hover/link:scale-110 transition duration-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9 9h2v6H9M13 9h2v6h-2M9 12h6" stroke-linecap="round"/></svg>
-            Hublot Modern
-          </a>
-          <a href="/${gender}?brand=tissot" class="group/link flex h-9 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-zinc-600 transition hover:bg-zinc-50 hover:text-[#C9A961]">
-            <svg class="w-5 h-5 text-zinc-400 group-hover/link:text-[#C9A961] group-hover/link:scale-110 transition duration-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8 8h8M12 8v8M15 14h4M17 12v4" stroke-linecap="round"/></svg>
-            Tissot Luxury
-          </a>
-          <a href="/${gender}?brand=longines" class="group/link flex h-9 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-zinc-600 transition hover:bg-zinc-50 hover:text-[#C9A961]">
-            <svg class="w-5 h-5 text-zinc-400 group-hover/link:text-[#C9A961] group-hover/link:scale-110 transition duration-300" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M8 6h8M8 18h8M12 6v12M9 10l6 4M15 10l-6 4M5 8c2 1 2 3 0 4M19 8c-2 1-2 3 0 4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            Longines Classic
-          </a>
-          <a href="/${gender}?brand=patek" class="group/link flex h-9 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-zinc-600 transition hover:bg-zinc-50 hover:text-[#C9A961]">
-            <svg class="w-5 h-5 text-zinc-400 group-hover/link:text-[#C9A961] group-hover/link:scale-110 transition duration-300" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 3v18M3 12h18M7 8l5 4-5 4M17 8l-5 4 5 4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            Patek Philippe
-          </a>
-          <a href="/${gender}?brand=audemars" class="group/link flex h-9 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-zinc-600 transition hover:bg-zinc-50 hover:text-[#C9A961]">
+          <a href="/${gender}?brand=carnival" class="group/link flex h-9 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-zinc-600 transition hover:bg-zinc-50 hover:text-[#C9A961]">
             <svg class="w-5 h-5 text-zinc-400 group-hover/link:text-[#C9A961] group-hover/link:scale-110 transition duration-300" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polygon points="12,2 19,5 22,12 19,19 12,22 5,19 2,12 5,5"/><path d="M9 10h4M9 14h4M9 10v4" stroke-linecap="round"/></svg>
-            Audemars Piguet
+            Carnival Premium
+          </a>
+          <a href="/${gender}?brand=casio" class="group/link flex h-9 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-zinc-600 transition hover:bg-zinc-50 hover:text-[#C9A961]">
+            <svg class="w-5 h-5 text-zinc-400 group-hover/link:text-[#C9A961] group-hover/link:scale-110 transition duration-300" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/><line x1="9" y1="6" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="18"/></svg>
+            Casio Watch
+          </a>
+          <a href="/${gender}?brand=kemil" class="group/link flex h-9 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-zinc-600 transition hover:bg-zinc-50 hover:text-[#C9A961]">
+            <svg class="w-5 h-5 text-zinc-400 group-hover/link:text-[#C9A961] group-hover/link:scale-110 transition duration-300" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 3l1 4 4 1-4 1-1 4-1-4-4-1 4-1z" stroke-linejoin="round"/></svg>
+            Kemil New
           </a>
         </div>
       </div>

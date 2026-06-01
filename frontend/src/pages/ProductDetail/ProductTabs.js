@@ -116,7 +116,7 @@ export default class ProductTabs {
   }
 
   _descriptionHtml() {
-    const isPremiumLayout = ['carnival', 'casio'].includes(String(this._product.brand || '').toLowerCase());
+    const isPremiumLayout = ['carnival', 'casio', 'kemil'].includes(String(this._product.brand || '').toLowerCase());
     if (isPremiumLayout) {
       const desc = this._product.description || 'Mẫu đồng hồ này cân bằng giữa độ hoàn thiện, cảm giác đeo và tính thẩm mỹ để sử dụng bền lâu trong nhiều bối cảnh.';
       return `
@@ -152,7 +152,7 @@ export default class ProductTabs {
   }
 
   _specsHtml() {
-    const isPremiumLayout = ['carnival', 'casio'].includes(String(this._product.brand || '').toLowerCase());
+    const isPremiumLayout = ['carnival', 'casio', 'kemil'].includes(String(this._product.brand || '').toLowerCase());
     const specs = this._product.specs || [];
     if (isPremiumLayout) {
       return `

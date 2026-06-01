@@ -1,4 +1,5 @@
 import { API_BASE, STORAGE_KEYS } from './config.js';
+import { getProductsOffline } from './productService.js';
 
 function headers() {
   const token = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN) || localStorage.getItem('dhat_token');
@@ -43,7 +44,14 @@ function buildQuery(params = {}) {
 export const getDashboardStats = () => api('GET', '/api/admin/dashboard/stats');
 
 // Products
-export const getProducts = (params = {}) => api('GET', `/api/admin/products${buildQuery(params)}`);
+export const getProducts = async (params = {}) => {
+  try {
+    return await api('GET', `/api/admin/products${buildQuery(params)}`);
+  } catch (err) {
+    console.warn('admin getProducts api failed, falling back to local json:', err);
+    return getProductsOffline(params);
+  }
+};
 export const createProduct = (d) => api('POST', '/api/admin/products', d);
 export const updateProduct = (id, d) => api('PUT', `/api/admin/products/${id}`, d);
 export const toggleProduct = (id) => api('PATCH', `/api/admin/products/${id}/toggle`);

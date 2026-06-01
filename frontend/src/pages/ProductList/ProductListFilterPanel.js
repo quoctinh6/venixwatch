@@ -121,7 +121,23 @@ export class ProductListFilterPanel {
         <h3 class="mb-4 text-[12px] font-bold uppercase tracking-[0.12em] text-[#0A0A0A]">Danh mục</h3>
         <div data-cats-wrapper>${categories}</div>
       </section>
-      <section class="mt-8">
+      <section class="mt-8 border-t border-zinc-100 pt-6">
+        <h3 class="mb-4 text-[12px] font-bold uppercase tracking-[0.12em] text-[#0A0A0A]">Thương hiệu</h3>
+        <div class="space-y-2">
+          ${['Carnival', 'Casio', 'Kemil'].map((brand) => {
+            const isActive = String(this._opts.brand || '').toLowerCase() === brand.toLowerCase();
+            return `
+              <button type="button" data-brand-filter="${brand.toLowerCase()}" class="flex w-full items-center justify-between text-left text-sm transition py-1 hover:text-[#C9A961] ${
+                isActive ? 'font-bold text-[#C9A961]' : 'text-zinc-600'
+              }">
+                <span>${brand}</span>
+                ${isActive ? '<span class="text-xs">✓</span>' : ''}
+              </button>
+            `;
+          }).join('')}
+        </div>
+      </section>
+      <section class="mt-8 border-t border-zinc-100 pt-6">
         <div class="mb-4 flex items-center justify-between">
           <h3 class="text-[12px] font-bold uppercase tracking-[0.12em] text-[#0A0A0A]">Khoảng giá</h3>
           <button type="button" data-clear-price class="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400 transition hover:text-[#C9A961]">Xóa giá</button>
@@ -205,6 +221,14 @@ export class ProductListFilterPanel {
   _bindEvents(sidebar, { mobile }) {
     this._bindCategoryEvents(sidebar, { mobile });
 
+    sidebar.querySelectorAll('[data-brand-filter]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const brand = button.dataset.brandFilter;
+        const nextBrand = String(this._opts.brand || '').toLowerCase() === brand ? '' : brand;
+        this._opts.onBrandChange?.(nextBrand, mobile);
+      });
+    });
+
     sidebar.querySelectorAll('[data-price-preset]').forEach((button) => {
       button.addEventListener('click', () => {
         this._opts.onPriceChange?.({ priceMin: button.dataset.min || '', priceMax: button.dataset.max || '', closeDrawer: mobile });
@@ -235,6 +259,26 @@ export class ProductListFilterPanel {
       const isActive = String(button.dataset.min || '') === String(this._opts.priceMin || '') &&
         String(button.dataset.max || '') === String(this._opts.priceMax || '');
       button.className = getPresetClass(isActive);
+    });
+
+    sidebar.querySelectorAll('[data-brand-filter]').forEach((button) => {
+      const isActive = String(button.dataset.brandFilter) === String(this._opts.brand || '').toLowerCase();
+      button.className = `flex w-full items-center justify-between text-left text-sm transition py-1 hover:text-[#C9A961] ${
+        isActive ? 'font-bold text-[#C9A961]' : 'text-zinc-600'
+      }`;
+      const tick = button.querySelector('span:last-child');
+      if (isActive) {
+        if (!tick || tick === button.querySelector('span')) {
+          const check = document.createElement('span');
+          check.className = 'text-xs';
+          check.textContent = '✓';
+          button.appendChild(check);
+        }
+      } else {
+        if (tick && tick !== button.querySelector('span')) {
+          tick.remove();
+        }
+      }
     });
   }
 

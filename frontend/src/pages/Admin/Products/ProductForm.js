@@ -102,7 +102,7 @@ export function openProductForm(product, onSaved) {
   let parsedSpecsObj = {};
   
   const brandLower = String(product?.brand || '').toLowerCase();
-  const isPremiumLayout = brandLower === 'carnival' || brandLower === 'casio';
+  const isPremiumLayout = brandLower === 'carnival' || brandLower === 'casio' || brandLower === 'kemil';
   const descLower = initialDescription.toLowerCase();
   if (product && isPremiumLayout && (descLower.includes('thông số kỹ thuật') || descLower.includes('thông số kĩ thuật') || descLower.includes('hông số kỹ thuật') || descLower.includes('hông số kĩ thuật'))) {
     const parsed = parseSpecsFromDescription(initialDescription);
@@ -571,7 +571,10 @@ async function loadBrands(overlay, selectedBrand) {
     const res = await getBrands();
     const brands = res.data || res;
     const sel = overlay.querySelector('#pf-brand');
+    // Clear existing to avoid duplicate options
+    sel.innerHTML = '<option value="">-- Chọn --</option>';
     (Array.isArray(brands) ? brands : []).forEach(b => {
+      if (Number(b.is_active ?? 1) === 0 && b.source_name !== selectedBrand) return;
       const opt = document.createElement('option');
       opt.value = b.source_name;
       opt.textContent = b.name;

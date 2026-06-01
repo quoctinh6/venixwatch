@@ -17,6 +17,7 @@ export default class ProductListPage {
     this._viewMode = localStorage.getItem('dhat_view_mode') === 'list' ? 'list' : 'grid';
     this._priceMin = urlParams.get('price_min') || '';
     this._priceMax = urlParams.get('price_max') || '';
+    this._brand = urlParams.get('brand') || '';
     this._page = Math.max(1, Number(urlParams.get('page') || 1));
     this._products = [];
     this._categoryTree = [];
@@ -97,9 +98,11 @@ export default class ProductListPage {
       childSlug: this._childSlug,
       priceMin: this._priceMin,
       priceMax: this._priceMax,
+      brand: this._brand,
       onNavigateCategory: (slug) => this._navigateCategory(slug),
       onNavigateSubcategory: (parent, child) => this._navigateSubcategory(parent, child),
       onPriceChange: ({ priceMin, priceMax, closeDrawer }) => this._applyPriceFilters(priceMin, priceMax, closeDrawer),
+      onBrandChange: (brand, closeDrawer) => this._applyBrandFilter(brand, closeDrawer),
       onClearAll: (closeDrawer) => this._clearAllFilters(closeDrawer),
     });
   }
@@ -160,9 +163,18 @@ export default class ProductListPage {
     this._loadProducts();
   }
 
+  _applyBrandFilter(brand, closeDrawer) {
+    this._brand = brand;
+    this._page = 1;
+    if (closeDrawer) this._filters.closeDrawer();
+    this._scrollToTop();
+    this._loadProducts();
+  }
+
   _clearAllFilters(closeDrawer = false) {
     this._priceMin = '';
     this._priceMax = '';
+    this._brand = '';
     this._page = 1;
     if (closeDrawer) this._filters.closeDrawer();
 
@@ -179,6 +191,7 @@ export default class ProductListPage {
   _buildUrl() {
     const query = new URLSearchParams();
     if (this._childSlug) query.set('category', this._childSlug);
+    if (this._brand) query.set('brand', this._brand);
     if (this._search) query.set('search', this._search);
     if (this._sort !== 'new') query.set('sort', this._sort);
     if (this._priceMin) query.set('price_min', this._priceMin);
@@ -247,6 +260,7 @@ export default class ProductListPage {
       childSlug: this._childSlug,
       priceMin: this._priceMin,
       priceMax: this._priceMax,
+      brand: this._brand,
       totalCount: this._totalCount,
     });
 
@@ -283,11 +297,12 @@ export default class ProductListPage {
       ...(this._sort ? { sort: this._sort } : {}),
       ...(this._priceMin ? { price_min: this._priceMin } : {}),
       ...(this._priceMax ? { price_max: this._priceMax } : {}),
+      ...(this._brand ? { brand: this._brand } : {}),
     };
   }
 
   _getActiveFilterCount() {
-    return (this._childSlug ? 1 : 0) + (this._priceMin || this._priceMax ? 1 : 0);
+    return (this._childSlug ? 1 : 0) + (this._priceMin || this._priceMax ? 1 : 0) + (this._brand ? 1 : 0);
   }
 
   _renderGrid() {
