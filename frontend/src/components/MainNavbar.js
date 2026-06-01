@@ -1,7 +1,7 @@
 import { cartService } from '../services/cartService.js';
 import { navigate } from '../utils/helpers.js';
 import { authService } from '../services/authService.js';
-import { openQuickSettings } from './QuickSettingsModal.js?v=1.0.4';
+import { openQuickSettings } from './QuickSettingsModal.js?v=1.0.5';
 
 const NAM_SUBS = [
   { label: 'Đồng Hồ Nam Cổ', href: '/nam?category=nam-co' },
@@ -186,8 +186,6 @@ export class MainNavbar {
             
             if (!menuBrands || menuBrands.length === 0) {
               menuBrands = [
-                { label: 'Carnival Premium', brand_key: 'carnival', icon_type: 'polygon' },
-                { label: 'Casio Watch', brand_key: 'casio', icon_type: 'rect' },
                 { label: 'Kemil New', brand_key: 'kemil', icon_type: 'star' }
               ];
             }

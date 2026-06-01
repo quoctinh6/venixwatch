@@ -343,22 +343,16 @@ export function openQuickSettings(defaultTab = 'brand', extraParam = 0) {
     }
     if (!settings.menu_brands) {
       settings.menu_brands = [
-        { label: 'Carnival Premium', brand_key: 'carnival', icon_type: 'polygon' },
-        { label: 'Casio Watch', brand_key: 'casio', icon_type: 'rect' },
         { label: 'Kemil New', brand_key: 'kemil', icon_type: 'star' }
       ];
     }
     if (!settings.menu_brands_nam) {
       settings.menu_brands_nam = settings.menu_brands ? JSON.parse(JSON.stringify(settings.menu_brands)) : [
-        { label: 'Carnival Premium', brand_key: 'carnival', icon_type: 'polygon' },
-        { label: 'Casio Watch', brand_key: 'casio', icon_type: 'rect' },
         { label: 'Kemil New', brand_key: 'kemil', icon_type: 'star' }
       ];
     }
     if (!settings.menu_brands_nu) {
       settings.menu_brands_nu = settings.menu_brands ? JSON.parse(JSON.stringify(settings.menu_brands)) : [
-        { label: 'Carnival Premium', brand_key: 'carnival', icon_type: 'polygon' },
-        { label: 'Casio Watch', brand_key: 'casio', icon_type: 'rect' },
         { label: 'Kemil New', brand_key: 'kemil', icon_type: 'star' }
       ];
     }

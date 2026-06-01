@@ -1,6 +1,6 @@
 import { navigate } from '../../utils/helpers.js';
 import { authService } from '../../services/authService.js';
-import { openQuickSettings } from '../../components/QuickSettingsModal.js?v=1.0.4';
+import { openQuickSettings } from '../../components/QuickSettingsModal.js?v=1.0.5';
 
 export class PromoBanner {
   render() {
