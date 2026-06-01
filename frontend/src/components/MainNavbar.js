@@ -165,13 +165,32 @@ export class MainNavbar {
         </h4>
         <div class="space-y-1">
           ${(() => {
-            const menuBrands = window.APP_SETTINGS?.menu_brands && window.APP_SETTINGS.menu_brands.length > 0
-              ? window.APP_SETTINGS.menu_brands
-              : [
-                  { label: 'Carnival Premium', brand_key: 'carnival', icon_type: 'polygon' },
-                  { label: 'Casio Watch', brand_key: 'casio', icon_type: 'rect' },
-                  { label: 'Kemil New', brand_key: 'kemil', icon_type: 'star' }
-                ];
+            let menuBrands = [];
+            if (gender === 'nam') {
+              menuBrands = window.APP_SETTINGS?.menu_brands_nam && window.APP_SETTINGS.menu_brands_nam.length > 0
+                ? window.APP_SETTINGS.menu_brands_nam
+                : (window.APP_SETTINGS?.menu_brands && window.APP_SETTINGS.menu_brands.length > 0
+                  ? window.APP_SETTINGS.menu_brands
+                  : []);
+            } else if (gender === 'nu') {
+              menuBrands = window.APP_SETTINGS?.menu_brands_nu && window.APP_SETTINGS.menu_brands_nu.length > 0
+                ? window.APP_SETTINGS.menu_brands_nu
+                : (window.APP_SETTINGS?.menu_brands && window.APP_SETTINGS.menu_brands.length > 0
+                  ? window.APP_SETTINGS.menu_brands
+                  : []);
+            } else {
+              menuBrands = window.APP_SETTINGS?.menu_brands && window.APP_SETTINGS.menu_brands.length > 0
+                ? window.APP_SETTINGS.menu_brands
+                : [];
+            }
+            
+            if (!menuBrands || menuBrands.length === 0) {
+              menuBrands = [
+                { label: 'Carnival Premium', brand_key: 'carnival', icon_type: 'polygon' },
+                { label: 'Casio Watch', brand_key: 'casio', icon_type: 'rect' },
+                { label: 'Kemil New', brand_key: 'kemil', icon_type: 'star' }
+              ];
+            }
             const BRAND_ICONS = {
               polygon: `<svg class="w-5 h-5 text-zinc-400 group-hover/link:text-[#C9A961] group-hover/link:scale-110 transition duration-300" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polygon points="12,2 19,5 22,12 19,19 12,22 5,19 2,12 5,5"/><path d="M9 10h4M9 14h4M9 10v4" stroke-linecap="round"/></svg>`,
               rect: `<svg class="w-5 h-5 text-zinc-400 group-hover/link:text-[#C9A961] group-hover/link:scale-110 transition duration-300" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/><line x1="9" y1="6" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="18"/></svg>`,

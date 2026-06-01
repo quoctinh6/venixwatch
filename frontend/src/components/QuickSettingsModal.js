@@ -348,6 +348,20 @@ export function openQuickSettings(defaultTab = 'brand', extraParam = 0) {
         { label: 'Kemil New', brand_key: 'kemil', icon_type: 'star' }
       ];
     }
+    if (!settings.menu_brands_nam) {
+      settings.menu_brands_nam = settings.menu_brands ? JSON.parse(JSON.stringify(settings.menu_brands)) : [
+        { label: 'Carnival Premium', brand_key: 'carnival', icon_type: 'polygon' },
+        { label: 'Casio Watch', brand_key: 'casio', icon_type: 'rect' },
+        { label: 'Kemil New', brand_key: 'kemil', icon_type: 'star' }
+      ];
+    }
+    if (!settings.menu_brands_nu) {
+      settings.menu_brands_nu = settings.menu_brands ? JSON.parse(JSON.stringify(settings.menu_brands)) : [
+        { label: 'Carnival Premium', brand_key: 'carnival', icon_type: 'polygon' },
+        { label: 'Casio Watch', brand_key: 'casio', icon_type: 'rect' },
+        { label: 'Kemil New', brand_key: 'kemil', icon_type: 'star' }
+      ];
+    }
     return `
       <div class="space-y-4">
         <div class="flex items-center justify-between border-b pb-2.5">
@@ -419,46 +433,94 @@ export function openQuickSettings(defaultTab = 'brand', extraParam = 0) {
 
         <hr class="border-gray-200 my-4" />
 
-        <div class="flex items-center justify-between border-b pb-2.5">
-          <h4 class="text-xs font-bold text-gray-900 uppercase">Thương hiệu trong Mega Menu</h4>
-          <button type="button" id="quick-add-menu-brand" class="bg-zinc-950 hover:bg-zinc-800 text-white font-semibold text-[10px] px-2.5 py-1.5 rounded-lg transition-colors flex items-center gap-1">
-            + Thêm Brand
-          </button>
+        <!-- Nam Brands -->
+        <div class="border border-gray-150 rounded-xl p-3 bg-gray-50/30 space-y-3">
+          <div class="flex items-center justify-between border-b pb-2">
+            <h4 class="text-[11px] font-bold text-gray-900 uppercase">Thương hiệu Mega Menu Nam</h4>
+            <button type="button" id="quick-add-menu-brand-nam" class="bg-zinc-950 hover:bg-zinc-800 text-white font-semibold text-[9px] px-2 py-1 rounded transition-colors flex items-center gap-1">
+              + Thêm
+            </button>
+          </div>
+          <div class="space-y-2.5" id="quick-menu-brands-nam-list">
+            ${settings.menu_brands_nam.length === 0 
+              ? `<div class="text-center py-4 text-gray-400 text-[10px]">Chưa cấu hình thương hiệu nào cho Nam.</div>`
+              : settings.menu_brands_nam.map((brand, i) => `
+                <div class="flex flex-wrap items-center gap-2 bg-white p-2 border border-gray-100 rounded shadow-sm" data-brand-nam-index="${i}">
+                  <div class="w-4 h-4 flex items-center justify-center bg-[#C9A84C] text-white rounded-full text-[8px] font-bold">
+                    ${i + 1}
+                  </div>
+                  <div class="flex-1 min-w-[90px]">
+                    <input type="text" class="quick-brand-nam-label w-full px-1.5 py-0.5 border border-gray-200 rounded text-[10px] focus:outline-none" value="${brand.label || ''}" placeholder="Tên" />
+                  </div>
+                  <div class="flex-1 min-w-[70px]">
+                    <input type="text" class="quick-brand-nam-key w-full px-1.5 py-0.5 border border-gray-200 rounded text-[10px] focus:outline-none" value="${brand.brand_key || ''}" placeholder="Mã" />
+                  </div>
+                  <div class="w-20">
+                    <select class="quick-brand-nam-icon w-full px-1 py-0.5 border border-gray-200 rounded text-[10px] bg-white focus:outline-none">
+                      <option value="star" ${brand.icon_type === 'star' ? 'selected' : ''}>Star</option>
+                      <option value="polygon" ${brand.icon_type === 'polygon' ? 'selected' : ''}>Badge</option>
+                      <option value="rect" ${brand.icon_type === 'rect' ? 'selected' : ''}>Watch</option>
+                    </select>
+                  </div>
+                  <div class="flex items-center gap-0.5">
+                    <button type="button" class="quick-move-up-brand-nam-btn p-0.5 border border-gray-200 rounded ${i === 0 ? 'opacity-30' : ''}" ${i === 0 ? 'disabled' : ''}>
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
+                    </button>
+                    <button type="button" class="quick-move-down-brand-nam-btn p-0.5 border border-gray-200 rounded ${i === settings.menu_brands_nam.length - 1 ? 'opacity-30' : ''}" ${i === settings.menu_brands_nam.length - 1 ? 'disabled' : ''}>
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <button type="button" class="quick-delete-brand-nam-btn p-0.5 border border-red-50 text-red-500 rounded">
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>
+                    </button>
+                  </div>
+                </div>
+              `).join('')}
+          </div>
         </div>
-        <div class="space-y-3" id="quick-menu-brands-list">
-          ${settings.menu_brands.length === 0 
-            ? `<div class="text-center py-4 text-gray-400 text-[11px]">Chưa cấu hình thương hiệu nào.</div>`
-            : settings.menu_brands.map((brand, i) => `
-              <div class="flex flex-wrap items-center gap-2 bg-white p-2.5 border border-gray-100 rounded-lg shadow-sm" data-brand-index="${i}">
-                <div class="w-5 h-5 flex items-center justify-center bg-[#C9A84C] text-white rounded-full text-[9px] font-bold">
-                  ${i + 1}
+
+        <!-- Nu Brands -->
+        <div class="border border-gray-150 rounded-xl p-3 bg-gray-50/30 space-y-3">
+          <div class="flex items-center justify-between border-b pb-2">
+            <h4 class="text-[11px] font-bold text-gray-900 uppercase">Thương hiệu Mega Menu Nữ</h4>
+            <button type="button" id="quick-add-menu-brand-nu" class="bg-zinc-950 hover:bg-zinc-800 text-white font-semibold text-[9px] px-2 py-1 rounded transition-colors flex items-center gap-1">
+              + Thêm
+            </button>
+          </div>
+          <div class="space-y-2.5" id="quick-menu-brands-nu-list">
+            ${settings.menu_brands_nu.length === 0 
+              ? `<div class="text-center py-4 text-gray-400 text-[10px]">Chưa cấu hình thương hiệu nào cho Nữ.</div>`
+              : settings.menu_brands_nu.map((brand, i) => `
+                <div class="flex flex-wrap items-center gap-2 bg-white p-2 border border-gray-100 rounded shadow-sm" data-brand-nu-index="${i}">
+                  <div class="w-4 h-4 flex items-center justify-center bg-[#C9A84C] text-white rounded-full text-[8px] font-bold">
+                    ${i + 1}
+                  </div>
+                  <div class="flex-1 min-w-[90px]">
+                    <input type="text" class="quick-brand-nu-label w-full px-1.5 py-0.5 border border-gray-200 rounded text-[10px] focus:outline-none" value="${brand.label || ''}" placeholder="Tên" />
+                  </div>
+                  <div class="flex-1 min-w-[70px]">
+                    <input type="text" class="quick-brand-nu-key w-full px-1.5 py-0.5 border border-gray-200 rounded text-[10px] focus:outline-none" value="${brand.brand_key || ''}" placeholder="Mã" />
+                  </div>
+                  <div class="w-20">
+                    <select class="quick-brand-nu-icon w-full px-1 py-0.5 border border-gray-200 rounded text-[10px] bg-white focus:outline-none">
+                      <option value="star" ${brand.icon_type === 'star' ? 'selected' : ''}>Star</option>
+                      <option value="polygon" ${brand.icon_type === 'polygon' ? 'selected' : ''}>Badge</option>
+                      <option value="rect" ${brand.icon_type === 'rect' ? 'selected' : ''}>Watch</option>
+                    </select>
+                  </div>
+                  <div class="flex items-center gap-0.5">
+                    <button type="button" class="quick-move-up-brand-nu-btn p-0.5 border border-gray-200 rounded ${i === 0 ? 'opacity-30' : ''}" ${i === 0 ? 'disabled' : ''}>
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
+                    </button>
+                    <button type="button" class="quick-move-down-brand-nu-btn p-0.5 border border-gray-200 rounded ${i === settings.menu_brands_nu.length - 1 ? 'opacity-30' : ''}" ${i === settings.menu_brands_nu.length - 1 ? 'disabled' : ''}>
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <button type="button" class="quick-delete-brand-nu-btn p-0.5 border border-red-50 text-red-500 rounded">
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>
+                    </button>
+                  </div>
                 </div>
-                <div class="flex-1 min-w-[100px]">
-                  <input type="text" class="quick-brand-label w-full px-2 py-1 border border-gray-300 rounded text-[11px] focus:outline-none" value="${brand.label || ''}" placeholder="Tên brand" />
-                </div>
-                <div class="flex-1 min-w-[80px]">
-                  <input type="text" class="quick-brand-key w-full px-2 py-1 border border-gray-300 rounded text-[11px] focus:outline-none" value="${brand.brand_key || ''}" placeholder="Mã hãng" />
-                </div>
-                <div class="w-24">
-                  <select class="quick-brand-icon w-full px-1.5 py-1 border border-gray-300 rounded text-[11px] bg-white focus:outline-none">
-                    <option value="star" ${brand.icon_type === 'star' ? 'selected' : ''}>Sparkle</option>
-                    <option value="polygon" ${brand.icon_type === 'polygon' ? 'selected' : ''}>Badge</option>
-                    <option value="rect" ${brand.icon_type === 'rect' ? 'selected' : ''}>Watch</option>
-                  </select>
-                </div>
-                <div class="flex items-center gap-1">
-                  <button type="button" class="quick-move-up-brand-btn p-1 border border-gray-200 hover:bg-gray-50 rounded ${i === 0 ? 'opacity-30' : ''}" ${i === 0 ? 'disabled' : ''}>
-                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>
-                  </button>
-                  <button type="button" class="quick-move-down-brand-btn p-1 border border-gray-200 hover:bg-gray-50 rounded ${i === settings.menu_brands.length - 1 ? 'opacity-30' : ''}" ${i === settings.menu_brands.length - 1 ? 'disabled' : ''}>
-                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-                  </button>
-                  <button type="button" class="quick-delete-brand-btn p-1 border border-red-50 hover:bg-red-50 text-red-500 rounded">
-                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>
-                  </button>
-                </div>
-              </div>
-            `).join('')}
+              `).join('')}
+          </div>
         </div>
       </div>
     `;
@@ -935,51 +997,99 @@ export function openQuickSettings(defaultTab = 'brand', extraParam = 0) {
         renderModal();
       });
 
-      // Bind brand menu events
-      const quickBrandsList = modalEl.querySelector('#quick-menu-brands-list');
-      quickBrandsList?.querySelectorAll('[data-brand-index]').forEach(brandRow => {
-        const brandIdx = parseInt(brandRow.dataset.brandIndex, 10);
-        const brand = settings.menu_brands[brandIdx];
+      // Bind brand menu events for Nam
+      const quickBrandsNamList = modalEl.querySelector('#quick-menu-brands-nam-list');
+      quickBrandsNamList?.querySelectorAll('[data-brand-nam-index]').forEach(brandRow => {
+        const brandIdx = parseInt(brandRow.dataset.brandNamIndex, 10);
+        const brand = settings.menu_brands_nam[brandIdx];
 
-        brandRow.querySelector('.quick-brand-label')?.addEventListener('input', (e) => {
+        brandRow.querySelector('.quick-brand-nam-label')?.addEventListener('input', (e) => {
           brand.label = e.target.value.trim();
         });
-        brandRow.querySelector('.quick-brand-key')?.addEventListener('input', (e) => {
+        brandRow.querySelector('.quick-brand-nam-key')?.addEventListener('input', (e) => {
           brand.brand_key = e.target.value.trim();
         });
-        brandRow.querySelector('.quick-brand-icon')?.addEventListener('change', (e) => {
+        brandRow.querySelector('.quick-brand-nam-icon')?.addEventListener('change', (e) => {
           brand.icon_type = e.target.value;
         });
 
-        brandRow.querySelector('.quick-move-up-brand-btn')?.addEventListener('click', () => {
+        brandRow.querySelector('.quick-move-up-brand-nam-btn')?.addEventListener('click', () => {
           if (brandIdx === 0) return;
-          const temp = settings.menu_brands[brandIdx];
-          settings.menu_brands[brandIdx] = settings.menu_brands[brandIdx - 1];
-          settings.menu_brands[brandIdx - 1] = temp;
+          const temp = settings.menu_brands_nam[brandIdx];
+          settings.menu_brands_nam[brandIdx] = settings.menu_brands_nam[brandIdx - 1];
+          settings.menu_brands_nam[brandIdx - 1] = temp;
           renderModal();
         });
 
-        brandRow.querySelector('.quick-move-down-brand-btn')?.addEventListener('click', () => {
-          if (brandIdx === settings.menu_brands.length - 1) return;
-          const temp = settings.menu_brands[brandIdx];
-          settings.menu_brands[brandIdx] = settings.menu_brands[brandIdx + 1];
-          settings.menu_brands[brandIdx + 1] = temp;
+        brandRow.querySelector('.quick-move-down-brand-nam-btn')?.addEventListener('click', () => {
+          if (brandIdx === settings.menu_brands_nam.length - 1) return;
+          const temp = settings.menu_brands_nam[brandIdx];
+          settings.menu_brands_nam[brandIdx] = settings.menu_brands_nam[brandIdx + 1];
+          settings.menu_brands_nam[brandIdx + 1] = temp;
           renderModal();
         });
 
-        brandRow.querySelector('.quick-delete-brand-btn')?.addEventListener('click', () => {
-          if (confirm(`Xóa thương hiệu "${brand.label}" khỏi menu?`)) {
-            settings.menu_brands.splice(brandIdx, 1);
+        brandRow.querySelector('.quick-delete-brand-nam-btn')?.addEventListener('click', () => {
+          if (confirm(`Xóa thương hiệu "${brand.label}" khỏi menu Nam?`)) {
+            settings.menu_brands_nam.splice(brandIdx, 1);
             showToast('Đã xóa thương hiệu.', 'info');
             renderModal();
           }
         });
       });
 
-      modalEl.querySelector('#quick-add-menu-brand')?.addEventListener('click', () => {
-        if (!settings.menu_brands) settings.menu_brands = [];
-        settings.menu_brands.push({ label: 'Thương Hiệu Mới', brand_key: 'new-brand', icon_type: 'star' });
-        showToast('Đã thêm thương hiệu mới.', 'success');
+      modalEl.querySelector('#quick-add-menu-brand-nam')?.addEventListener('click', () => {
+        if (!settings.menu_brands_nam) settings.menu_brands_nam = [];
+        settings.menu_brands_nam.push({ label: 'Thương Hiệu Mới', brand_key: 'new-brand', icon_type: 'star' });
+        showToast('Đã thêm thương hiệu mới cho Nam.', 'success');
+        renderModal();
+      });
+
+      // Bind brand menu events for Nữ
+      const quickBrandsNuList = modalEl.querySelector('#quick-menu-brands-nu-list');
+      quickBrandsNuList?.querySelectorAll('[data-brand-nu-index]').forEach(brandRow => {
+        const brandIdx = parseInt(brandRow.dataset.brandNuIndex, 10);
+        const brand = settings.menu_brands_nu[brandIdx];
+
+        brandRow.querySelector('.quick-brand-nu-label')?.addEventListener('input', (e) => {
+          brand.label = e.target.value.trim();
+        });
+        brandRow.querySelector('.quick-brand-nu-key')?.addEventListener('input', (e) => {
+          brand.brand_key = e.target.value.trim();
+        });
+        brandRow.querySelector('.quick-brand-nu-icon')?.addEventListener('change', (e) => {
+          brand.icon_type = e.target.value;
+        });
+
+        brandRow.querySelector('.quick-move-up-brand-nu-btn')?.addEventListener('click', () => {
+          if (brandIdx === 0) return;
+          const temp = settings.menu_brands_nu[brandIdx];
+          settings.menu_brands_nu[brandIdx] = settings.menu_brands_nu[brandIdx - 1];
+          settings.menu_brands_nu[brandIdx - 1] = temp;
+          renderModal();
+        });
+
+        brandRow.querySelector('.quick-move-down-brand-nu-btn')?.addEventListener('click', () => {
+          if (brandIdx === settings.menu_brands_nu.length - 1) return;
+          const temp = settings.menu_brands_nu[brandIdx];
+          settings.menu_brands_nu[brandIdx] = settings.menu_brands_nu[brandIdx + 1];
+          settings.menu_brands_nu[brandIdx + 1] = temp;
+          renderModal();
+        });
+
+        brandRow.querySelector('.quick-delete-brand-nu-btn')?.addEventListener('click', () => {
+          if (confirm(`Xóa thương hiệu "${brand.label}" khỏi menu Nữ?`)) {
+            settings.menu_brands_nu.splice(brandIdx, 1);
+            showToast('Đã xóa thương hiệu.', 'info');
+            renderModal();
+          }
+        });
+      });
+
+      modalEl.querySelector('#quick-add-menu-brand-nu')?.addEventListener('click', () => {
+        if (!settings.menu_brands_nu) settings.menu_brands_nu = [];
+        settings.menu_brands_nu.push({ label: 'Thương Hiệu Mới', brand_key: 'new-brand', icon_type: 'star' });
+        showToast('Đã thêm thương hiệu mới cho Nữ.', 'success');
         renderModal();
       });
     }

@@ -51,6 +51,8 @@ class SettingService
                 'theme_colors' => [],
                 'navigation_menu' => [],
                 'menu_brands' => [],
+                'menu_brands_nam' => [],
+                'menu_brands_nu' => [],
                 'home_sections' => []
             ];
         }
@@ -147,6 +149,32 @@ class SettingService
                         'details' => "Thay đổi cấu trúc danh sách thương hiệu trong mega menu"
                     ];
                     $this->updateSetting('menu_brands', $newVal);
+                }
+            }
+
+            // 5c. Compare menu_brands_nam
+            if (isset($newSettings['menu_brands_nam'])) {
+                $oldVal = json_encode($oldSettings['menu_brands_nam'] ?? [], JSON_UNESCAPED_UNICODE);
+                $newVal = json_encode($newSettings['menu_brands_nam'], JSON_UNESCAPED_UNICODE);
+                if ($oldVal !== $newVal) {
+                    $logs[] = [
+                        'action' => 'Cập nhật Thương hiệu Mega Menu Nam',
+                        'details' => "Thay đổi danh sách thương hiệu hiển thị trên mega menu Nam"
+                    ];
+                    $this->updateSetting('menu_brands_nam', $newVal);
+                }
+            }
+
+            // 5d. Compare menu_brands_nu
+            if (isset($newSettings['menu_brands_nu'])) {
+                $oldVal = json_encode($oldSettings['menu_brands_nu'] ?? [], JSON_UNESCAPED_UNICODE);
+                $newVal = json_encode($newSettings['menu_brands_nu'], JSON_UNESCAPED_UNICODE);
+                if ($oldVal !== $newVal) {
+                    $logs[] = [
+                        'action' => 'Cập nhật Thương hiệu Mega Menu Nữ',
+                        'details' => "Thay đổi danh sách thương hiệu hiển thị trên mega menu Nữ"
+                    ];
+                    $this->updateSetting('menu_brands_nu', $newVal);
                 }
             }
 
