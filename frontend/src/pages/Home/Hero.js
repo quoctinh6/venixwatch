@@ -1,7 +1,7 @@
 import { navigate, throttle } from '../../utils/helpers.js';
 import { PEXELS } from '../../services/config.js';
 import { authService } from '../../services/authService.js';
-import { openQuickSettings } from '../../components/QuickSettingsModal.js?v=1.0.3';
+import { openQuickSettings } from '../../components/QuickSettingsModal.js?v=1.0.4';
 
 const SLIDES = [
   {

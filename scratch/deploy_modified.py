@@ -24,7 +24,13 @@ FILES_TO_DEPLOY = [
     "frontend/src/components/QuickSettingsModal.js",
     "frontend/src/pages/ProductList/ProductListFilterPanel.js",
     "frontend/src/pages/ProductList/ProductListPage.js",
-    "frontend/src/services/brandService.js"
+    "frontend/src/services/brandService.js",
+    "frontend/src/pages/Home/CategoryBanners.js",
+    "frontend/src/pages/Home/PromoBanner.js",
+    "frontend/src/pages/Home/Newsletter.js",
+    "frontend/src/pages/Home/Hero.js",
+    "frontend/src/pages/Home/BrandStory.js",
+    "frontend/src/pages/Home/AnnouncementBar.js"
 ]
 
 def get_ftp_connection():

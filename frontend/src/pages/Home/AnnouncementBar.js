@@ -1,5 +1,5 @@
 import { authService } from '../../services/authService.js';
-import { openQuickSettings } from '../../components/QuickSettingsModal.js?v=1.0.3';
+import { openQuickSettings } from '../../components/QuickSettingsModal.js?v=1.0.4';
 
 const getMessages = () => {
   return window.APP_SETTINGS?.home_sections?.announcement_bar?.messages || [
