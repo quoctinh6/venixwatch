@@ -164,18 +164,26 @@ export class MainNavbar {
           <div class="h-0.5 w-6 bg-[#C9A961] mt-2"></div>
         </h4>
         <div class="space-y-1">
-          <a href="/${gender}?brand=carnival" class="group/link flex h-9 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-zinc-600 transition hover:bg-zinc-50 hover:text-[#C9A961]">
-            <svg class="w-5 h-5 text-zinc-400 group-hover/link:text-[#C9A961] group-hover/link:scale-110 transition duration-300" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polygon points="12,2 19,5 22,12 19,19 12,22 5,19 2,12 5,5"/><path d="M9 10h4M9 14h4M9 10v4" stroke-linecap="round"/></svg>
-            Carnival Premium
-          </a>
-          <a href="/${gender}?brand=casio" class="group/link flex h-9 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-zinc-600 transition hover:bg-zinc-50 hover:text-[#C9A961]">
-            <svg class="w-5 h-5 text-zinc-400 group-hover/link:text-[#C9A961] group-hover/link:scale-110 transition duration-300" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/><line x1="9" y1="6" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="18"/></svg>
-            Casio Watch
-          </a>
-          <a href="/${gender}?brand=kemil" class="group/link flex h-9 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-zinc-600 transition hover:bg-zinc-50 hover:text-[#C9A961]">
-            <svg class="w-5 h-5 text-zinc-400 group-hover/link:text-[#C9A961] group-hover/link:scale-110 transition duration-300" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 3l1 4 4 1-4 1-1 4-1-4-4-1 4-1z" stroke-linejoin="round"/></svg>
-            Kemil New
-          </a>
+          ${(() => {
+            const menuBrands = window.APP_SETTINGS?.menu_brands && window.APP_SETTINGS.menu_brands.length > 0
+              ? window.APP_SETTINGS.menu_brands
+              : [
+                  { label: 'Carnival Premium', brand_key: 'carnival', icon_type: 'polygon' },
+                  { label: 'Casio Watch', brand_key: 'casio', icon_type: 'rect' },
+                  { label: 'Kemil New', brand_key: 'kemil', icon_type: 'star' }
+                ];
+            const BRAND_ICONS = {
+              polygon: `<svg class="w-5 h-5 text-zinc-400 group-hover/link:text-[#C9A961] group-hover/link:scale-110 transition duration-300" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polygon points="12,2 19,5 22,12 19,19 12,22 5,19 2,12 5,5"/><path d="M9 10h4M9 14h4M9 10v4" stroke-linecap="round"/></svg>`,
+              rect: `<svg class="w-5 h-5 text-zinc-400 group-hover/link:text-[#C9A961] group-hover/link:scale-110 transition duration-300" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/><line x1="9" y1="6" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="18"/></svg>`,
+              star: `<svg class="w-5 h-5 text-zinc-400 group-hover/link:text-[#C9A961] group-hover/link:scale-110 transition duration-300" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 3l1 4 4 1-4 1-1 4-1-4-4-1 4-1z" stroke-linejoin="round"/></svg>`
+            };
+            return menuBrands.map(b => `
+              <a href="/${gender}?brand=${b.brand_key}" class="group/link flex h-9 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-zinc-600 transition hover:bg-zinc-50 hover:text-[#C9A961]">
+                ${BRAND_ICONS[b.icon_type] || BRAND_ICONS.star}
+                ${b.label}
+              </a>
+            `).join('');
+          })()}
         </div>
       </div>
 

@@ -50,6 +50,7 @@ class SettingService
                 'hero_banners' => [],
                 'theme_colors' => [],
                 'navigation_menu' => [],
+                'menu_brands' => [],
                 'home_sections' => []
             ];
         }
@@ -133,6 +134,19 @@ class SettingService
                         'details' => "Thay đổi cấu trúc danh mục và liên kết của thanh điều hướng"
                     ];
                     $this->updateSetting('navigation_menu', $newVal);
+                }
+            }
+
+            // 5b. Compare menu_brands
+            if (isset($newSettings['menu_brands'])) {
+                $oldVal = json_encode($oldSettings['menu_brands'] ?? [], JSON_UNESCAPED_UNICODE);
+                $newVal = json_encode($newSettings['menu_brands'], JSON_UNESCAPED_UNICODE);
+                if ($oldVal !== $newVal) {
+                    $logs[] = [
+                        'action' => 'Cập nhật Thương hiệu Menu',
+                        'details' => "Thay đổi cấu trúc danh sách thương hiệu trong mega menu"
+                    ];
+                    $this->updateSetting('menu_brands', $newVal);
                 }
             }
 

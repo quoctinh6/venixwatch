@@ -341,6 +341,13 @@ export function openQuickSettings(defaultTab = 'brand', extraParam = 0) {
     if (!settings.navigation_menu) {
       settings.navigation_menu = [];
     }
+    if (!settings.menu_brands) {
+      settings.menu_brands = [
+        { label: 'Carnival Premium', brand_key: 'carnival', icon_type: 'polygon' },
+        { label: 'Casio Watch', brand_key: 'casio', icon_type: 'rect' },
+        { label: 'Kemil New', brand_key: 'kemil', icon_type: 'star' }
+      ];
+    }
     return `
       <div class="space-y-4">
         <div class="flex items-center justify-between border-b pb-2.5">
@@ -405,6 +412,50 @@ export function openQuickSettings(defaultTab = 'brand', extraParam = 0) {
                       </div>
                     </div>
                   `).join('')}
+                </div>
+              </div>
+            `).join('')}
+        </div>
+
+        <hr class="border-gray-200 my-4" />
+
+        <div class="flex items-center justify-between border-b pb-2.5">
+          <h4 class="text-xs font-bold text-gray-900 uppercase">Thương hiệu trong Mega Menu</h4>
+          <button type="button" id="quick-add-menu-brand" class="bg-zinc-950 hover:bg-zinc-800 text-white font-semibold text-[10px] px-2.5 py-1.5 rounded-lg transition-colors flex items-center gap-1">
+            + Thêm Brand
+          </button>
+        </div>
+        <div class="space-y-3" id="quick-menu-brands-list">
+          ${settings.menu_brands.length === 0 
+            ? `<div class="text-center py-4 text-gray-400 text-[11px]">Chưa cấu hình thương hiệu nào.</div>`
+            : settings.menu_brands.map((brand, i) => `
+              <div class="flex flex-wrap items-center gap-2 bg-white p-2.5 border border-gray-100 rounded-lg shadow-sm" data-brand-index="${i}">
+                <div class="w-5 h-5 flex items-center justify-center bg-[#C9A84C] text-white rounded-full text-[9px] font-bold">
+                  ${i + 1}
+                </div>
+                <div class="flex-1 min-w-[100px]">
+                  <input type="text" class="quick-brand-label w-full px-2 py-1 border border-gray-300 rounded text-[11px] focus:outline-none" value="${brand.label || ''}" placeholder="Tên brand" />
+                </div>
+                <div class="flex-1 min-w-[80px]">
+                  <input type="text" class="quick-brand-key w-full px-2 py-1 border border-gray-300 rounded text-[11px] focus:outline-none" value="${brand.brand_key || ''}" placeholder="Mã hãng" />
+                </div>
+                <div class="w-24">
+                  <select class="quick-brand-icon w-full px-1.5 py-1 border border-gray-300 rounded text-[11px] bg-white focus:outline-none">
+                    <option value="star" ${brand.icon_type === 'star' ? 'selected' : ''}>Sparkle</option>
+                    <option value="polygon" ${brand.icon_type === 'polygon' ? 'selected' : ''}>Badge</option>
+                    <option value="rect" ${brand.icon_type === 'rect' ? 'selected' : ''}>Watch</option>
+                  </select>
+                </div>
+                <div class="flex items-center gap-1">
+                  <button type="button" class="quick-move-up-brand-btn p-1 border border-gray-200 hover:bg-gray-50 rounded ${i === 0 ? 'opacity-30' : ''}" ${i === 0 ? 'disabled' : ''}>
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>
+                  </button>
+                  <button type="button" class="quick-move-down-brand-btn p-1 border border-gray-200 hover:bg-gray-50 rounded ${i === settings.menu_brands.length - 1 ? 'opacity-30' : ''}" ${i === settings.menu_brands.length - 1 ? 'disabled' : ''}>
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                  </button>
+                  <button type="button" class="quick-delete-brand-btn p-1 border border-red-50 hover:bg-red-50 text-red-500 rounded">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>
+                  </button>
                 </div>
               </div>
             `).join('')}
@@ -881,6 +932,54 @@ export function openQuickSettings(defaultTab = 'brand', extraParam = 0) {
       modalEl.querySelector('#quick-add-menu-item')?.addEventListener('click', () => {
         settings.navigation_menu.push({ label: 'Menu Mới', href: '#', children: [] });
         showToast('Đã thêm một menu chính.', 'success');
+        renderModal();
+      });
+
+      // Bind brand menu events
+      const quickBrandsList = modalEl.querySelector('#quick-menu-brands-list');
+      quickBrandsList?.querySelectorAll('[data-brand-index]').forEach(brandRow => {
+        const brandIdx = parseInt(brandRow.dataset.brandIndex, 10);
+        const brand = settings.menu_brands[brandIdx];
+
+        brandRow.querySelector('.quick-brand-label')?.addEventListener('input', (e) => {
+          brand.label = e.target.value.trim();
+        });
+        brandRow.querySelector('.quick-brand-key')?.addEventListener('input', (e) => {
+          brand.brand_key = e.target.value.trim();
+        });
+        brandRow.querySelector('.quick-brand-icon')?.addEventListener('change', (e) => {
+          brand.icon_type = e.target.value;
+        });
+
+        brandRow.querySelector('.quick-move-up-brand-btn')?.addEventListener('click', () => {
+          if (brandIdx === 0) return;
+          const temp = settings.menu_brands[brandIdx];
+          settings.menu_brands[brandIdx] = settings.menu_brands[brandIdx - 1];
+          settings.menu_brands[brandIdx - 1] = temp;
+          renderModal();
+        });
+
+        brandRow.querySelector('.quick-move-down-brand-btn')?.addEventListener('click', () => {
+          if (brandIdx === settings.menu_brands.length - 1) return;
+          const temp = settings.menu_brands[brandIdx];
+          settings.menu_brands[brandIdx] = settings.menu_brands[brandIdx + 1];
+          settings.menu_brands[brandIdx + 1] = temp;
+          renderModal();
+        });
+
+        brandRow.querySelector('.quick-delete-brand-btn')?.addEventListener('click', () => {
+          if (confirm(`Xóa thương hiệu "${brand.label}" khỏi menu?`)) {
+            settings.menu_brands.splice(brandIdx, 1);
+            showToast('Đã xóa thương hiệu.', 'info');
+            renderModal();
+          }
+        });
+      });
+
+      modalEl.querySelector('#quick-add-menu-brand')?.addEventListener('click', () => {
+        if (!settings.menu_brands) settings.menu_brands = [];
+        settings.menu_brands.push({ label: 'Thương Hiệu Mới', brand_key: 'new-brand', icon_type: 'star' });
+        showToast('Đã thêm thương hiệu mới.', 'success');
         renderModal();
       });
     }

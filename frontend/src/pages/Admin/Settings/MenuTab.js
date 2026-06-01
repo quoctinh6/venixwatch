@@ -4,11 +4,18 @@ export function renderMenuTab(settings) {
   if (!settings.navigation_menu) {
     settings.navigation_menu = [];
   }
+  if (!settings.menu_brands) {
+    settings.menu_brands = [
+      { label: 'Carnival Premium', brand_key: 'carnival', icon_type: 'polygon' },
+      { label: 'Casio Watch', brand_key: 'casio', icon_type: 'rect' },
+      { label: 'Kemil New', brand_key: 'kemil', icon_type: 'star' }
+    ];
+  }
   return `
     <div class="space-y-6">
       <div class="flex items-center justify-between border-b pb-3">
         <div>
-          <h3 class="text-base font-bold text-gray-900">Cấu Hình Menu Điều Hướng</h3>
+          <h3 class="text-base font-bold text-gray-900">Cấu Hìn Menu Điều Hướng</h3>
           <p class="text-xs text-gray-500 mt-0.5">Tùy chỉnh các liên kết xuất hiện trên thanh menu chính của trang web.</p>
         </div>
         <button id="add-menu-item" class="bg-zinc-900 hover:bg-zinc-800 text-white font-semibold text-xs px-3.5 py-2 rounded-lg transition-colors flex items-center gap-1.5">
@@ -85,6 +92,61 @@ export function renderMenuTab(settings) {
             </div>
           `).join('')
         }
+      </div>
+
+      <hr class="border-gray-200 my-6" />
+
+      <!-- mega menu brand column -->
+      <div class="space-y-4">
+        <div class="flex items-center justify-between border-b pb-3">
+          <div>
+            <h3 class="text-base font-bold text-gray-900">Thương Hiệu Trong Mega Menu</h3>
+            <p class="text-xs text-gray-500 mt-0.5">Tùy chỉnh danh sách thương hiệu hiển thị ở cột giữa mega menu ĐỒNG HỒ NAM/NỮ.</p>
+          </div>
+          <button id="add-menu-brand-item" class="bg-zinc-900 hover:bg-zinc-800 text-white font-semibold text-xs px-3.5 py-2 rounded-lg transition-colors flex items-center gap-1.5">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Thêm Thương Hiệu
+          </button>
+        </div>
+
+        <div class="space-y-3" id="menu-brands-list">
+          ${settings.menu_brands.length === 0 
+            ? `<div class="text-center py-6 text-gray-400">Chưa cấu hình thương hiệu nào.</div>`
+            : settings.menu_brands.map((brand, i) => `
+              <div class="flex flex-wrap items-center gap-3 bg-white p-3 border border-gray-200 rounded-xl shadow-sm" data-brand-index="${i}">
+                <div class="w-5 h-5 flex items-center justify-center bg-[#C9A84C] text-white rounded-full text-[9px] font-bold">
+                  ${i + 1}
+                </div>
+                <div class="flex-1 min-w-[120px]">
+                  <label class="block text-[9px] font-bold text-gray-400 uppercase mb-0.5">Tên hiển thị</label>
+                  <input type="text" class="menu-brand-label w-full px-2.5 py-1.5 border border-gray-300 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-[#C9A84C]" value="${brand.label || ''}" />
+                </div>
+                <div class="flex-1 min-w-[100px]">
+                  <label class="block text-[9px] font-bold text-gray-400 uppercase mb-0.5">Mã hãng (brand query)</label>
+                  <input type="text" class="menu-brand-key w-full px-2.5 py-1.5 border border-gray-300 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-[#C9A84C]" value="${brand.brand_key || ''}" />
+                </div>
+                <div class="w-32">
+                  <label class="block text-[9px] font-bold text-gray-400 uppercase mb-0.5">Biểu tượng</label>
+                  <select class="menu-brand-icon w-full px-2 py-1.5 border border-gray-300 rounded-lg text-xs bg-white focus:outline-none">
+                    <option value="star" ${brand.icon_type === 'star' ? 'selected' : ''}>Ngôi sao / Sparkle</option>
+                    <option value="polygon" ${brand.icon_type === 'polygon' ? 'selected' : ''}>Huy hiệu / Badge</option>
+                    <option value="rect" ${brand.icon_type === 'rect' ? 'selected' : ''}>Đồng hồ đeo tay</option>
+                  </select>
+                </div>
+                <div class="flex items-center gap-1 mt-3 sm:mt-0">
+                  <button type="button" class="move-up-brand-btn p-1.5 border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-lg transition-colors ${i === 0 ? 'opacity-30 cursor-not-allowed' : ''}" ${i === 0 ? 'disabled' : ''}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>
+                  </button>
+                  <button type="button" class="move-down-brand-btn p-1.5 border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-lg transition-colors ${i === settings.menu_brands.length - 1 ? 'opacity-30 cursor-not-allowed' : ''}" ${i === settings.menu_brands.length - 1 ? 'disabled' : ''}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                  </button>
+                  <button type="button" class="delete-brand-btn p-1.5 border border-red-100 hover:bg-red-50 text-red-600 rounded-lg transition-colors">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>
+                  </button>
+                </div>
+              </div>
+            `).join('')}
+        </div>
       </div>
     </div>
   `;
@@ -191,6 +253,54 @@ export function bindMenuTab(container, settings, token, API_BASE, ctx) {
   container.querySelector('#add-menu-item')?.addEventListener('click', () => {
     settings.navigation_menu.push({ label: 'Menu Mới', href: '#', children: [] });
     showToast('Đã thêm một menu chính mới.', 'success');
+    ctx.renderUI();
+  });
+
+  // Bind menu_brands items
+  const menuBrandsList = container.querySelector('#menu-brands-list');
+  menuBrandsList?.querySelectorAll('[data-brand-index]').forEach(brandRow => {
+    const brandIdx = parseInt(brandRow.dataset.brandIndex, 10);
+    const brand = settings.menu_brands[brandIdx];
+
+    brandRow.querySelector('.menu-brand-label')?.addEventListener('input', (e) => {
+      brand.label = e.target.value.trim();
+    });
+    brandRow.querySelector('.menu-brand-key')?.addEventListener('input', (e) => {
+      brand.brand_key = e.target.value.trim();
+    });
+    brandRow.querySelector('.menu-brand-icon')?.addEventListener('change', (e) => {
+      brand.icon_type = e.target.value;
+    });
+
+    brandRow.querySelector('.move-up-brand-btn')?.addEventListener('click', () => {
+      if (brandIdx === 0) return;
+      const temp = settings.menu_brands[brandIdx];
+      settings.menu_brands[brandIdx] = settings.menu_brands[brandIdx - 1];
+      settings.menu_brands[brandIdx - 1] = temp;
+      ctx.renderUI();
+    });
+
+    brandRow.querySelector('.move-down-brand-btn')?.addEventListener('click', () => {
+      if (brandIdx === settings.menu_brands.length - 1) return;
+      const temp = settings.menu_brands[brandIdx];
+      settings.menu_brands[brandIdx] = settings.menu_brands[brandIdx + 1];
+      settings.menu_brands[brandIdx + 1] = temp;
+      ctx.renderUI();
+    });
+
+    brandRow.querySelector('.delete-brand-btn')?.addEventListener('click', () => {
+      if (confirm(`Xóa thương hiệu "${brand.label}" khỏi menu?`)) {
+        settings.menu_brands.splice(brandIdx, 1);
+        showToast('Đã xóa thương hiệu khỏi menu.', 'info');
+        ctx.renderUI();
+      }
+    });
+  });
+
+  container.querySelector('#add-menu-brand-item')?.addEventListener('click', () => {
+    if (!settings.menu_brands) settings.menu_brands = [];
+    settings.menu_brands.push({ label: 'Thương Hiệu Mới', brand_key: 'new-brand', icon_type: 'star' });
+    showToast('Đã thêm một thương hiệu mới vào menu.', 'success');
     ctx.renderUI();
   });
 }

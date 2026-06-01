@@ -11,6 +11,7 @@ FILES_TO_DEPLOY = [
     "backend/public/seed_kemil_products.php",
     "backend/public/list_brands.php",
     "backend/public/fix_admin_brands.php",
+    "backend/src/Modules/Admin/Settings/SettingService.php",
     "kemil_products.json",
     "frontend/src/pages/Admin/Products/ProductForm.js",
     "frontend/src/pages/ProductDetail/ProductDetailPage.js",
@@ -19,6 +20,8 @@ FILES_TO_DEPLOY = [
     "frontend/src/services/adminService.js",
     "frontend/src/services/productService.js",
     "frontend/src/components/MainNavbar.js",
+    "frontend/src/pages/Admin/Settings/MenuTab.js",
+    "frontend/src/components/QuickSettingsModal.js",
     "frontend/src/pages/ProductList/ProductListFilterPanel.js",
     "frontend/src/pages/ProductList/ProductListPage.js",
     "frontend/src/services/brandService.js"
