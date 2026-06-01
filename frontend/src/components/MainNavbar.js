@@ -186,6 +186,8 @@ export class MainNavbar {
             
             if (!menuBrands || menuBrands.length === 0) {
               menuBrands = [
+                { label: 'Carnival Premium', brand_key: 'carnival', icon_type: 'polygon' },
+                { label: 'Casio Watch', brand_key: 'casio', icon_type: 'rect' },
                 { label: 'Kemil New', brand_key: 'kemil', icon_type: 'star' }
               ];
             }
