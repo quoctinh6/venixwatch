@@ -1,0 +1,6 @@
+scratch/
+.gitlab-ci.yml
+.git-ftp-ignore
+.gitignore
+.gitattributes
+products.json
