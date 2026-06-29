@@ -41,8 +41,12 @@ class Product
         }
 
         if (!empty($filters['badge'])) {
-            $where[]           = 'p.badge = :badge';
-            $params[':badge']  = $filters['badge'];
+            if (strtoupper($filters['badge']) === 'SALE') {
+                $where[] = 'fs.sale_price IS NOT NULL';
+            } else {
+                $where[]          = 'p.badge = :badge';
+                $params[':badge'] = $filters['badge'];
+            }
         }
         if (!empty($filters['featured'])) {
             $where[] = 'p.is_featured = 1';
@@ -52,23 +56,39 @@ class Product
             $params[':is_active'] = (int)$filters['is_active'];
         }
         if (!empty($filters['search'])) {
-            $where[]                  = '(p.name LIKE :search_name OR p.sku LIKE :search_sku OR p.brand LIKE :search_brand OR b.name LIKE :search_brand_name)';
-            $params[':search_name']   = '%' . $filters['search'] . '%';
-            $params[':search_sku']    = '%' . $filters['search'] . '%';
-            $params[':search_brand']  = '%' . $filters['search'] . '%';
+            $where[]                      = '(p.name LIKE :search_name OR p.sku LIKE :search_sku OR p.brand LIKE :search_brand OR b.name LIKE :search_brand_name OR c.name LIKE :search_cat OR s.name LIKE :search_sub)';
+            $params[':search_name']       = '%' . $filters['search'] . '%';
+            $params[':search_sku']        = '%' . $filters['search'] . '%';
+            $params[':search_brand']      = '%' . $filters['search'] . '%';
             $params[':search_brand_name'] = '%' . $filters['search'] . '%';
+            $params[':search_cat']        = '%' . $filters['search'] . '%';
+            $params[':search_sub']        = '%' . $filters['search'] . '%';
         }
         if (!empty($filters['brand'])) {
             $where[] = 'p.brand = :brand';
             $params[':brand'] = $filters['brand'];
         }
         if (isset($filters['price_min']) && $filters['price_min'] !== null && $filters['price_min'] !== '') {
-            $where[] = 'COALESCE(p.sale_price, p.price) >= :price_min';
+            $where[] = 'COALESCE(fs.sale_price, p.sale_price, p.price) >= :price_min';
             $params[':price_min'] = (float)$filters['price_min'];
         }
         if (isset($filters['price_max']) && $filters['price_max'] !== null && $filters['price_max'] !== '') {
-            $where[] = 'COALESCE(p.sale_price, p.price) <= :price_max';
+            $where[] = 'COALESCE(fs.sale_price, p.sale_price, p.price) <= :price_max';
             $params[':price_max'] = (float)$filters['price_max'];
+        }
+
+        if (isset($filters['parent_only']) && (int)$filters['parent_only'] === 1) {
+            $where[] = 'p.parent_id IS NULL';
+        }
+        if (!empty($filters['dial_color'])) {
+            $where[] = '(p.dial_color = :dial_color_f1 OR p.id IN (SELECT DISTINCT parent_id FROM products WHERE dial_color = :dial_color_f2 AND parent_id IS NOT NULL))';
+            $params[':dial_color_f1'] = $filters['dial_color'];
+            $params[':dial_color_f2'] = $filters['dial_color'];
+        }
+        if (!empty($filters['strap_type'])) {
+            $where[] = '(p.strap_type = :strap_type_f1 OR p.id IN (SELECT DISTINCT parent_id FROM products WHERE strap_type = :strap_type_f2 AND parent_id IS NOT NULL))';
+            $params[':strap_type_f1'] = $filters['strap_type'];
+            $params[':strap_type_f2'] = $filters['strap_type'];
         }
 
         $page   = max(1, (int)($filters['page']  ?? 1));
@@ -77,7 +97,12 @@ class Product
 
         $whereStr  = implode(' AND ', $where);
         $countStmt = $this->pdo->prepare(
-            "SELECT COUNT(*) FROM products p LEFT JOIN brands b ON b.id = p.brand_id WHERE {$whereStr}"
+            "SELECT COUNT(*) FROM products p 
+             LEFT JOIN categories c ON c.id = p.category_id
+             LEFT JOIN subcategories s ON s.id = p.subcategory_id
+             LEFT JOIN brands b ON b.id = p.brand_id 
+             LEFT JOIN flash_sales fs ON fs.product_id = p.id AND fs.starts_at <= NOW() AND fs.ends_at >= NOW()
+             WHERE {$whereStr}"
         );
         foreach ($params as $k => $v) {
             $type = is_int($v) ? PDO::PARAM_INT : PDO::PARAM_STR;
@@ -87,8 +112,8 @@ class Product
         $total = (int)$countStmt->fetchColumn();
 
         $orderBy = match ($filters['sort'] ?? '') {
-            'price_asc'  => 'COALESCE(p.sale_price, p.price) ASC, p.created_at DESC',
-            'price_desc' => 'COALESCE(p.sale_price, p.price) DESC, p.created_at DESC',
+            'price_asc'  => 'COALESCE(fs.sale_price, p.sale_price, p.price) ASC, p.created_at DESC',
+            'price_desc' => 'COALESCE(fs.sale_price, p.sale_price, p.price) DESC, p.created_at DESC',
             'name_asc'   => 'p.name ASC',
             'name_desc'  => 'p.name DESC',
             'cat_asc'    => 'c.name ASC, p.name ASC',
@@ -102,11 +127,13 @@ class Product
             default      => 'p.created_at DESC',
         };
 
-        $sql = "SELECT p.*, c.name AS category_name, s.name AS subcategory_name, b.name AS brand_name
+        $sql = "SELECT p.*, c.name AS category_name, s.name AS subcategory_name, b.name AS brand_name,
+                       fs.sale_price AS flash_sale_price
                 FROM products p
                 LEFT JOIN categories c ON c.id = p.category_id
                 LEFT JOIN subcategories s ON s.id = p.subcategory_id
                 LEFT JOIN brands b ON b.id = p.brand_id
+                LEFT JOIN flash_sales fs ON fs.product_id = p.id AND fs.starts_at <= NOW() AND fs.ends_at >= NOW()
                 WHERE {$whereStr}
                 ORDER BY {$orderBy}
                 LIMIT :limit OFFSET :offset";
@@ -122,6 +149,9 @@ class Product
         $rows = $stmt->fetchAll();
 
         foreach ($rows as &$row) {
+            if (isset($row['flash_sale_price']) && $row['flash_sale_price'] !== null) {
+                $row['sale_price'] = $row['flash_sale_price'];
+            }
             $row['images'] = $row['images'] ? json_decode($row['images'], true) : [];
             $row['specs'] = !empty($row['specs']) ? json_decode($row['specs'], true) : null;
         }
@@ -132,17 +162,22 @@ class Product
     public function findById(int $id): array|false
     {
         $stmt = $this->pdo->prepare(
-            'SELECT p.*, c.name AS category_name, s.name AS subcategory_name, b.name AS brand_name
+            'SELECT p.*, c.name AS category_name, s.name AS subcategory_name, b.name AS brand_name,
+                    fs.sale_price AS flash_sale_price
              FROM products p
              LEFT JOIN categories c ON c.id = p.category_id
              LEFT JOIN subcategories s ON s.id = p.subcategory_id
              LEFT JOIN brands b ON b.id = p.brand_id
+             LEFT JOIN flash_sales fs ON fs.product_id = p.id AND fs.starts_at <= NOW() AND fs.ends_at >= NOW()
              WHERE p.id = :id LIMIT 1'
         );
         $stmt->bindValue(':id', $id, PDO::PARAM_INT);
         $stmt->execute();
         $row = $stmt->fetch();
         if ($row) {
+            if (isset($row['flash_sale_price']) && $row['flash_sale_price'] !== null) {
+                $row['sale_price'] = $row['flash_sale_price'];
+            }
             $row['images'] = $row['images'] ? json_decode($row['images'], true) : [];
             $row['specs'] = !empty($row['specs']) ? json_decode($row['specs'], true) : null;
         }
@@ -152,17 +187,22 @@ class Product
     public function findBySlug(string $slug): array|false
     {
         $stmt = $this->pdo->prepare(
-            'SELECT p.*, c.name AS category_name, s.name AS subcategory_name, b.name AS brand_name
+            'SELECT p.*, c.name AS category_name, s.name AS subcategory_name, b.name AS brand_name,
+                    fs.sale_price AS flash_sale_price
              FROM products p
              LEFT JOIN categories c ON c.id = p.category_id
              LEFT JOIN subcategories s ON s.id = p.subcategory_id
              LEFT JOIN brands b ON b.id = p.brand_id
+             LEFT JOIN flash_sales fs ON fs.product_id = p.id AND fs.starts_at <= NOW() AND fs.ends_at >= NOW()
              WHERE p.slug = :slug LIMIT 1'
         );
         $stmt->bindValue(':slug', $slug, PDO::PARAM_STR);
         $stmt->execute();
         $row = $stmt->fetch();
         if ($row) {
+            if (isset($row['flash_sale_price']) && $row['flash_sale_price'] !== null) {
+                $row['sale_price'] = $row['flash_sale_price'];
+            }
             $row['images'] = $row['images'] ? json_decode($row['images'], true) : [];
             $row['specs'] = !empty($row['specs']) ? json_decode($row['specs'], true) : null;
         }
@@ -176,12 +216,12 @@ class Product
                (category_id, subcategory_id, brand_id, name, slug, description, price, sale_price, stock, sku,
                 brand, case_material, case_size, movement_type, water_resistance,
                 images, is_active, is_featured, badge,
-                meta_title, meta_description, og_image, specs)
+                meta_title, meta_description, og_image, parent_id, strap_type, dial_color, specs)
              VALUES
                (:category_id, :subcategory_id, :brand_id, :name, :slug, :description, :price, :sale_price, :stock, :sku,
                 :brand, :case_material, :case_size, :movement_type, :water_resistance,
                 :images, :is_active, :is_featured, :badge,
-                :meta_title, :meta_description, :og_image, :specs)'
+                :meta_title, :meta_description, :og_image, :parent_id, :strap_type, :dial_color, :specs)'
         );
         $this->bindProductValues($stmt, $data);
         $stmt->execute();
@@ -199,7 +239,8 @@ class Product
                movement_type = :movement_type, water_resistance = :water_resistance,
                images = :images, is_active = :is_active, is_featured = :is_featured,
                badge = :badge, meta_title = :meta_title,
-               meta_description = :meta_description, og_image = :og_image, specs = :specs
+               meta_description = :meta_description, og_image = :og_image,
+               parent_id = :parent_id, strap_type = :strap_type, dial_color = :dial_color, specs = :specs
              WHERE id = :id'
         );
         $this->bindProductValues($stmt, $data);
@@ -233,6 +274,9 @@ class Product
         $stmt->bindValue(':meta_title',       $d['meta_title']        ?? null,   PDO::PARAM_STR);
         $stmt->bindValue(':meta_description', $d['meta_description']  ?? null,   PDO::PARAM_STR);
         $stmt->bindValue(':og_image',         $d['og_image']          ?? null,   PDO::PARAM_STR);
+        $stmt->bindValue(':parent_id',        isset($d['parent_id']) && $d['parent_id'] !== '' ? (int)$d['parent_id'] : null, PDO::PARAM_INT);
+        $stmt->bindValue(':strap_type',       $d['strap_type']        ?? null,   PDO::PARAM_STR);
+        $stmt->bindValue(':dial_color',       $d['dial_color']        ?? null,   PDO::PARAM_STR);
         $stmt->bindValue(':specs',            $specs,                            PDO::PARAM_STR);
     }
 
@@ -263,18 +307,23 @@ class Product
     public function getFeatured(int $limit = 8): array
     {
         $stmt = $this->pdo->prepare(
-            'SELECT p.*, c.name AS category_name, s.name AS subcategory_name, b.name AS brand_name
+            'SELECT p.*, c.name AS category_name, s.name AS subcategory_name, b.name AS brand_name,
+                    fs.sale_price AS flash_sale_price
              FROM products p
              LEFT JOIN categories c ON c.id = p.category_id
              LEFT JOIN subcategories s ON s.id = p.subcategory_id
              LEFT JOIN brands b ON b.id = p.brand_id
-             WHERE p.is_featured = 1 AND p.is_active = 1
+             LEFT JOIN flash_sales fs ON fs.product_id = p.id AND fs.starts_at <= NOW() AND fs.ends_at >= NOW()
+             WHERE p.is_featured = 1 AND p.is_active = 1 AND p.parent_id IS NULL
              ORDER BY p.created_at DESC LIMIT :limit'
         );
         $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
         $stmt->execute();
         $rows = $stmt->fetchAll();
         foreach ($rows as &$row) {
+            if (isset($row['flash_sale_price']) && $row['flash_sale_price'] !== null) {
+                $row['sale_price'] = $row['flash_sale_price'];
+            }
             $row['images'] = $row['images'] ? json_decode($row['images'], true) : [];
             $row['specs'] = !empty($row['specs']) ? json_decode($row['specs'], true) : null;
         }
@@ -341,5 +390,41 @@ class Product
         )->fetchAll();
 
         return $stats;
+    }
+
+    public function findVariants(int $id): array
+    {
+        $stmt = $this->pdo->prepare('SELECT parent_id FROM products WHERE id = :id LIMIT 1');
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+        $stmt->execute();
+        $parentId = $stmt->fetchColumn();
+
+        $effectiveParentId = ($parentId !== null && $parentId !== false && $parentId !== '') ? (int)$parentId : $id;
+
+        $stmt = $this->pdo->prepare(
+            'SELECT p.*, c.name AS category_name, s.name AS subcategory_name, b.name AS brand_name,
+                    fs.sale_price AS flash_sale_price
+             FROM products p
+             LEFT JOIN categories c ON c.id = p.category_id
+             LEFT JOIN subcategories s ON s.id = p.subcategory_id
+             LEFT JOIN brands b ON b.id = p.brand_id
+             LEFT JOIN flash_sales fs ON fs.product_id = p.id AND fs.starts_at <= NOW() AND fs.ends_at >= NOW()
+             WHERE (p.id = :parent_id1 OR p.parent_id = :parent_id2) AND p.id != :id
+             ORDER BY p.id ASC'
+        );
+        $stmt->bindValue(':parent_id1', $effectiveParentId, PDO::PARAM_INT);
+        $stmt->bindValue(':parent_id2', $effectiveParentId, PDO::PARAM_INT);
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+        $stmt->execute();
+        
+        $rows = $stmt->fetchAll();
+        foreach ($rows as &$row) {
+            if (isset($row['flash_sale_price']) && $row['flash_sale_price'] !== null) {
+                $row['sale_price'] = $row['flash_sale_price'];
+            }
+            $row['images'] = $row['images'] ? json_decode($row['images'], true) : [];
+            $row['specs'] = !empty($row['specs']) ? json_decode($row['specs'], true) : null;
+        }
+        return $rows;
     }
 }

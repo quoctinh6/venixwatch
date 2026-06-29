@@ -25,6 +25,15 @@ class CartController
     {
         $sessionId = $this->getSessionId();
         $items     = $this->cartModel->getBySession($sessionId);
+        $flashSales = new \App\Models\FlashSale(Database::getInstance());
+        foreach ($items as &$item) {
+            $activeFlash = $flashSales->findByProduct((int)$item['product_id']);
+            if ($activeFlash) {
+                $item['sale_price'] = $activeFlash['sale_price'];
+            }
+        }
+        unset($item);
+
         $total     = array_reduce($items, function ($carry, $item) {
             $price = $item['sale_price'] ?? $item['price'];
             return $carry + ((float)$price * (int)$item['quantity']);

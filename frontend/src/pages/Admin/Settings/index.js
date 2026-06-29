@@ -6,13 +6,15 @@ import { renderBannerTab, bindBannerTab } from './BannerTab.js';
 import { renderSectionsTab, bindSectionsTab } from './SectionsTab.js';
 import { renderColorsTab, bindColorsTab } from './ColorsTab.js';
 import { renderHistoryTab, bindHistoryTab } from './HistoryTab.js';
+import { renderFooterTab, bindFooterTab } from './FooterTab.js';
+import { renderPolicyTab, bindPolicyTab } from './PolicyTab.js';
 
 function getAdminToken() {
   return localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN) || localStorage.getItem('dhat_token');
 }
 
 export function renderSettings(container) {
-  let activeTab = 'brand'; // 'brand' | 'menu' | 'banner' | 'sections' | 'colors' | 'history'
+  let activeTab = 'brand'; // 'brand' | 'menu' | 'banner' | 'sections' | 'colors' | 'footer' | 'policy' | 'history'
   let settings = {
     brand_name: 'Venix Watch',
     logo_url: '',
@@ -102,6 +104,12 @@ export function renderSettings(container) {
           <button data-tab="colors" class="flex-1 min-w-[120px] py-2 px-3 text-center text-xs font-semibold rounded-lg transition-all ${activeTab === 'colors' ? 'bg-[#C9A84C]/15 text-[#C9A84C]' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'}">
             Màu Sắc Giao Diện (Kèm Live Preview)
           </button>
+          <button data-tab="footer" class="flex-1 min-w-[120px] py-2 px-3 text-center text-xs font-semibold rounded-lg transition-all ${activeTab === 'footer' ? 'bg-[#C9A84C]/15 text-[#C9A84C]' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'}">
+            Cấu Hình Footer
+          </button>
+          <button data-tab="policy" class="flex-1 min-w-[120px] py-2 px-3 text-center text-xs font-semibold rounded-lg transition-all ${activeTab === 'policy' ? 'bg-[#C9A84C]/15 text-[#C9A84C]' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'}">
+            Chính Sách & Badges
+          </button>
           <button data-tab="history" class="flex-1 min-w-[120px] py-2 px-3 text-center text-xs font-semibold rounded-lg transition-all ${activeTab === 'history' ? 'bg-[#C9A84C]/15 text-[#C9A84C]' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'}">
             Lịch Sử Thay Đổi
           </button>
@@ -131,6 +139,10 @@ export function renderSettings(container) {
         return renderSectionsTab(settings);
       case 'colors':
         return renderColorsTab(settings, localColors);
+      case 'footer':
+        return renderFooterTab(settings);
+      case 'policy':
+        return renderPolicyTab(settings);
       case 'history':
         return renderHistoryTab(historyLogs, currentPage);
     }
@@ -179,6 +191,10 @@ export function renderSettings(container) {
       bindSectionsTab(container, settings, token, API_BASE, ctx);
     } else if (activeTab === 'colors') {
       bindColorsTab(container, settings, localColors, ctx);
+    } else if (activeTab === 'footer') {
+      bindFooterTab(container, settings, token, API_BASE, ctx);
+    } else if (activeTab === 'policy') {
+      bindPolicyTab(container, settings, token, API_BASE, ctx);
     } else if (activeTab === 'history') {
       bindHistoryTab(container, token, API_BASE, historyLogs, currentPage, ctx);
     }

@@ -1,7 +1,6 @@
-/**
- * MainFooter.js — Site footer for Venix Watch
- */
 import { navigate } from '../utils/helpers.js';
+import { authService } from '../services/authService.js';
+import { openQuickSettings } from './QuickSettingsModal.js?v=1.0.5';
 
 const FOOTER_LINKS = {
   SHOP: [
@@ -54,7 +53,32 @@ const SOCIAL = [
 export class MainFooter {
   render() {
     const footer = document.createElement('footer');
+    footer.className = 'relative';
     footer.innerHTML = this._html();
+
+    const user = authService.getUser();
+    const hasAdminRole = user && user.roles && user.roles.some(r => {
+      const name = (typeof r === 'object' && r !== null) ? r.name : r;
+      return name === 'super_admin' || name === 'admin' || name === 'editor';
+    });
+    const canEditSettings = user && (
+      (user.permissions && user.permissions.includes('settings:write')) || hasAdminRole
+    );
+
+    if (canEditSettings) {
+      const editBtn = document.createElement('button');
+      editBtn.type = 'button';
+      editBtn.className = 'absolute right-8 top-8 z-30 flex h-7 w-7 items-center justify-center rounded-full bg-white/90 border border-zinc-200 text-[#A88840] hover:bg-zinc-950 hover:text-white hover:border-zinc-950 transition-all shadow-md cursor-pointer';
+      editBtn.title = 'Chỉnh sửa Chân Trang';
+      editBtn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`;
+      editBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        openQuickSettings('footer');
+      });
+      footer.appendChild(editBtn);
+    }
+
     return footer;
   }
 
@@ -69,6 +93,32 @@ export class MainFooter {
 
   _html() {
     const brandName = window.APP_SETTINGS?.brand_name || 'Venix Watch';
+    const footer = window.APP_SETTINGS?.footer_settings || {
+      hotline: '0929 000 063',
+      email: 'venixwatch@gmail.com',
+      address: 'B37-44 Khu B Geleximco Lê Trọng Tấn, Xã An Khánh, TP Hà Nội',
+      social_facebook: 'https://www.facebook.com/people/Venix-Watch/61590595195580/',
+      social_instagram: 'https://www.instagram.com/venixwatch/',
+      social_tiktok: 'https://www.tiktok.com/@venix.watch',
+      social_youtube: 'https://www.youtube.com/@Venixwatch'
+    };
+
+    const shopLinks = footer.shop_links || FOOTER_LINKS.SHOP;
+    const serviceLinks = footer.service_links || FOOTER_LINKS.SERVICE;
+    const aboutLinks = footer.about_links || FOOTER_LINKS.ABOUT;
+
+    const socialIconsHtml = [
+      { name: 'Facebook', href: footer.social_facebook, icon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>` },
+      { name: 'Instagram', href: footer.social_instagram, icon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>` },
+      { name: 'TikTok', href: footer.social_tiktok, icon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.79 1.53V6.75a4.85 4.85 0 0 1-1.02-.06z"/></svg>` },
+      { name: 'YouTube', href: footer.social_youtube, icon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.163a3.003 3.003 0 0 0-2.11-2.108C19.516 3.5 12 3.5 12 3.5s-7.517 0-9.388.555A3.002 3.002 0 0 0 .5 6.163C0 8.037 0 12 0 12s0 3.963.502 5.837a3.003 3.003 0 0 0 2.11 2.108C4.483 20.5 12 20.5 12 20.5s7.517 0 9.388-.555a3.003 3.003 0 0 0 2.11-2.108C24 15.963 24 12 24 12s0-3.963-.502-5.837zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>` }
+    ]
+      .filter(s => s.href)
+      .map(s => `
+        <a href="${s.href}" target="_blank" rel="noopener" title="${s.name}" class="social-icon">
+          ${s.icon}
+        </a>
+      `).join('');
 
     return `
       <div class="footer-wrap">
@@ -77,37 +127,34 @@ export class MainFooter {
           <div class="footer-logo">${brandName}</div>
           <p class="footer-tagline">ĐỈNH CAO TINH XẢO — PHONG CÁCH VĨNH CỬU</p>
         </div>
-
+ 
         <!-- 4 columns grid -->
         <div class="footer-grid">
           <!-- SHOP -->
           <div class="footer-col">
             ${this._colTitle('Shop')}
-            ${this._links(FOOTER_LINKS.SHOP)}
+            ${this._links(shopLinks)}
           </div>
           <!-- SERVICE -->
           <div class="footer-col">
             ${this._colTitle('Dịch Vụ KH')}
-            ${this._links(FOOTER_LINKS.SERVICE)}
+            ${this._links(serviceLinks)}
           </div>
           <!-- ABOUT -->
           <div class="footer-col">
             ${this._colTitle('Về Chúng Tôi')}
-            ${this._links(FOOTER_LINKS.ABOUT)}
+            ${this._links(aboutLinks)}
           </div>
           <!-- SOCIAL + CONTACT -->
           <div class="footer-col">
             ${this._colTitle('Theo Dõi')}
             <div class="social-icons">
-              ${SOCIAL.map(s => `
-                <a href="${s.href}" target="_blank" rel="noopener" title="${s.name}" class="social-icon">
-                  ${s.icon}
-                </a>`).join('')}
+              ${socialIconsHtml}
             </div>
             <div class="contact-info">
-              <p><span>Hotline:</span> 0929 000 063</p>
-              <p><span>Email:</span> venixwatch@gmail.com</p>
-              <p><span>Địa chỉ:</span> B37-44 Khu B Geleximco Lê Trọng Tấn,Xã An Khánh,TP Hà Nội </p>
+              <p><span>Hotline:</span> ${footer.hotline || ''}</p>
+              <p><span>Email:</span> ${footer.email || ''}</p>
+              <p><span>Địa chỉ:</span> ${footer.address || ''}</p>
             </div>
           </div>
         </div>
@@ -129,10 +176,6 @@ export class MainFooter {
         <!-- Bottom bar -->
         <div class="footer-bottom">
           <p class="footer-copyright">© 2026 ${brandName}. All rights reserved.</p>
-          <div class="footer-bottom-links">
-            ${['Chính Sách Bảo Mật', 'Điều Khoản'].map(t => `
-              <a href="#">${t}</a>`).join('')}
-          </div>
         </div>
       </div>
 
@@ -303,24 +346,7 @@ export class MainFooter {
           letter-spacing: 0.5px;
         }
         
-        .footer-bottom-links {
-          display: flex;
-          gap: 24px;
-        }
-        
-        .footer-bottom-links a {
-          font-size: 12px;
-          color: #636366;
-          text-decoration: none;
-          letter-spacing: 0.5px;
-          transition: color 0.2s;
-        }
-        
-        .footer-bottom-links a:hover {
-          color: #C9A84C;
-        }
-
-        /* Responsive Breakpoints */
+/* Responsive Breakpoints */
         @media (max-width: 768px) {
           .footer-wrap {
             padding: 60px 24px 32px;
@@ -369,9 +395,6 @@ export class MainFooter {
             align-items: center;
             text-align: center;
             gap: 12px;
-          }
-          .footer-bottom-links {
-            justify-content: center;
           }
         }
       </style>`;

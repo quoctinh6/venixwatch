@@ -9,7 +9,7 @@ import { ProductListHeader } from './ProductListHeader.js';
 export default class ProductListPage {
   constructor(params = {}) {
     const urlParams = new URLSearchParams(window.location.search);
-    this._slug = params.category_slug || 'nam';
+    this._slug = params.category_slug || '';
     this._badge = params.badge || '';
     this._childSlug = urlParams.get('category') || '';
     this._search = urlParams.get('search') || '';
@@ -18,6 +18,8 @@ export default class ProductListPage {
     this._priceMin = urlParams.get('price_min') || '';
     this._priceMax = urlParams.get('price_max') || '';
     this._brand = urlParams.get('brand') || '';
+    this._dialColor = urlParams.get('dial_color') || '';
+    this._strapType = urlParams.get('strap_type') || '';
     this._page = Math.max(1, Number(urlParams.get('page') || 1));
     this._products = [];
     this._categoryTree = [];
@@ -99,10 +101,14 @@ export default class ProductListPage {
       priceMin: this._priceMin,
       priceMax: this._priceMax,
       brand: this._brand,
+      dialColor: this._dialColor,
+      strapType: this._strapType,
       onNavigateCategory: (slug) => this._navigateCategory(slug),
       onNavigateSubcategory: (parent, child) => this._navigateSubcategory(parent, child),
       onPriceChange: ({ priceMin, priceMax, closeDrawer }) => this._applyPriceFilters(priceMin, priceMax, closeDrawer),
       onBrandChange: (brand, closeDrawer) => this._applyBrandFilter(brand, closeDrawer),
+      onDialColorChange: (color, closeDrawer) => this._applyDialColorFilter(color, closeDrawer),
+      onStrapTypeChange: (strap, closeDrawer) => this._applyStrapTypeFilter(strap, closeDrawer),
       onClearAll: (closeDrawer) => this._clearAllFilters(closeDrawer),
     });
   }
@@ -136,11 +142,12 @@ export default class ProductListPage {
   }
 
   _buildHeaderMeta() {
-    const title = this._activeChild?.name || this._activeTop?.name || CATEGORY_LABELS[this._slug] || this._slug || 'Đồng Hồ';
+    const title = this._activeChild?.name || this._activeTop?.name || CATEGORY_LABELS[this._slug]
+      || (this._search ? `Kết quả tìm kiếm: "${this._search}"` : 'Tất cả sản phẩm');
     const description = this._activeChild?.description
       || this._activeTop?.description
       || CATEGORY_DESCRIPTIONS[this._slug]
-      || CATEGORY_DESCRIPTIONS.nam;
+      || '';
 
     return { title, description };
   }
@@ -171,10 +178,28 @@ export default class ProductListPage {
     this._loadProducts();
   }
 
+  _applyDialColorFilter(color, closeDrawer) {
+    this._dialColor = color;
+    this._page = 1;
+    if (closeDrawer) this._filters.closeDrawer();
+    this._scrollToTop();
+    this._loadProducts();
+  }
+
+  _applyStrapTypeFilter(strap, closeDrawer) {
+    this._strapType = strap;
+    this._page = 1;
+    if (closeDrawer) this._filters.closeDrawer();
+    this._scrollToTop();
+    this._loadProducts();
+  }
+
   _clearAllFilters(closeDrawer = false) {
     this._priceMin = '';
     this._priceMax = '';
     this._brand = '';
+    this._dialColor = '';
+    this._strapType = '';
     this._page = 1;
     if (closeDrawer) this._filters.closeDrawer();
 
@@ -192,12 +217,15 @@ export default class ProductListPage {
     const query = new URLSearchParams();
     if (this._childSlug) query.set('category', this._childSlug);
     if (this._brand) query.set('brand', this._brand);
+    if (this._dialColor) query.set('dial_color', this._dialColor);
+    if (this._strapType) query.set('strap_type', this._strapType);
     if (this._search) query.set('search', this._search);
     if (this._sort !== 'new') query.set('sort', this._sort);
     if (this._priceMin) query.set('price_min', this._priceMin);
     if (this._priceMax) query.set('price_max', this._priceMax);
     if (this._page > 1) query.set('page', String(this._page));
-    return `/${this._slug}${query.toString() ? `?${query.toString()}` : ''}`;
+    const basePath = this._slug ? `/${this._slug}` : '/tim-kiem';
+    return `${basePath}${query.toString() ? `?${query.toString()}` : ''}`;
   }
 
   _replaceUrl() {
@@ -261,6 +289,8 @@ export default class ProductListPage {
       priceMin: this._priceMin,
       priceMax: this._priceMax,
       brand: this._brand,
+      dialColor: this._dialColor,
+      strapType: this._strapType,
       totalCount: this._totalCount,
     });
 
@@ -290,7 +320,7 @@ export default class ProductListPage {
     return {
       page: this._page,
       limit: 9,
-      ...(this._slug !== 'sale' ? { category_slug: this._slug } : {}),
+      ...(this._slug && this._slug !== 'sale' ? { category_slug: this._slug } : {}),
       ...(this._childSlug ? { category: this._childSlug } : {}),
       ...(this._badge ? { badge: this._badge } : {}),
       ...(this._search ? { search: this._search } : {}),
@@ -298,11 +328,13 @@ export default class ProductListPage {
       ...(this._priceMin ? { price_min: this._priceMin } : {}),
       ...(this._priceMax ? { price_max: this._priceMax } : {}),
       ...(this._brand ? { brand: this._brand } : {}),
+      ...(this._dialColor ? { dial_color: this._dialColor } : {}),
+      ...(this._strapType ? { strap_type: this._strapType } : {}),
     };
   }
 
   _getActiveFilterCount() {
-    return (this._childSlug ? 1 : 0) + (this._priceMin || this._priceMax ? 1 : 0) + (this._brand ? 1 : 0);
+    return (this._childSlug ? 1 : 0) + (this._priceMin || this._priceMax ? 1 : 0) + (this._brand ? 1 : 0) + (this._dialColor ? 1 : 0) + (this._strapType ? 1 : 0);
   }
 
   _renderGrid() {

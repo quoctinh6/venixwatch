@@ -26,6 +26,16 @@ function renderDetail(container, order, onBack) {
   const isCancelled = order.status === 'cancelled';
   const currentIdx = STATUS_STEPS.indexOf(order.status);
 
+  const paymentLabels = {
+    cod: 'Thanh toán khi nhận hàng (COD)',
+    bank: 'Chuyển khoản ngân hàng',
+    momo: 'Ví MoMo',
+  };
+  const paymentMethodText = paymentLabels[order.payment_method] || order.payment_method || '—';
+  
+  const subtotal = (order.items || order.order_items || []).reduce((sum, item) => sum + (Number(item.product_price || 0) * (item.quantity || 1)), 0);
+  const totalAmount = Number(order.total_amount || 0);
+
   container.innerHTML = `
     <div class="space-y-4">
       <div class="flex items-center gap-3">
@@ -71,10 +81,10 @@ function renderDetail(container, order, onBack) {
         <div class="bg-white rounded-xl shadow-sm p-6">
           <h3 class="text-sm font-semibold text-gray-700 mb-3">Thông tin thanh toán</h3>
           <div class="space-y-2 text-sm text-gray-600">
-            <div class="flex gap-2"><span class="text-gray-400 w-28">Phương thức:</span><span>${order.payment_method || '—'}</span></div>
-            <div class="flex gap-2"><span class="text-gray-400 w-28">Tạm tính:</span><span>${formatPrice(order.subtotal)}</span></div>
-            <div class="flex gap-2"><span class="text-gray-400 w-28">Phí ship:</span><span>${formatPrice(order.shipping_fee)}</span></div>
-            <div class="flex gap-2"><span class="text-gray-400 w-28 font-semibold">Tổng cộng:</span><span class="text-[#C9A84C] font-bold text-base">${formatPrice(order.total)}</span></div>
+            <div class="flex gap-2"><span class="text-gray-400 w-28">Phương thức:</span><span>${paymentMethodText}</span></div>
+            <div class="flex gap-2"><span class="text-gray-400 w-28">Tạm tính:</span><span>${formatPrice(subtotal)}</span></div>
+            <div class="flex gap-2"><span class="text-gray-400 w-28">Phí ship:</span><span>Miễn phí</span></div>
+            <div class="flex gap-2"><span class="text-gray-400 w-28 font-semibold">Tổng cộng:</span><span class="text-[#C9A84C] font-bold text-base">${formatPrice(totalAmount)}</span></div>
           </div>
         </div>
       </div>
@@ -90,7 +100,7 @@ function renderDetail(container, order, onBack) {
                 <p class="text-xs text-gray-500 mt-0.5">SKU: ${item.product?.sku || item.sku || '—'}</p>
               </div>
               <div class="text-right flex-shrink-0">
-                <p class="font-semibold text-gray-900">${formatPrice(item.price)}</p>
+                <p class="font-semibold text-gray-900">${formatPrice(item.product_price || item.price)}</p>
                 <p class="text-xs text-gray-500">x${item.quantity}</p>
               </div>
             </div>

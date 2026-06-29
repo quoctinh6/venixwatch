@@ -74,7 +74,10 @@ class ProductController
             'sort' => trim($_GET['sort'] ?? ''),
             'price_min' => isset($_GET['price_min']) ? (float)$_GET['price_min'] : null,
             'price_max' => isset($_GET['price_max']) ? (float)$_GET['price_max'] : null,
+            'dial_color' => trim($_GET['dial_color'] ?? '') ?: null,
+            'strap_type' => trim($_GET['strap_type'] ?? '') ?: null,
             'is_active' => 1,
+            'parent_only' => 1,
         ];
 
         $result = $this->model->findAll(array_filter($filters, fn($v) => $v !== null && $v !== ''));

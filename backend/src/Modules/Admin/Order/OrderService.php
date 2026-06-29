@@ -23,6 +23,9 @@ class OrderService
     public function paginate(int $page, int $limit, string $status = ''): array
     {
         $result = $this->orderModel->findAll($page, $limit, $status);
+        foreach ($result['data'] as &$order) {
+            $order['items'] = $this->itemModel->getByOrder((int)$order['id']);
+        }
         return [
             'success' => true,
             'data'    => $result['data'],

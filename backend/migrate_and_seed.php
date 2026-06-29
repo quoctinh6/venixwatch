@@ -43,7 +43,10 @@ try {
         'view_count'        => "ALTER TABLE products ADD COLUMN view_count INT NOT NULL DEFAULT 0 AFTER badge",
         'sold_count'        => "ALTER TABLE products ADD COLUMN sold_count INT NOT NULL DEFAULT 0 AFTER view_count",
         'rating_avg'        => "ALTER TABLE products ADD COLUMN rating_avg DECIMAL(3,2) NOT NULL DEFAULT 0 AFTER sold_count",
-        'rating_count'      => "ALTER TABLE products ADD COLUMN rating_count INT UNSIGNED NOT NULL DEFAULT 0 AFTER rating_avg"
+        'rating_count'      => "ALTER TABLE products ADD COLUMN rating_count INT UNSIGNED NOT NULL DEFAULT 0 AFTER rating_avg",
+        'parent_id'         => "ALTER TABLE products ADD COLUMN parent_id INT UNSIGNED DEFAULT NULL AFTER og_image",
+        'strap_type'        => "ALTER TABLE products ADD COLUMN strap_type VARCHAR(100) DEFAULT NULL AFTER parent_id",
+        'dial_color'        => "ALTER TABLE products ADD COLUMN dial_color VARCHAR(100) DEFAULT NULL AFTER strap_type"
     ];
 
     foreach ($columnsToAdd as $col => $sql) {
@@ -53,6 +56,14 @@ try {
         } else {
             echo "Column '{$col}' already exists in products table.\n";
         }
+    }
+
+    // Add payment_method to orders table safely
+    if (!columnExists($pdo, 'orders', 'payment_method')) {
+        $pdo->exec("ALTER TABLE orders ADD COLUMN payment_method VARCHAR(50) NOT NULL DEFAULT 'cod' AFTER notes");
+        echo "Added column 'payment_method' to orders table.\n";
+    } else {
+        echo "Column 'payment_method' already exists in orders table.\n";
     }
 
     // 2. Safely recreate reviews and product Q&A tables to match types
@@ -408,9 +419,246 @@ try {
         echo "Product ID {$pr['product_id']}: avg = " . round($pr['avg'], 2) . ", count = {$pr['count']}\n";
     }
 
+    // Add constraint
+    try {
+        $pdo->exec("ALTER TABLE products ADD CONSTRAINT fk_products_parent FOREIGN KEY (parent_id) REFERENCES products(id) ON DELETE SET NULL");
+        echo "Added foreign key constraint fk_products_parent.\n";
+    } catch (Exception $e) {
+        echo "Note: Foreign key constraint might already exist: " . $e->getMessage() . "\n";
+    }
+
+    // 6. Group products and assign parent-child variations
+    echo "Grouping products and assigning variants...\n";
+    runGroupingAndVariants($pdo);
+
     echo "\nDatabase migration and seeding completed successfully!\n";
 
 } catch (Exception $e) {
     echo "\nError occurred: " . $e->getMessage() . "\n";
     exit(1);
+}
+
+function runGroupingAndVariants(PDO $pdo): void {
+    // Normalizers
+    $getCasioColor = function($sku) {
+        $sku = strtoupper(trim($sku));
+        $parts = explode('-', $sku);
+        if (count($parts) > 1) {
+            $suffix = end($parts);
+            if (preg_match('/^(\d)/', $suffix, $m)) {
+                $code = $m[1];
+                switch ($code) {
+                    case '1': return 'Đen';
+                    case '2': return 'Xanh dương / Xanh lam';
+                    case '3': return 'Xanh lá / Lục';
+                    case '4': return 'Hồng / Vàng hồng';
+                    case '5': return 'Nâu / Cà phê';
+                    case '6': return 'Khác / Chưa rõ';
+                    case '7': return 'Trắng / Bạc';
+                    case '8': return 'Xám / Ghi';
+                    case '9': return 'Vàng (Gold)';
+                }
+            }
+        }
+        return null;
+    };
+    
+    $normalizeColor = function($color) {
+        $color = trim(mb_strtolower($color, 'UTF-8'));
+        if ($color === '') return 'Khác / Chưa rõ';
+        if (str_contains($color, 'đen')) return 'Đen';
+        if (str_contains($color, 'trắng') || str_contains($color, 'bạc') || str_contains($color, 'emaille') || str_contains($color, 'trang') || str_contains($color, 'bac')) return 'Trắng / Bạc';
+        if (str_contains($color, 'xanh dương') || str_contains($color, 'xanh lam') || str_contains($color, 'xanh nước biển') || str_contains($color, 'blue')) return 'Xanh dương / Xanh lam';
+        if (str_contains($color, 'xanh lá') || str_contains($color, 'lục') || str_contains($color, 'xanh luc') || str_contains($color, 'green')) return 'Xanh lá / Lục';
+        if (str_contains($color, 'vàng hồng') || str_contains($color, 'rose gold') || str_contains($color, 'vàng đỏ') || str_contains($color, 'hồng')) return 'Hồng / Vàng hồng';
+        if (str_contains($color, 'vàng') || str_contains($color, 'gold') || str_contains($color, 'yellow')) return 'Vàng (Gold)';
+        if (str_contains($color, 'ngọc trai') || str_contains($color, 'xà cừ') || str_contains($color, 'pearl')) return 'Mặt xà cừ / Ngọc trai';
+        if (str_contains($color, 'đỏ') || str_contains($color, 'huyết') || str_contains($color, 'red') || str_contains($color, 'do')) return 'Đỏ / Đỏ rượu';
+        if (str_contains($color, 'nâu') || str_contains($color, 'cà phê') || str_contains($color, 'cafe') || str_contains($color, 'brown') || $color === 'n') return 'Nâu / Cà phê';
+        if (str_contains($color, 'xám') || str_contains($color, 'ghi') || str_contains($color, 'gray') || str_contains($color, 'grey')) return 'Xám / Ghi';
+        return 'Khác / Chưa rõ';
+    };
+    
+    $normalizeStrap = function($strap, $name, $descText) {
+        $s = trim(mb_strtolower($strap, 'UTF-8'));
+        $n = trim(mb_strtolower($name, 'UTF-8'));
+        $d = trim(mb_strtolower($descText, 'UTF-8'));
+        
+        if (str_contains($s, 'da') || str_contains($n, 'dây da') || str_contains($d, 'dây da') || str_contains($d, 'chất liệu dây: da')) {
+            return 'Dây da';
+        }
+        if (str_contains($s, 'cao su') || str_contains($s, 'silicone') || str_contains($s, 'nhựa') || str_contains($s, 'resin') || str_contains($n, 'dây cao su') || str_contains($n, 'dây nhựa') || str_contains($n, 'dcs') || str_contains($d, 'dây cao su') || str_contains($d, 'dây nhựa') || str_contains($d, 'silicon') || str_contains($d, 'resin') || str_contains($n, 'g-shock') || str_contains($n, 'baby-g')) {
+            return 'Dây cao su / Nhựa / Silicone';
+        }
+        if (str_contains($s, 'thép') || str_contains($s, 'kim loại') || str_contains($s, 'titanium') || str_contains($n, 'dây thép') || str_contains($n, 'dây kim loại') || str_contains($n, 'edifice') || str_contains($d, 'dây thép') || str_contains($d, 'dây kim loại') || str_contains($d, 'thép không gỉ') || str_contains($d, 'thép 316l')) {
+            return 'Dây kim loại / Thép';
+        }
+        if (str_contains($s, 'nylon') || str_contains($s, 'nato') || str_contains($s, 'vải') || str_contains($n, 'dây nato') || str_contains($n, 'dây vải') || str_contains($d, 'dây nato') || str_contains($d, 'dây vải')) {
+            return 'Dây Nato / Vải';
+        }
+        if (str_contains($n, 'carnival')) {
+            if (str_contains($n, 'dcs')) return 'Dây cao su / Nhựa / Silicone';
+            return 'Dây kim loại / Thép';
+        }
+        return 'Chưa rõ / Dây khác';
+    };
+    
+    $getBaseModel = function($name, $sku, $brand) {
+        $brandClean = strtolower(trim($brand));
+        $sku = strtoupper(trim($sku));
+        
+        if (str_contains($brandClean, 'casio') || str_contains($brandClean, 'g-shock') || str_contains($brandClean, 'baby') || str_contains($brandClean, 'edifice')) {
+            $parts = explode('-', $sku);
+            if (count($parts) > 1) {
+                $last = end($parts);
+                if (preg_match('/^\d/', $last)) {
+                    array_pop($parts);
+                    return implode('-', $parts);
+                }
+            }
+            return $sku;
+        }
+        
+        if (preg_match('/\b([A-Z]*\d{3,}[A-Z0-9]*)\b/i', $name, $matches)) {
+            $prefix = '';
+            if (str_contains(strtolower($name), 'carnival')) {
+                $prefix = 'CARNIVAL ';
+            } elseif (str_contains(strtolower($name), 'kemil')) {
+                $prefix = 'KEMIL ';
+            }
+            return $prefix . strtoupper($matches[1]);
+        }
+        
+        return strtoupper($brand !== '' ? $brand : 'DỰ ÁN') . ' ' . $sku;
+    };
+
+    $stmt = $pdo->query("SELECT id, name, sku, description, specs, brand FROM products");
+    $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $groups = [];
+    foreach ($products as $p) {
+        $name = $p['name'];
+        $desc = $p['description'] ?? '';
+        $specsJson = $p['specs'] ?? '';
+        $brand = trim($p['brand'] ?? '');
+        
+        $rawDial = '';
+        $rawStrap = '';
+        
+        if ($specsJson !== '') {
+            $specs = json_decode($specsJson, true);
+            if (is_array($specs)) {
+                $rawDial = $specs['Màu mặt'] ?? $specs['Màu sắc'] ?? '';
+                $rawStrap = $specs['Dây'] ?? $specs['Chất liệu dây'] ?? '';
+            }
+        }
+        if ($rawDial === '' && $desc !== '') {
+            if (preg_match('/Màu mặt<\/th>\s*<td[^>]*>([^<]+)<\/td>/iu', $desc, $m)) {
+                $rawDial = $m[1];
+            } elseif (preg_match('/Màu sắc<\/th>\s*<td[^>]*>([^<]+)<\/td>/iu', $desc, $m)) {
+                $rawDial = $m[1];
+            } elseif (preg_match('/Màu mặt:<\/strong><\/aside>\s*<p>([^<]+)<\/p>/iu', $desc, $m)) {
+                $rawDial = $m[1];
+            }
+        }
+        if ($rawStrap === '' && $desc !== '') {
+            if (preg_match('/Chất liệu dây<\/th>\s*<td[^>]*>([^<]+)<\/td>/iu', $desc, $m)) {
+                $rawStrap = $m[1];
+            } elseif (preg_match('/Dây<\/th>\s*<td[^>]*>([^<]+)<\/td>/iu', $desc, $m)) {
+                $rawStrap = $m[1];
+            } elseif (preg_match('/Chất liệu dây:<\/strong><\/aside>\s*<p>([^<]+)<\/p>/iu', $desc, $m)) {
+                $rawStrap = $m[1];
+            }
+        }
+        
+        if ($rawDial === '') {
+            $tokens = explode(' ', $name);
+            $lastToken = end($tokens);
+            if (preg_match('/-N2?$/i', $lastToken) || preg_match('/-NN$/i', $lastToken)) $rawDial = 'Nâu';
+            elseif (preg_match('/-D$/i', $lastToken) || preg_match('/-DK$/i', $lastToken) || preg_match('/-DO$/i', $lastToken)) $rawDial = 'Đen';
+            elseif (preg_match('/-X$/i', $lastToken) || preg_match('/-XT$/i', $lastToken) || preg_match('/-XL$/i', $lastToken)) $rawDial = 'Xanh dương';
+            elseif (preg_match('/-T$/i', $lastToken) || preg_match('/-TK$/i', $lastToken) || preg_match('/-TT$/i', $lastToken)) $rawDial = 'Trắng / Bạc';
+            elseif (preg_match('/-H$/i', $lastToken) || preg_match('/-HK$/i', $lastToken)) $rawDial = 'Hồng';
+            elseif (preg_match('/-DO$/i', $lastToken)) $rawDial = 'Đỏ';
+            elseif (preg_match('/-V$/i', $lastToken) || preg_match('/-VT$/i', $lastToken) || preg_match('/-VV$/i', $lastToken)) $rawDial = 'Vàng';
+        }
+        
+        $dialGroup = $normalizeColor($rawDial);
+        if ($dialGroup === 'Khác / Chưa rõ' && (str_contains(strtolower($brand), 'casio') || str_contains(strtolower($brand), 'g-shock') || str_contains(strtolower($brand), 'baby') || str_contains(strtolower($brand), 'edifice'))) {
+            $casioColor = $getCasioColor($p['sku']);
+            if ($casioColor) {
+                $dialGroup = $casioColor;
+            }
+        }
+        if ($dialGroup === 'Khác / Chưa rõ') {
+            $nameLower = mb_strtolower($name, 'UTF-8');
+            if (str_contains($nameLower, 'màu đen') || str_contains($nameLower, 'mặt đen') || str_contains($nameLower, 'black')) {
+                $dialGroup = 'Đen';
+            } elseif (str_contains($nameLower, 'màu trắng') || str_contains($nameLower, 'mặt trắng') || str_contains($nameLower, 'white') || str_contains($nameLower, 'màu bạc') || str_contains($nameLower, 'silver')) {
+                $dialGroup = 'Trắng / Bạc';
+            } elseif (str_contains($nameLower, 'màu xanh dương') || str_contains($nameLower, 'mặt xanh dương') || str_contains($nameLower, 'xanh lam') || str_contains($nameLower, 'blue')) {
+                $dialGroup = 'Xanh dương / Xanh lam';
+            } elseif (str_contains($nameLower, 'màu xanh lá') || str_contains($nameLower, 'xanh lục') || str_contains($nameLower, 'green')) {
+                $dialGroup = 'Xanh lá / Lục';
+            } elseif (str_contains($nameLower, 'vàng hồng') || str_contains($nameLower, 'rose gold')) {
+                $dialGroup = 'Hồng / Vàng hồng';
+            } elseif (str_contains($nameLower, 'màu vàng') || str_contains($nameLower, 'gold')) {
+                $dialGroup = 'Vàng (Gold)';
+            } elseif (str_contains($nameLower, 'màu đỏ') || str_contains($nameLower, 'red')) {
+                $dialGroup = 'Đỏ / Đỏ rượu';
+            } elseif (str_contains($nameLower, 'màu nâu') || str_contains($nameLower, 'brown')) {
+                $dialGroup = 'Nâu / Cà phê';
+            }
+        }
+        
+        $strapGroup = $normalizeStrap($rawStrap, $name, $desc);
+        
+        $baseModel = $getBaseModel($name, $p['sku'], $brand);
+        
+        $groups[$baseModel][] = [
+            'id' => (int)$p['id'],
+            'strap_type' => $strapGroup,
+            'dial_color' => $dialGroup
+        ];
+    }
+
+    $stmtUpdate = $pdo->prepare("
+        UPDATE products 
+        SET parent_id = :parent_id, strap_type = :strap_type, dial_color = :dial_color 
+        WHERE id = :id
+    ");
+
+    $updatedCount = 0;
+    foreach ($groups as $model => $items) {
+        // Sort items by ID ascending
+        usort($items, function($a, $b) {
+            return $a['id'] <=> $b['id'];
+        });
+
+        // The first product in each group is the parent
+        $parent = $items[0];
+        
+        // Update parent in database (parent_id is null)
+        $stmtUpdate->execute([
+            ':parent_id' => null,
+            ':strap_type' => $parent['strap_type'],
+            ':dial_color' => $parent['dial_color'],
+            ':id' => $parent['id']
+        ]);
+        $updatedCount++;
+
+        // Update all other variations in database (parent_id is the parent's id)
+        for ($i = 1; $i < count($items); $i++) {
+            $child = $items[$i];
+            $stmtUpdate->execute([
+                ':parent_id' => $parent['id'],
+                ':strap_type' => $child['strap_type'],
+                ':dial_color' => $child['dial_color'],
+                ':id' => $child['id']
+            ]);
+            $updatedCount++;
+        }
+    }
+
+    echo "Successfully mapped and updated {$updatedCount} products into variations.\n";
 }

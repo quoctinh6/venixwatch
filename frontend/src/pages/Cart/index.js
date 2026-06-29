@@ -192,7 +192,8 @@ export default class CartPage {
         const item = cartService.getCart().find((entry) => String(entry.id) === String(id));
         if (item) {
           cartService.updateQty(id, item.qty - 1);
-          btn.closest('.cart-item-row')?.querySelector('.qty-val').textContent = Math.max(0, item.qty - 1);
+          const qtyVal = btn.closest('.cart-item-row')?.querySelector('.qty-val');
+          if (qtyVal) qtyVal.textContent = Math.max(0, item.qty - 1);
         }
         if (cartService.getCart().length === 0) {
           const content = wrap.querySelector('#cart-page-content');
@@ -210,7 +211,8 @@ export default class CartPage {
         const item = cartService.getCart().find((entry) => String(entry.id) === String(id));
         if (item) {
           cartService.updateQty(id, item.qty + 1);
-          btn.closest('.cart-item-row')?.querySelector('.qty-val').textContent = item.qty + 1;
+          const qtyVal = btn.closest('.cart-item-row')?.querySelector('.qty-val');
+          if (qtyVal) qtyVal.textContent = item.qty + 1;
         }
       });
     });

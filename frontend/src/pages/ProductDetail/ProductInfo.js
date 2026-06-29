@@ -1,5 +1,5 @@
 import { cartService } from '../../services/cartService.js';
-import { formatPrice, navigate } from '../../utils/helpers.js';
+import { formatPrice, navigate, navigateReplace } from '../../utils/helpers.js';
 import {
   PDP_KEYS, dispatchCompare, formatInstallment, icon, readStoredArray, renderStars, showToast, toggleStoredItem,
 } from './ProductDetailShared.js';
@@ -20,67 +20,109 @@ export default class ProductInfo {
     const user = authService.getUser();
     const canQuickEdit = user && user.permissions && user.permissions.includes('products:quick_edit');
 
-    const brandLower = String(this._product.brand || '').toLowerCase();
-    const isPremiumLayout = brandLower === 'carnival' || brandLower === 'casio' || brandLower === 'kemil';
-    let specsHtml = '';
+    const variants = this._product.variants || [];
+    const activeStrap = this._product.strap_type || '';
+    const activeColor = this._product.dial_color || '';
 
-    if (isPremiumLayout) {
-      const excludedLabels = ['Thương hiệu', 'Bộ sưu tập', 'Mã sản phẩm', 'Loại máy'];
-      const specs = (this._product.specs || []).filter(spec => !excludedLabels.includes(spec.label));
-      specsHtml = specs.length > 0 ? `
-        <div class="space-y-4 border-t border-gray-100 pt-5">
-          <div class="flex items-center gap-2 mb-1">
-            <span class="w-[5px] h-[18px] bg-[#C9A961] rounded-full"></span>
-            <h4 class="text-[13px] font-bold uppercase tracking-wider text-[#0A0A0A]">Thông số kỹ thuật</h4>
-          </div>
-          <div class="bg-[#FAF8F3] rounded-xl p-5 border border-[#E8E4DC] grid grid-cols-2 gap-x-8 gap-y-4 text-[13px]">
-            ${specs.map((spec, index) => {
-              const isLastRow = index >= specs.length - (specs.length % 2 === 0 ? 2 : 1);
-              const borderClass = isLastRow ? '' : 'border-b border-[#E8E4DC] pb-2.5';
-              return `
-                <div class="${borderClass}">
-                  <span class="font-semibold text-[#8E8E8E] block mb-1 text-[10px] uppercase tracking-wider">${spec.label}</span>
-                  <span class="text-[#0A0A0A] font-bold leading-normal block text-sm">${spec.value}</span>
-                </div>
-              `;
-            }).join('')}
-          </div>
-        </div>
-      ` : '';
-    } else {
-      const layoutDescFirst = this._product.layout_desc_first !== false;
+    const uniqueStraps = [...new Set(variants.map(v => v.strap_type).filter(Boolean))];
+    const uniqueColors = [...new Set(variants.map(v => v.dial_color).filter(Boolean))];
 
-      const descHtml = this._product.description ? `
-        <div class="space-y-3 border-t border-gray-100 pt-5">
-          <div class="flex items-center gap-2">
-            <span class="w-1.5 h-3 bg-[#C9A961] rounded-full"></span>
-            <h4 class="text-[13px] font-bold uppercase tracking-wider text-[#0A0A0A]">Thông tin cơ bản</h4>
-          </div>
-          <div class="text-[14px] leading-7 text-[#4B5563] whitespace-pre-wrap pl-3.5 border-l border-gray-100">${this._product.description}</div>
-        </div>
-      ` : '';
-
-      const excludedLabels = ['Thương hiệu', 'Bộ sưu tập', 'Mã sản phẩm', 'Loại máy'];
-      const specs = (this._product.specs || []).filter(spec => !excludedLabels.includes(spec.label));
-      const childSpecsHtml = specs.length > 0 ? `
-        <div class="space-y-4 border-t border-gray-100 pt-5">
-          <div class="flex items-center gap-2">
-            <span class="w-1.5 h-3 bg-[#C9A961] rounded-full"></span>
-            <h4 class="text-[13px] font-bold uppercase tracking-wider text-[#0A0A0A]">Thông số kỹ thuật</h4>
-          </div>
-          <div class="bg-[#FAF8F3] rounded-xl p-4 border border-[#E8E4DC]/60 grid grid-cols-2 gap-x-6 gap-y-4 text-[13px]">
-            ${specs.map(spec => `
-              <div class="border-b border-[#E8E4DC] last:border-b-0 pb-2">
-                <span class="font-semibold text-gray-500 block mb-0.5 text-[11px] uppercase tracking-wider">${spec.label}</span>
-                <span class="text-[#0A0A0A] font-medium leading-relaxed block">${spec.value}</span>
+    let variantsHtml = '';
+    if (variants.length > 1) {
+      variantsHtml = `
+        <div class="space-y-4 border-t border-[#E8E4DC] pt-4">
+          ${uniqueStraps.length > 1 ? `
+            <div class="space-y-2">
+              <span class="text-xs font-semibold uppercase tracking-[0.08em] text-[#0A0A0A]">Loại dây đeo: <span class="text-[#6B7280] font-normal">${activeStrap}</span></span>
+              <div class="flex flex-wrap gap-2">
+                ${uniqueStraps.map(strap => {
+                  const isSelected = strap === activeStrap;
+                  const hasCombination = variants.some(v => v.strap_type === strap && v.dial_color === activeColor);
+                  return `
+                    <button type="button" 
+                            data-variant-strap="${strap}" 
+                            class="px-4 py-2 border text-xs font-bold uppercase tracking-[0.05em] rounded-[6px] transition-all duration-200 
+                                   ${isSelected 
+                                     ? 'border-[#C9A961] bg-[#FAF8F3] text-[#0A0A0A] shadow-sm' 
+                                     : hasCombination 
+                                       ? 'border-[#E8E4DC] bg-white text-[#4B5563] hover:border-[#0A0A0A] hover:text-[#0A0A0A]' 
+                                       : 'border-dashed border-[#E5E7EB] bg-white text-zinc-300 opacity-60'}"
+                            ${!hasCombination && uniqueColors.length === 1 ? 'disabled' : ''}>
+                      ${strap}
+                    </button>
+                  `;
+                }).join('')}
               </div>
-            `).join('')}
-          </div>
-        </div>
-      ` : '';
+            </div>
+          ` : ''}
 
-      specsHtml = layoutDescFirst ? `${descHtml} ${childSpecsHtml}` : `${childSpecsHtml} ${descHtml}`;
+          ${uniqueColors.length > 1 ? `
+            <div class="space-y-2">
+              <span class="text-xs font-semibold uppercase tracking-[0.08em] text-[#0A0A0A]">Màu sắc mặt: <span class="text-[#6B7280] font-normal">${activeColor}</span></span>
+              <div class="flex flex-wrap gap-2">
+                ${uniqueColors.map(color => {
+                  const isSelected = color === activeColor;
+                  const hasCombination = variants.some(v => v.dial_color === color && v.strap_type === activeStrap);
+                  
+                  let colorClass = 'bg-zinc-200';
+                  const cLower = color.toLowerCase();
+                  if (cLower.includes('đen')) colorClass = 'bg-[#121212] border-white/20';
+                  else if (cLower.includes('trắng') || cLower.includes('bạc')) colorClass = 'bg-[#F2F2F2]';
+                  else if (cLower.includes('xanh dương') || cLower.includes('xanh lam')) colorClass = 'bg-[#1E3A8A]';
+                  else if (cLower.includes('xanh lá') || cLower.includes('lục')) colorClass = 'bg-[#065F46]';
+                  else if (cLower.includes('vàng') && cLower.includes('hồng')) colorClass = 'bg-[#E5A99E]';
+                  else if (cLower.includes('vàng')) colorClass = 'bg-[#D4AF37]';
+                  else if (cLower.includes('nâu') || cLower.includes('cà phê')) colorClass = 'bg-[#78350F]';
+                  else if (cLower.includes('xám') || cLower.includes('ghi')) colorClass = 'bg-[#6B7280]';
+                  else if (cLower.includes('đỏ')) colorClass = 'bg-[#991B1B]';
+                  else if (cLower.includes('hồng')) colorClass = 'bg-[#EC4899]';
+                  
+                  return `
+                    <button type="button" 
+                            data-variant-color="${color}" 
+                            class="inline-flex items-center gap-2 pl-2 pr-3 py-1.5 border text-xs font-bold uppercase tracking-[0.05em] rounded-[20px] transition-all duration-200 
+                                   ${isSelected 
+                                     ? 'border-[#C9A961] bg-[#FAF8F3] text-[#0A0A0A] shadow-sm' 
+                                     : hasCombination 
+                                       ? 'border-[#E8E4DC] bg-white text-[#4B5563] hover:border-[#0A0A0A] hover:text-[#0A0A0A]' 
+                                       : 'border-dashed border-[#E5E7EB] bg-white text-zinc-300 opacity-60'}"
+                            ${!hasCombination && uniqueStraps.length === 1 ? 'disabled' : ''}>
+                      <span class="inline-block w-4 h-4 rounded-full border border-black/10 ${colorClass}"></span>
+                      <span>${color}</span>
+                    </button>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+          ` : ''}
+        </div>
+      `;
     }
+
+    const getShortDescription = () => {
+      if (this._product.basic_info) return this._product.basic_info;
+      if (this._product.short_description) return this._product.short_description;
+      if (this._product.description) {
+        const cleanText = this._product.description.replace(/<\/?[^>]+(>|$)/g, "").trim();
+        if (cleanText.length > 220) {
+          const cut = cleanText.lastIndexOf(' ', 220);
+          return cleanText.substring(0, cut > 0 ? cut : 220) + '...';
+        }
+        return cleanText;
+      }
+      return '';
+    };
+
+    const shortDesc = getShortDescription();
+    const shortDescHtml = shortDesc ? `
+      <div class="space-y-3 border-t border-[#E8E4DC] pt-5">
+        <div class="flex items-center gap-2">
+          <span class="w-[5px] h-[18px] bg-[#C9A961] rounded-full"></span>
+          <h4 class="text-[13px] font-bold uppercase tracking-wider text-[#0A0A0A]">Mô tả ngắn</h4>
+        </div>
+        <div class="text-[14px] leading-relaxed text-[#4B5563] pl-3.5 border-l border-[#E8E4DC]">${shortDesc}</div>
+      </div>
+    ` : '';
 
     wrap.innerHTML = `
       <div class="space-y-4 rounded-[12px] border border-[#E8E4DC] bg-white p-5 shadow-sm lg:p-7">
@@ -122,52 +164,12 @@ export default class ProductInfo {
             ${icon('credit')} Trả góp 0% từ ${formatInstallment(this._product.sale_price || this._product.price)}/tháng
           </div>
         </div>
+        ${variantsHtml}
         <div class="space-y-3">
           <p class="inline-flex items-center gap-2 rounded-full bg-[#FEF2F2] px-3 py-1.5 text-sm font-semibold text-[#DC2626]">⚡ Còn 3 sản phẩm cuối</p>
         </div>
 
-        <div class="grid grid-cols-2 gap-x-4 gap-y-3 border-t border-[#E8E4DC] pt-4 text-[12px]">
-          <div class="flex items-center gap-2.5">
-            <span class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#FAF8F3] text-[#C9A961]">
-              ${icon('truck', 'h-4 w-4')}
-            </span>
-            <div>
-              <p class="font-bold text-[#0A0A0A] leading-none">Miễn Phí Vận Chuyển</p>
-              <p class="text-[10px] text-zinc-400 mt-1">Đơn trên 500.000đ</p>
-            </div>
-          </div>
-          
-          <div class="flex items-center gap-2.5">
-            <span class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#FAF8F3] text-[#C9A961]">
-              ${icon('rotate', 'h-4 w-4')}
-            </span>
-            <div>
-              <p class="font-bold text-[#0A0A0A] leading-none">Đổi Trả Dễ Dàng</p>
-              <p class="text-[10px] text-zinc-400 mt-1">Trong vòng 30 ngày</p>
-            </div>
-          </div>
-
-          <div class="flex items-center gap-2.5">
-            <span class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#FAF8F3] text-[#C9A961]">
-              ${icon('shield', 'h-4 w-4')}
-            </span>
-            <div>
-              <p class="font-bold text-[#0A0A0A] leading-none">Bảo Hành 2 Năm</p>
-              <p class="text-[10px] text-zinc-400 mt-1">Chính hãng tuyệt đối</p>
-            </div>
-          </div>
-
-          <div class="flex items-center gap-2.5">
-            <span class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#FAF8F3] text-[#C9A961]">
-              ${icon('star', 'h-4 w-4')}
-            </span>
-            <div>
-              <p class="font-bold text-[#0A0A0A] leading-none">Chính Hãng 100%</p>
-              <p class="text-[10px] text-zinc-400 mt-1">Cam kết uy tín</p>
-            </div>
-          </div>
-        </div>
-        ${specsHtml}
+        ${shortDescHtml}
 
         <div class="flex items-center gap-3 border-t border-[#E8E4DC] pt-4">
           <span class="text-sm font-semibold uppercase tracking-[0.08em] text-[#0A0A0A]">Số lượng</span>
@@ -190,21 +192,35 @@ export default class ProductInfo {
         </div>
       </div>
 
-      <div class="rounded-[12px] bg-[#FAF8F3] p-5">
-        <div class="space-y-3 text-sm text-[#4B5563]">
-          <p class="flex items-start gap-3">${icon('truck')} <span>Giao hàng tận nơi: ${this._product.delivery?.delivery_eta || '2-3 ngày làm việc'}</span></p>
-          <p class="flex items-start gap-3">${icon('message')} <span>Nhận tại cửa hàng: ${this._product.delivery?.pickup_store || '123 Nguyễn Huệ, Q.1, TP.HCM'}</span></p>
-        </div>
-        <div class="mt-4 flex gap-3">
-          <input type="text" placeholder="Mã bưu điện" class="h-11 flex-1 rounded-[8px] border border-[#E8E4DC] bg-white px-3 text-sm focus:border-[#C9A961] focus:outline-none"/>
-          <button type="button" class="h-11 rounded-[8px] border border-[#0A0A0A] px-4 text-xs font-bold uppercase tracking-[0.08em]">Kiểm tra</button>
-        </div>
-      </div>
+
 
     `;
     this._bind(wrap);
     this._mountMobileSticky();
+    this._element = wrap;
     return wrap;
+  }
+
+  updateProduct(product) {
+    this._product = product;
+    this._qty = 1;
+    
+    if (this._element) {
+      if (this._toggleMobileBar) {
+        window.removeEventListener('scroll', this._toggleMobileBar);
+        this._toggleMobileBar = null;
+      }
+      if (this._onPageRendered) {
+        window.removeEventListener('page-rendered', this._onPageRendered);
+        this._onPageRendered = null;
+      }
+      const bar = document.getElementById('pdp-mobile-bar');
+      if (bar) bar.remove();
+      
+      const newInfo = this.render();
+      this._element.replaceWith(newInfo);
+      this._element = newInfo;
+    }
   }
 
   _bind(root) {
@@ -228,6 +244,36 @@ export default class ProductInfo {
     root.querySelector('[data-quick-edit]')?.addEventListener('click', () => {
       openProductForm(this._product, () => {
         window.location.reload();
+      });
+    });
+
+    root.querySelectorAll('[data-variant-strap]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const clickedStrap = btn.dataset.variantStrap;
+        const variants = this._product.variants || [];
+        const activeColor = this._product.dial_color || '';
+        let target = variants.find(v => v.strap_type === clickedStrap && v.dial_color === activeColor);
+        if (!target) {
+          target = variants.find(v => v.strap_type === clickedStrap);
+        }
+        if (target && target.slug !== this._product.slug) {
+          navigateReplace('/san-pham/' + target.slug);
+        }
+      });
+    });
+
+    root.querySelectorAll('[data-variant-color]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const clickedColor = btn.dataset.variantColor;
+        const variants = this._product.variants || [];
+        const activeStrap = this._product.strap_type || '';
+        let target = variants.find(v => v.dial_color === clickedColor && v.strap_type === activeStrap);
+        if (!target) {
+          target = variants.find(v => v.dial_color === clickedColor);
+        }
+        if (target && target.slug !== this._product.slug) {
+          navigateReplace('/san-pham/' + target.slug);
+        }
       });
     });
   }

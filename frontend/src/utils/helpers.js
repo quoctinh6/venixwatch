@@ -158,6 +158,23 @@ export function navigate(path) {
 }
 
 /**
+ * Navigate using replaceState (for SPA routing without polluting history stack)
+ */
+export function navigateReplace(path) {
+  if (window.lenis) window.lenis.start();
+  
+  if (typeof window.cancelOngoingScrollRestoration === 'function') {
+    window.cancelOngoingScrollRestoration();
+  }
+
+  // Clear target scroll position
+  sessionStorage.removeItem(`dhat_scroll_${path}`);
+
+  history.replaceState({ isForward: true }, '', path);
+  window.dispatchEvent(new PopStateEvent('popstate'));
+}
+
+/**
  * Clamp a number between min and max
  */
 export function clamp(val, min, max) {

@@ -15,6 +15,8 @@ export function openFlashSaleForm(flashSale, onSaved) {
       </div>
       <form id="flash-form" class="p-6 space-y-4">
         <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1.5">Tìm kiếm sản phẩm</label>
+          <input type="text" id="fsf-product-search" class="w-full mb-2 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-[#C9A84C]" placeholder="Nhập tên sản phẩm để lọc..."/>
           <label class="block text-sm font-medium text-gray-700 mb-1.5">Sản phẩm *</label>
           <select name="product_id" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-[#C9A84C]" id="fsf-product">
             <option value="">-- Chọn sản phẩm --</option>
@@ -54,9 +56,16 @@ export function openFlashSaleForm(flashSale, onSaved) {
   const close = () => overlay.remove();
   overlay.querySelector('#fsf-close').addEventListener('click', close);
   overlay.querySelector('#fsf-cancel').addEventListener('click', close);
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) close();
+  });
 
   let products = [];
-  loadProductOptions(overlay, flashSale?.product_id).then(p => { products = p; });
+  loadProductOptions(overlay, flashSale?.product_id).then(p => { 
+    products = p; 
+    // Trigger initial preview if product selected
+    updatePreview();
+  });
 
   const sel = overlay.querySelector('#fsf-product');
   const salePriceInput = overlay.querySelector('[name="sale_price"]');
@@ -101,21 +110,45 @@ export function openFlashSaleForm(flashSale, onSaved) {
 async function loadProductOptions(overlay, selectedId) {
   try {
     const res = await getProducts({ per_page: 200 });
-    const items = res.data || res.items || res;
+    const items = Array.isArray(res.data) ? res.data : (Array.isArray(res.items) ? res.items : (Array.isArray(res) ? res : []));
     const list = Array.isArray(items) ? items : [];
     const sel = overlay.querySelector('#fsf-product');
-    list.forEach(p => {
-      const opt = document.createElement('option');
-      opt.value = p.id; opt.textContent = `${p.name} — ${formatPrice(p.price)}`;
-      opt.dataset.price = p.price;
-      if (p.id == selectedId) opt.selected = true;
-      sel.appendChild(opt);
+    const searchInput = overlay.querySelector('#fsf-product-search');
+    
+    const populateOptions = (filterText = '') => {
+      const currentSelected = sel.value || selectedId;
+      sel.innerHTML = '<option value="">-- Chọn sản phẩm --</option>';
+      list.forEach(p => {
+        const name = p.name || '';
+        const sku = p.sku || '';
+        const text = `${name} — ${formatPrice(p.price)}`;
+        if (filterText && !name.toLowerCase().includes(filterText.toLowerCase()) && !sku.toLowerCase().includes(filterText.toLowerCase())) {
+          if (p.id != currentSelected) {
+            return;
+          }
+        }
+        const opt = document.createElement('option');
+        opt.value = p.id; opt.textContent = text;
+        opt.dataset.price = p.price;
+        if (p.id == currentSelected) opt.selected = true;
+        sel.appendChild(opt);
+      });
+    };
+
+    populateOptions();
+    
+    searchInput?.addEventListener('input', (e) => {
+      populateOptions(e.target.value.trim());
+      // Trigger preview update after filtering/changing
+      const triggerChangeEvent = new Event('change');
+      sel.dispatchEvent(triggerChangeEvent);
     });
+    
     return list;
   } catch { return []; }
 }
 
 function toDatetimeLocal(isoStr) {
   if (!isoStr) return '';
-  return isoStr.slice(0, 16);
+  return isoStr.replace(' ', 'T').slice(0, 16);
 }

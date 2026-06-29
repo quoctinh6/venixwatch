@@ -30,6 +30,12 @@ class ProductDetailService
             return ['success' => false, 'error' => 'Product not found.', 'code' => 404];
         }
 
+        $flashSales = new \App\Models\FlashSale(Database::getInstance());
+        $activeFlash = $flashSales->findByProduct((int)$product['id']);
+        if ($activeFlash) {
+            $product['sale_price'] = $activeFlash['sale_price'];
+        }
+
         $product['category_slug'] = $product['category_slug'] ?? $this->guessCategorySlug((string)($product['category_name'] ?? ''));
         $product['images'] = $this->buildImages($product);
         $product['ref_number'] = $product['sku'] ?? $product['slug'];
@@ -43,6 +49,33 @@ class ProductDetailService
         }
         $product['layout_desc_first'] = !isset($custom['_layout_desc_first']) || (bool)$custom['_layout_desc_first'];
         $product['specs'] = $this->buildSpecs($product);
+
+        // Fetch variations/variants
+        $parentId = $product['parent_id'] !== null ? (int)$product['parent_id'] : (int)$product['id'];
+        
+        $pdo = Database::getInstance();
+        $vStmt = $pdo->prepare('
+            SELECT id, name, slug, price, sale_price, stock, sku, strap_type, dial_color, images 
+            FROM products 
+            WHERE (id = :parent_id1 OR parent_id = :parent_id2) AND is_active = 1
+        ');
+        $vStmt->execute([
+            ':parent_id1' => $parentId,
+            ':parent_id2' => $parentId
+        ]);
+        $variantRows = $vStmt->fetchAll();
+        
+        $flashSalesModel = new \App\Models\FlashSale($pdo);
+        foreach ($variantRows as &$vRow) {
+            $vRow['images'] = $vRow['images'] ? json_decode($vRow['images'], true) : [];
+            $vRow['image'] = !empty($vRow['images']) ? $vRow['images'][0] : null;
+            
+            $vFlash = $flashSalesModel->findByProduct((int)$vRow['id']);
+            if ($vFlash) {
+                $vRow['sale_price'] = $vFlash['sale_price'];
+            }
+        }
+        $product['variants'] = $variantRows;
 
         return ['success' => true, 'data' => $product];
     }
@@ -71,6 +104,7 @@ class ProductDetailService
             'is_active' => 1,
             'limit' => 20,
             'sort' => $mode === 'cross_sell' ? 'bestseller' : 'price_asc',
+            'parent_only' => 1,
         ])['data'];
 
         $basePrice = (float)($product['sale_price'] ?: $product['price']);

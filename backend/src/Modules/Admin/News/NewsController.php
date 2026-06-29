@@ -92,7 +92,7 @@ class NewsController
         $body = $this->body();
         $body['author'] = $changedBy;
 
-        $this->respond($this->service->create($body), 201);
+        $this->respond($this->service->createNews($body), 201);
     }
 
     /**
@@ -101,7 +101,7 @@ class NewsController
     public function update(int $id): void
     {
         RBACMiddleware::require('settings:write');
-        $this->respond($this->service->update($id, $this->body()));
+        $this->respond($this->service->updateNews($id, $this->body()));
     }
 
     /**
@@ -110,7 +110,7 @@ class NewsController
     public function destroy(int $id): void
     {
         RBACMiddleware::require('settings:write');
-        $this->respond($this->service->delete($id));
+        $this->respond($this->service->deleteNews($id));
     }
 
     /**

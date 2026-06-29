@@ -42,7 +42,7 @@ export function renderAnalytics(container) {
           <!-- Export button -->
           <button id="analytics-export-btn" class="bg-zinc-950 hover:bg-zinc-800 active:scale-95 text-white font-semibold px-4 py-2.5 rounded-xl shadow-md transition-all flex items-center gap-1.5 cursor-pointer">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Xuất Báo Cáo
+            Xuất Excel
           </button>
         </div>
       </div>
@@ -658,72 +658,90 @@ function renderCities(container, list) {
   `).join('');
 }
 
-function downloadCSV(filename, headers, rows) {
-  const csvContent = "\uFEFF" + [
-    headers.join(','),
-    ...rows.map(row => row.map(val => {
-      const escaped = String(val === null || val === undefined ? '' : val).replace(/"/g, '""');
-      return `"${escaped}"`;
-    }).join(','))
-  ].join('\r\n');
-  
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+function downloadXLS(filename, reportTitle, sections) {
+  const dateStr = new Date().toLocaleDateString('vi-VN');
+  const maxCols = Math.max(...sections.map(s => s.columns.length));
+  const esc = (v) => String(v === null || v === undefined ? '' : v)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+  const S = {
+    ti: 'font-family:Arial,sans-serif;font-size:15pt;font-weight:bold;color:#C9A961;background:#0A0A0A;text-align:center;padding:10px 20px;',
+    su: 'font-family:Arial,sans-serif;font-size:10pt;color:#9CA3AF;background:#0A0A0A;text-align:center;padding:4px 20px;',
+    sp: 'background:#FFFFFF;padding:5px;',
+    se: 'font-family:Arial,sans-serif;font-size:11pt;font-weight:bold;color:#C9A961;background:#1A1A1A;padding:7px 10px;',
+    ch: 'font-family:Arial,sans-serif;font-size:11pt;font-weight:bold;color:#FFFFFF;background:#C9A84C;text-align:center;padding:6px 10px;border:1px solid #B8963E;',
+    re: 'font-family:Arial,sans-serif;font-size:10pt;color:#374151;background:#FFFFFF;padding:5px 10px;border:1px solid #E5E7EB;',
+    ro: 'font-family:Arial,sans-serif;font-size:10pt;color:#374151;background:#F3F4F6;padding:5px 10px;border:1px solid #E5E7EB;',
+  };
+
+  let t = '<table cellspacing="0" cellpadding="0" border="0">';
+  t += `<tr><td colspan="${maxCols}" style="${S.ti}">VENIX WATCH</td></tr>`;
+  t += `<tr><td colspan="${maxCols}" style="${S.su}">${esc(reportTitle)}</td></tr>`;
+  t += `<tr><td colspan="${maxCols}" style="${S.su}">Xu\u1EA5t ng\u00E0y: ${dateStr}</td></tr>`;
+
+  sections.forEach(sec => {
+    t += `<tr>${Array(maxCols).fill(`<td style="${S.sp}"> </td>`).join('')}</tr>`;
+    if (sec.heading) t += `<tr><td colspan="${maxCols}" style="${S.se}">${esc(sec.heading)}</td></tr>`;
+    t += '<tr>';
+    for (let i = 0; i < maxCols; i++) t += `<td style="${S.ch}">${esc(sec.columns[i] || '')}</td>`;
+    t += '</tr>';
+    sec.rows.forEach((row, idx) => {
+      const s = idx % 2 === 0 ? S.re : S.ro;
+      t += '<tr>';
+      for (let i = 0; i < maxCols; i++) {
+        const v = row[i] === null || row[i] === undefined ? '' : row[i];
+        t += `<td style="${s}">${esc(v)}</td>`;
+      }
+      t += '</tr>';
+    });
+  });
+  t += '</table>';
+
+  const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="UTF-8"><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Bao cao</x:Name><x:WorksheetOptions><x:Selected/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body>${t}</body></html>`;
+
+  const blob = new Blob(['\uFEFF', html], { type: 'application/vnd.ms-excel' });
   const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.setAttribute('download', filename);
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
+  const a = document.createElement('a');
+  a.href = url;
+  a.setAttribute('download', filename);
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 function exportCSVReport(data) {
-  // Export Summary metrics
   const sum = data.summary || {};
-  downloadCSV(
-    `Bao-cao-tom-tat-analytics-${new Date().toISOString().split('T')[0]}.csv`,
-    ['Chỉ số', 'Giá trị'],
-    [
-      ['Tổng lượt truy cập', sum.total_visits],
-      ['Khách hàng độc nhất', sum.unique_visitors],
-      ['Tổng lượt xem trang', sum.page_views],
-      ['Thời gian lưu lại trung bình (giây)', sum.avg_time_on_page],
-      ['Cuộn sâu trung bình (%)', sum.avg_scroll_depth],
-      ['Số đơn hàng phát sinh', sum.total_orders],
-      ['Doanh thu ước tính (VND)', sum.total_revenue],
-      ['Giá trị đơn hàng trung bình (VND)', sum.aov],
-    ]
-  );
+  const dateStr = new Date().toISOString().split('T')[0];
 
-  // Export top viewed products
-  if (data.top_products && data.top_products.length > 0) {
-    setTimeout(() => {
-      downloadCSV(
-        `Top-san-pham-xem-nhieu-${new Date().toISOString().split('T')[0]}.csv`,
-        ['Mã SKU', 'Tên sản phẩm', 'Lượt xem', 'Giá bán'],
-        data.top_products.map(p => [
-          p.sku || 'N/A',
-          p.name,
-          p.views,
-          p.sale_price || p.price
-        ])
-      );
-    }, 300);
-  }
-
-  // Export top searches
-  if (data.top_searches && data.top_searches.length > 0) {
-    setTimeout(() => {
-      downloadCSV(
-        `Top-tu-khoa-tim-kiem-${new Date().toISOString().split('T')[0]}.csv`,
-        ['Từ khóa', 'Tần suất tìm kiếm'],
-        data.top_searches.map(s => [
-          s.name,
-          s.count
-        ])
-      );
-    }, 600);
-  }
+  downloadXLS(`Bao-cao-analytics-${dateStr}.xls`, 'BÁO CÁO ANALYTICS', [
+    {
+      heading: '▌ BÁO CÁO TÓM TẮT',
+      columns: ['Chỉ số', 'Giá trị'],
+      rows: [
+        ['Tổng lượt truy cập', sum.total_visits ?? ''],
+        ['Khách hàng độc nhất', sum.unique_visitors ?? ''],
+        ['Tổng lượt xem trang', sum.page_views ?? ''],
+        ['Thời gian lưu lại trung bình (giây)', sum.avg_time_on_page ?? ''],
+        ['Cuộn sâu trung bình (%)', sum.avg_scroll_depth ?? ''],
+        ['Số đơn hàng phát sinh', sum.total_orders ?? ''],
+        ['Doanh thu ước tính (VND)', sum.total_revenue ?? ''],
+        ['Giá trị đơn hàng trung bình (VND)', sum.aov ?? ''],
+      ],
+    },
+    {
+      heading: '▌ TOP SẢN PHẨM XEM NHIỀU',
+      columns: ['Mã SKU', 'Tên sản phẩm', 'Lượt xem', 'Giá bán (VND)'],
+      rows: (data.top_products || []).map(p => [
+        p.sku || 'N/A', p.name, p.views, p.sale_price || p.price,
+      ]),
+    },
+    {
+      heading: '▌ TOP TỪ KHÓA TÌM KIẾM',
+      columns: ['Từ khóa', 'Tần suất tìm kiếm'],
+      rows: (data.top_searches || []).map(s => [s.name, s.count]),
+    },
+  ]);
 }
 
 function getMockRows(type) {

@@ -1,6 +1,7 @@
 import { getFlashSales, deleteFlashSale } from '../../../services/adminService.js';
 import { createConfirmDialog, showToast, formatPrice, formatDate, createPagination } from '../shared/ui.js';
 import { openFlashSaleForm } from './FlashSaleForm.js';
+import { openBulkDiscountModal } from '../Products/BulkDiscountModal.js';
 
 const PAGE_SIZE = 10;
 let state = { page: 1, sortDir: {}, data: [] };
@@ -52,7 +53,7 @@ export function renderFlashSales(container) {
   `;
 
   container.querySelector('#fs-add-btn').addEventListener('click', () => {
-    openFlashSaleForm(null, () => loadFlashSales(container));
+    openBulkDiscountModal(() => loadFlashSales(container), { isFlashSaleMode: true });
   });
 
   container.querySelectorAll('.sort-th').forEach(th => {

@@ -64,7 +64,25 @@ export default class ProductGallery {
       </div>
     `;
     this._bind(wrap);
+    this._element = wrap;
     return wrap;
+  }
+
+  updateProduct(product) {
+    this._product = product;
+    this._images = normalizeImages(product.images || [product.image]);
+    this._index = 0;
+    
+    if (this._element) {
+      if (this._onKeyDown) {
+        document.removeEventListener('keydown', this._onKeyDown);
+        this._onKeyDown = null;
+      }
+      
+      const newGallery = this.render();
+      this._element.replaceWith(newGallery);
+      this._element = newGallery;
+    }
   }
 
   _bind(root) {

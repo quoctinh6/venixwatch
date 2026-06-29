@@ -1,4 +1,4 @@
-const BADGES = [
+const DEFAULT_BADGES = [
   {
     icon: `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>`,
     title: 'Miễn Phí Vận Chuyển',
@@ -23,13 +23,17 @@ const BADGES = [
 
 export class TrustBadges {
   render() {
+    const badges = (window.APP_SETTINGS?.trust_badges?.length > 0)
+      ? window.APP_SETTINGS.trust_badges
+      : DEFAULT_BADGES;
+
     const section = document.createElement('section');
     section.className = 'border-y border-zinc-200 py-8 font-sans sm:py-10 overflow-hidden';
 
     const container = document.createElement('div');
     container.className = 'mx-auto grid max-w-7xl grid-cols-1 divide-y divide-zinc-200 px-4 sm:grid-cols-2 sm:divide-x sm:divide-y-0 sm:px-6 lg:grid-cols-4 lg:px-8';
 
-    BADGES.forEach((badge, index) => {
+    badges.forEach((badge, index) => {
       const item = document.createElement('div');
       item.className = 'feature-item flex items-start gap-4 px-0 py-5 transition hover:bg-zinc-50 sm:px-5 lg:px-6';
       item.style.setProperty('--item-index', index);

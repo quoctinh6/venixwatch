@@ -1,8 +1,9 @@
 import { API_BASE, STORAGE_KEYS } from './config.js';
 import { getProductsOffline } from './productService.js';
+import { getToken } from './authService.js';
 
 function headers() {
-  const token = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN) || localStorage.getItem('dhat_token');
+  const token = getToken();
   const h = { 'Content-Type': 'application/json' };
   if (token) h.Authorization = `Bearer ${token}`;
   return h;
@@ -58,6 +59,9 @@ export const toggleProduct = (id) => api('PATCH', `/api/admin/products/${id}/tog
 export const deleteProduct = (id) => api('DELETE', `/api/admin/products/${id}`);
 export const getLowStock = () => api('GET', '/api/admin/products/low-stock');
 export const computeBadges = () => api('POST', '/api/admin/products/compute-badges');
+export const getProduct = (id) => api('GET', `/api/admin/products/${id}`);
+export const getVariants = (id) => api('GET', `/api/admin/products/${id}/variants`);
+export const bulkDiscount = (d) => api('POST', '/api/admin/products/bulk-discount', d);
 
 // Images
 export const getImages = () => api('GET', '/api/admin/images');

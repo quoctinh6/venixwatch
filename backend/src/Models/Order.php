@@ -57,10 +57,10 @@ class Order
         $stmt = $this->pdo->prepare(
             'INSERT INTO orders
                (user_id, customer_name, customer_email, customer_phone,
-                shipping_address, total_amount, status, notes)
+                shipping_address, total_amount, status, notes, payment_method)
              VALUES
                (:user_id, :customer_name, :customer_email, :customer_phone,
-                :shipping_address, :total_amount, :status, :notes)'
+                :shipping_address, :total_amount, :status, :notes, :payment_method)'
         );
         $stmt->bindValue(':user_id',          $data['user_id']          ?? null,      PDO::PARAM_INT);
         $stmt->bindValue(':customer_name',    $data['customer_name'],                 PDO::PARAM_STR);
@@ -70,6 +70,7 @@ class Order
         $stmt->bindValue(':total_amount',     $data['total_amount']);
         $stmt->bindValue(':status',           $data['status']           ?? 'pending', PDO::PARAM_STR);
         $stmt->bindValue(':notes',            $data['notes']            ?? null,      PDO::PARAM_STR);
+        $stmt->bindValue(':payment_method',   $data['payment_method']   ?? 'cod',     PDO::PARAM_STR);
         $stmt->execute();
         return (int)$this->pdo->lastInsertId();
     }
@@ -80,7 +81,8 @@ class Order
             'UPDATE orders SET
                customer_name = :customer_name, customer_email = :customer_email,
                customer_phone = :customer_phone, shipping_address = :shipping_address,
-               total_amount = :total_amount, status = :status, notes = :notes
+               total_amount = :total_amount, status = :status, notes = :notes,
+               payment_method = :payment_method
              WHERE id = :id'
         );
         $stmt->bindValue(':customer_name',    $data['customer_name'],    PDO::PARAM_STR);
@@ -90,6 +92,7 @@ class Order
         $stmt->bindValue(':total_amount',     $data['total_amount']);
         $stmt->bindValue(':status',           $data['status'],           PDO::PARAM_STR);
         $stmt->bindValue(':notes',            $data['notes'] ?? null,    PDO::PARAM_STR);
+        $stmt->bindValue(':payment_method',   $data['payment_method']   ?? 'cod',  PDO::PARAM_STR);
         $stmt->bindValue(':id',               $id,                       PDO::PARAM_INT);
         return $stmt->execute();
     }

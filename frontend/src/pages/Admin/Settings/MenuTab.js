@@ -29,7 +29,7 @@ export function renderMenuTab(settings) {
     <div class="space-y-6">
       <div class="flex items-center justify-between border-b pb-3">
         <div>
-          <h3 class="text-base font-bold text-gray-900">Cấu Hìn Menu Điều Hướng</h3>
+          <h3 class="text-base font-bold text-gray-900">Cấu Hình Menu Điều Hướng</h3>
           <p class="text-xs text-gray-500 mt-0.5">Tùy chỉnh các liên kết xuất hiện trên thanh menu chính của trang web.</p>
         </div>
         <button id="add-menu-item" class="bg-zinc-900 hover:bg-zinc-800 text-white font-semibold text-xs px-3.5 py-2 rounded-lg transition-colors flex items-center gap-1.5">

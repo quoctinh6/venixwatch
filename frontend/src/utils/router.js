@@ -5,17 +5,25 @@ import { navigate } from './helpers.js';
 
 const routes = [
   { path: '/', component: () => import('../pages/Home/index.js') },
+  { path: '/tim-kiem', component: () => import('../pages/ProductList/index.js') },
   { path: '/nam', component: () => import('../pages/ProductList/index.js'), params: { category_slug: 'nam' } },
   { path: '/nu', component: () => import('../pages/ProductList/index.js'), params: { category_slug: 'nu' } },
   { path: '/phu-kien', component: () => import('../pages/ProductList/index.js'), params: { category_slug: 'phu-kien' } },
   { path: '/sale', component: () => import('../pages/ProductList/index.js'), params: { category_slug: 'sale', badge: 'SALE' } },
   { path: '/gio-hang', component: () => import('../pages/Cart/index.js') },
-  { path: '/thanh-toan', component: () => import('../pages/Checkout/index.js') },
-  { path: '/tai-khoan', component: () => import('../pages/Account/index.js') },
+  { path: '/thanh-toan', component: () => import('../pages/Checkout/index.js?v=1.0.1') },
+  { path: '/tai-khoan', component: () => import('../pages/Account/index.js?v=1.0.1') },
   { path: '/so-sanh', component: () => import('../pages/Compare/index.js') },
   { path: '/san-pham/:slug', component: () => import('../pages/ProductDetail/index.js') },
   { path: '/tin-tuc', component: () => import('../pages/NewsList/index.js') },
   { path: '/tin-tuc/:slug', component: () => import('../pages/NewsDetail/index.js') },
+  { path: '/gioi-thieu', component: () => import('../pages/StaticPolicy/index.js'), params: { policyType: 'gioi-thieu' } },
+  { path: '/van-chuyen', component: () => import('../pages/StaticPolicy/index.js'), params: { policyType: 'van-chuyen' } },
+  { path: '/doi-tra', component: () => import('../pages/StaticPolicy/index.js'), params: { policyType: 'doi-tra' } },
+  { path: '/bao-hanh', component: () => import('../pages/StaticPolicy/index.js'), params: { policyType: 'bao-hanh' } },
+  { path: '/bao-mat', component: () => import('../pages/StaticPolicy/index.js'), params: { policyType: 'bao-mat' } },
+  { path: '/dieu-khoan', component: () => import('../pages/StaticPolicy/index.js'), params: { policyType: 'dieu-khoan' } },
+  { path: '/faq', component: () => import('../pages/StaticPolicy/index.js'), params: { policyType: 'faq' } },
 ];
 
 function matchRoute(pathname) {
@@ -112,6 +120,18 @@ async function handleRoute() {
     if (localSeq !== routeSeq) return; // Bỏ qua nếu đã có lệnh chuyển trang mới hơn
 
     const PageClass = mod.default || mod[Object.keys(mod)[0]];
+
+    // Check if current page is the same class and can be updated in-place
+    if (_currentPageInstance && _currentPageInstance.constructor === PageClass) {
+      if (typeof _currentPageInstance.updateParams === 'function') {
+        _currentPageInstance.updateParams(match.params);
+      }
+      if (_mainNavbar && typeof _mainNavbar.updateActiveLinks === 'function') {
+        _mainNavbar.updateActiveLinks();
+      }
+      window.dispatchEvent(new CustomEvent('page-rendered'));
+      return;
+    }
 
     app.innerHTML = '';
 

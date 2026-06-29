@@ -44,6 +44,9 @@ class ProductService
 
         $id      = $this->model->create($data);
         $product = $this->model->findById($id);
+
+        $this->syncProductFlashSale((int)$id, $data);
+
         return ['success' => true, 'data' => $product];
     }
 
@@ -66,7 +69,46 @@ class ProductService
         }
 
         $this->model->update($id, $data);
+
+        $this->syncProductFlashSale($id, $data);
+
         return ['success' => true, 'data' => $this->model->findById($id)];
+    }
+
+    private function syncProductFlashSale(int $productId, array $data): void
+    {
+        $pdo = Database::getInstance();
+        $salePrice = isset($data['sale_price']) && $data['sale_price'] !== '' ? (float)$data['sale_price'] : null;
+
+        if ($salePrice !== null && $salePrice > 0) {
+            // Check if there is an active or future flash sale for this product
+            $stmt = $pdo->prepare("SELECT id FROM flash_sales WHERE product_id = :product_id AND ends_at >= NOW() LIMIT 1");
+            $stmt->execute([':product_id' => $productId]);
+            $fsId = $stmt->fetchColumn();
+
+            if ($fsId) {
+                // Update existing active/future flash sale price
+                $stmtUpdate = $pdo->prepare("UPDATE flash_sales SET sale_price = :sale_price WHERE id = :id");
+                $stmtUpdate->execute([
+                    ':sale_price' => $salePrice,
+                    ':id' => (int)$fsId
+                ]);
+            } else {
+                // Create a new flash sale starting now and ending 30 days from now
+                $stmtInsert = $pdo->prepare("
+                    INSERT INTO flash_sales (product_id, sale_price, starts_at, ends_at)
+                    VALUES (:product_id, :sale_price, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY))
+                ");
+                $stmtInsert->execute([
+                    ':product_id' => $productId,
+                    ':sale_price' => $salePrice
+                ]);
+            }
+        } else {
+            // Delete active/future flash sales if discount is removed
+            $stmtDelete = $pdo->prepare("DELETE FROM flash_sales WHERE product_id = :product_id AND ends_at >= NOW()");
+            $stmtDelete->execute([':product_id' => $productId]);
+        }
     }
 
     private function resolveCategorySubcategoryAndBrand(array &$data, ?array $existing = null): void
@@ -179,6 +221,15 @@ class ProductService
         return ['success' => true, 'data' => $product];
     }
 
+    public function getVariants(int $id): array
+    {
+        $product = $this->model->findById($id);
+        if (!$product) {
+            return ['success' => false, 'error' => 'Product not found.', 'code' => 404];
+        }
+        return ['success' => true, 'data' => $this->model->findVariants($id)];
+    }
+
     private function validate(array $data, int $excludeId = 0): ?array
     {
         if (empty($data['name'])) {
@@ -229,5 +280,139 @@ class ProductService
             $slug = $base . '-' . $counter++;
         }
         return $slug;
+    }
+
+    public function applyBulkDiscount(array $data): array
+    {
+        $scope = $data['scope'] ?? '';
+        $targetValues = $data['target_values'] ?? [];
+        $action = $data['action'] ?? 'apply';
+        $discountType = $data['discount_type'] ?? 'percentage';
+        $discountValue = isset($data['discount_value']) ? (float)$data['discount_value'] : 0.0;
+        $startsAt = !empty($data['starts_at']) ? $data['starts_at'] : null;
+        $endsAt = !empty($data['ends_at']) ? $data['ends_at'] : null;
+
+        if (empty($scope) || empty($targetValues)) {
+            return ['success' => false, 'error' => 'Missing scope or target values.', 'code' => 400];
+        }
+
+        $pdo = Database::getInstance();
+
+        $where = '';
+        $params = [];
+        if ($scope === 'brand') {
+            $placeholders = [];
+            foreach ($targetValues as $idx => $val) {
+                $k = ":brand_{$idx}";
+                $placeholders[] = $k;
+                $params[$k] = trim($val);
+            }
+            $where = "brand IN (" . implode(',', $placeholders) . ")";
+        } elseif ($scope === 'category') {
+            $placeholders = [];
+            foreach ($targetValues as $idx => $val) {
+                $k = ":cat_{$idx}";
+                $placeholders[] = $k;
+                $params[$k] = (int)$val;
+            }
+            $where = "category_id IN (" . implode(',', $placeholders) . ")";
+        } elseif ($scope === 'sku') {
+            $placeholders = [];
+            foreach ($targetValues as $idx => $val) {
+                $k = ":sku_{$idx}";
+                $placeholders[] = $k;
+                $params[$k] = trim($val);
+            }
+            $where = "sku IN (" . implode(',', $placeholders) . ")";
+        } else {
+            return ['success' => false, 'error' => 'Invalid scope.', 'code' => 400];
+        }
+
+        try {
+            $pdo->beginTransaction();
+
+            $stmt = $pdo->prepare("SELECT id, price FROM products WHERE {$where}");
+            $stmt->execute($params);
+            $products = $stmt->fetchAll();
+
+            if (empty($products)) {
+                $pdo->rollBack();
+                return ['success' => true, 'data' => ['message' => 'No products found matching criteria.', 'affected' => 0]];
+            }
+
+            $productIds = array_column($products, 'id');
+            $idsPlaceholder = implode(',', array_fill(0, count($productIds), '?'));
+
+            if ($action === 'clear') {
+                $stmtDelFS = $pdo->prepare("DELETE FROM flash_sales WHERE product_id IN ({$idsPlaceholder})");
+                $stmtDelFS->execute($productIds);
+
+                $stmtClearProd = $pdo->prepare("UPDATE products SET sale_price = NULL WHERE id IN ({$idsPlaceholder})");
+                $stmtClearProd->execute($productIds);
+
+                $pdo->commit();
+                return ['success' => true, 'data' => ['message' => 'Cleared discounts successfully.', 'affected' => count($productIds)]];
+            }
+
+            $hasDuration = ($startsAt !== null && $endsAt !== null);
+
+            if ($hasDuration) {
+                $stmtDelFS = $pdo->prepare("DELETE FROM flash_sales WHERE product_id IN ({$idsPlaceholder}) AND ends_at >= NOW()");
+                $stmtDelFS->execute($productIds);
+
+                $stmtInsertFS = $pdo->prepare("
+                    INSERT INTO flash_sales (product_id, sale_price, starts_at, ends_at)
+                    VALUES (:product_id, :sale_price, :starts_at, :ends_at)
+                ");
+
+                foreach ($products as $p) {
+                    $pid = (int)$p['id'];
+                    $price = (float)$p['price'];
+                    
+                    if ($discountType === 'percentage') {
+                        $salePrice = round($price * (100.0 - $discountValue) / 100.0, -3);
+                    } else {
+                        $salePrice = max(0.0, $price - $discountValue);
+                    }
+
+                    $stmtInsertFS->execute([
+                        ':product_id' => $pid,
+                        ':sale_price' => $salePrice,
+                        ':starts_at' => $startsAt,
+                        ':ends_at' => $endsAt
+                    ]);
+                }
+            } else {
+                $stmtDelFS = $pdo->prepare("DELETE FROM flash_sales WHERE product_id IN ({$idsPlaceholder}) AND ends_at >= NOW()");
+                $stmtDelFS->execute($productIds);
+
+                $stmtUpdateProd = $pdo->prepare("UPDATE products SET sale_price = :sale_price WHERE id = :id");
+
+                foreach ($products as $p) {
+                    $pid = (int)$p['id'];
+                    $price = (float)$p['price'];
+
+                    if ($discountType === 'percentage') {
+                        $salePrice = round($price * (100.0 - $discountValue) / 100.0, -3);
+                    } else {
+                        $salePrice = max(0.0, $price - $discountValue);
+                    }
+
+                    $stmtUpdateProd->execute([
+                        ':sale_price' => $salePrice,
+                        ':id' => $pid
+                    ]);
+                }
+            }
+
+            $pdo->commit();
+            return ['success' => true, 'data' => ['message' => 'Applied discount successfully.', 'affected' => count($productIds)]];
+
+        } catch (\Throwable $e) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            return ['success' => false, 'error' => 'Database error: ' . $e->getMessage(), 'code' => 500];
+        }
     }
 }

@@ -18,6 +18,8 @@ export function openWarrantyForm(warranty, onSaved) {
           <input name="serial_number" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-[#C9A84C]" value="${warranty?.serial_number || ''}" placeholder="SN-2024-XXXX"/>
         </div>
         <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1.5">Tìm kiếm sản phẩm</label>
+          <input type="text" id="wf-product-search" class="w-full mb-2 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-[#C9A84C]" placeholder="Nhập tên sản phẩm để lọc..."/>
           <label class="block text-sm font-medium text-gray-700 mb-1.5">Sản phẩm</label>
           <select name="product_id" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-[#C9A84C]" id="wf-product">
             <option value="">-- Chọn sản phẩm --</option>
@@ -92,14 +94,34 @@ export function openWarrantyForm(warranty, onSaved) {
 
 async function loadProducts(overlay, selectedId) {
   try {
-    const res = await getProducts({ per_page: 100 });
-    const items = res.data || res.items || res;
+    const res = await getProducts({ per_page: 200 });
+    const items = Array.isArray(res.data) ? res.data : (Array.isArray(res.items) ? res.items : (Array.isArray(res) ? res : []));
     const sel = overlay.querySelector('#wf-product');
-    (Array.isArray(items) ? items : []).forEach(p => {
-      const opt = document.createElement('option');
-      opt.value = p.id; opt.textContent = `${p.name} (${p.sku || '—'})`;
-      if (p.id == selectedId) opt.selected = true;
-      sel.appendChild(opt);
+    const searchInput = overlay.querySelector('#wf-product-search');
+    
+    const populateOptions = (filterText = '') => {
+      const currentSelected = sel.value || selectedId;
+      sel.innerHTML = '<option value="">-- Chọn sản phẩm --</option>';
+      items.forEach(p => {
+        const name = p.name || '';
+        const sku = p.sku || '';
+        const text = `${name} (${sku || '—'})`;
+        if (filterText && !text.toLowerCase().includes(filterText.toLowerCase())) {
+          if (p.id != currentSelected) {
+            return;
+          }
+        }
+        const opt = document.createElement('option');
+        opt.value = p.id; opt.textContent = text;
+        if (p.id == currentSelected) opt.selected = true;
+        sel.appendChild(opt);
+      });
+    };
+
+    populateOptions();
+    
+    searchInput?.addEventListener('input', (e) => {
+      populateOptions(e.target.value.trim());
     });
   } catch {}
 }

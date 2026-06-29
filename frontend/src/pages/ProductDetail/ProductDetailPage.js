@@ -19,7 +19,9 @@ export default class ProductDetailPage {
     ensureProductDetailStyles();
     const wrap = document.createElement('div');
     wrap.className = 'bg-white pb-20 md:pb-0';
+    this._wrap = wrap;
     const payload = await this._loadPayload();
+    this._payload = payload;
     if (this.aborted) {
       return wrap;
     }
@@ -82,6 +84,76 @@ export default class ProductDetailPage {
     }
     const bar = document.getElementById('pdp-mobile-bar');
     if (bar) bar.remove();
+  }
+
+  async updateParams(params) {
+    const newSlug = params.slug || '';
+    if (newSlug === this._slug) return;
+    this._slug = newSlug;
+
+    // Check if we already have this product variant in our cache
+    const currentProduct = this._payload?.product;
+    const variants = currentProduct?.variants || [];
+    const targetVariant = variants.find(v => v.slug === newSlug);
+
+    if (targetVariant) {
+      // 1. Instantly switch variant without hitting the server!
+      const updatedProduct = {
+        ...currentProduct,
+        id: targetVariant.id,
+        name: targetVariant.name,
+        slug: targetVariant.slug,
+        price: targetVariant.price,
+        sale_price: targetVariant.sale_price,
+        stock: targetVariant.stock,
+        sku: targetVariant.sku,
+        ref_number: targetVariant.sku || targetVariant.slug,
+        strap_type: targetVariant.strap_type,
+        dial_color: targetVariant.dial_color,
+        images: normalizeImages(targetVariant.images || [targetVariant.image])
+      };
+      
+      // Update our payload product reference
+      this._payload.product = updatedProduct;
+
+      // Update document titles/meta
+      setProductMeta(updatedProduct);
+
+      // Trigger sub-components updates
+      if (this._gallery && typeof this._gallery.updateProduct === 'function') {
+        this._gallery.updateProduct(updatedProduct);
+      }
+      if (this._info && typeof this._info.updateProduct === 'function') {
+        this._info.updateProduct(updatedProduct);
+      }
+      
+      // Update breadcrumbs and title in page header!
+      if (this._wrap) {
+        const headerTitle = this._wrap.querySelector('h1');
+        if (headerTitle) headerTitle.textContent = updatedProduct.name;
+        const breadcrumbActive = this._wrap.querySelector('.flex.flex-wrap span:last-child');
+        if (breadcrumbActive) breadcrumbActive.textContent = updatedProduct.name;
+      }
+      
+    } else {
+      // 2. Fallback to full API reload if they clicked a related/different product
+      if (this._wrap) {
+        this._wrap.innerHTML = `
+          <div style="display:flex;align-items:center;justify-content:center;min-height:60vh;">
+            <div class="spinner"></div>
+          </div>`;
+      }
+      
+      const payload = await this._loadPayload();
+      if (this.aborted || params.slug !== this._slug) return;
+      
+      // Rebuild the whole page content inside this._wrap!
+      const newPageContent = await this.render();
+      if (this._wrap) {
+        this._wrap.replaceWith(newPageContent);
+        this._wrap = newPageContent;
+      }
+    }
   }
 
   async _loadPayload() {

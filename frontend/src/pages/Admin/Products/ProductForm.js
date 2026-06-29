@@ -1,5 +1,5 @@
 import { showToast } from '../shared/ui.js';
-import { createProduct, updateProduct, getCategories, getBrands } from '../../../services/adminService.js';
+import { createProduct, updateProduct, getCategories, getBrands, getProducts, getVariants, getProduct } from '../../../services/adminService.js';
 import { openImagePicker } from './ImagePicker.js';
 
 const MOVEMENTS = ['automatic', 'quartz', 'mechanical', 'solar'];
@@ -112,55 +112,7 @@ export function openProductForm(product, onSaved) {
 
   let specs = { ...parsedSpecsObj, ...normalizeSpecs(product?.specs) };
 
-  // If editing an existing product, pre-fill specifications with default values if they are empty/null
-  if (product) {
-    const defaultSpecs = {
-      'case_material': 'Thép không gỉ 316L',
-      'Chất liệu vỏ': 'Thép không gỉ 316L',
-      'case_size': '40mm',
-      'Đường kính mặt': '40mm',
-      'Kích thước vỏ': '40mm',
-      'movement_type': 'quartz',
-      'Loại máy': 'quartz',
-      'water_resistance': '5ATM',
-      'Kháng nước': '5ATM',
-      'Chống nước': '5ATM',
-      'Kháng nước (ATM)': '5ATM',
-      'Xuất xứ': 'Nhật Bản',
-      'Giới tính': 'Nam',
-      'Độ dày vỏ': '11.8mm',
-      'Độ dày': '11.8mm',
-      'Mặt kính': 'Kính khoáng',
-      'Chất liệu dây': 'Dây cao su',
-      'Dây đeo': 'Dây cao su',
-      'Màu mặt số': 'Đen',
-      'Độ chính xác': '±20s/tháng',
-      'Trữ năng lượng': '3 năm',
-      'Thông tin pin': '3 năm',
-      'Trọng lượng': '50g',
-      'Bảo hành': '1 năm chính hãng',
-      'Phụ kiện đi kèm': 'Hộp đựng, Sách hướng dẫn'
-    };
 
-    Object.entries(defaultSpecs).forEach(([key, val]) => {
-      if (!specs[key] || specs[key].trim() === '') {
-        specs[key] = val;
-      }
-    });
-
-    if (!product.case_material || product.case_material.trim() === '') {
-      product.case_material = defaultSpecs['case_material'];
-    }
-    if (!product.case_size || product.case_size.trim() === '') {
-      product.case_size = defaultSpecs['case_size'];
-    }
-    if (!product.movement_type || product.movement_type.trim() === '') {
-      product.movement_type = defaultSpecs['movement_type'];
-    }
-    if (!product.water_resistance || product.water_resistance.trim() === '') {
-      product.water_resistance = defaultSpecs['water_resistance'];
-    }
-  }
 
   const overlay = document.createElement('div');
   overlay.className = 'fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4';
@@ -377,6 +329,44 @@ export function openProductForm(product, onSaved) {
           </div>
         </div>
 
+        <!-- SECTION: CẤU HÌNH BIẾN THỂ -->
+        <div class="space-y-4 border-t border-gray-100 pt-4">
+          <h3 class="text-sm font-bold text-gray-900 flex items-center gap-2">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M9 2h6l1 5H8L9 2z"/><path d="M8 17l1 5h6l1-5"/><line x1="12" y1="9" x2="12" y2="12"/><line x1="12" y1="12" x2="14" y2="12"/></svg>
+            Cấu hình biến thể (Variants)
+          </h3>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="col-span-2">
+              <label class="form-label">Sản phẩm gốc (Sản phẩm cha)</label>
+              <div class="relative">
+                <input type="hidden" name="parent_id" id="pf-parent-id" value="${product?.parent_id || ''}">
+                <div class="flex gap-2">
+                  <input type="text" id="pf-parent-search" class="form-input flex-1" placeholder="Tìm kiếm sản phẩm cha bằng tên hoặc SKU..." autocomplete="off">
+                  <button type="button" id="pf-parent-clear" class="px-3 py-2 border border-red-200 text-red-500 rounded-lg text-xs hover:bg-red-50 hidden">
+                    Xóa liên kết
+                  </button>
+                </div>
+                <div id="pf-parent-results" class="absolute left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto hidden z-20">
+                </div>
+              </div>
+              <p class="text-xs text-gray-400 mt-1">Để trống nếu đây là sản phẩm chính (không có sản phẩm cha).</p>
+            </div>
+
+            <div class="col-span-2">
+              <label class="form-label">Màu sắc mặt đồng hồ (Biến thể màu sắc)</label>
+              <input name="dial_color" class="form-input" value="${product?.dial_color || ''}" placeholder="Đen, Trắng, Xanh dương..."/>
+            </div>
+            <input type="hidden" name="strap_type" value="${product?.strap_type || ''}"/>
+
+            <div class="col-span-2 border-t border-gray-100 pt-3" id="pf-related-variants-section">
+              <label class="form-label font-semibold text-gray-900">Các biến thể khác của sản phẩm này</label>
+              <div id="pf-related-variants-list" class="space-y-2 mt-2">
+                <div class="text-xs text-gray-400 italic">Đang tải các biến thể khác...</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- SECTION 4: META SEO & VISIBILITY (CỐ ĐỊNH) -->
         <div class="space-y-4 border-t border-gray-100 pt-4">
           <h3 class="text-sm font-bold text-gray-900">Cấu hình SEO & Hiển thị</h3>
@@ -417,10 +407,18 @@ export function openProductForm(product, onSaved) {
   document.body.style.overflow = 'hidden';
   if (window.lenis) window.lenis.stop();
 
+  const close = () => {
+    overlay.remove();
+    document.body.style.overflow = '';
+    if (window.lenis) window.lenis.start();
+  };
+
   loadCategories(overlay, product?.category_id);
   loadBrands(overlay, product?.brand);
   setupImages(overlay, product?.images || []);
   setupCustomSpecs(overlay, specs);
+  setupParentAutocomplete(overlay, product);
+  setupRelatedVariants(overlay, product, onSaved, close);
 
   // Handle initial layout ordering
   const layoutDescFirst = specs._layout_desc_first !== false;
@@ -446,13 +444,9 @@ export function openProductForm(product, onSaved) {
     });
   });
 
-  const close = () => {
-    overlay.remove();
-    document.body.style.overflow = '';
-    if (window.lenis) window.lenis.start();
-  };
   overlay.querySelector('#pf-close').addEventListener('click', close);
   overlay.querySelector('#pf-cancel').addEventListener('click', close);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
 
   const nameInput = overlay.querySelector('[name="name"]');
   const slugInput = overlay.querySelector('#pf-slug');
@@ -483,6 +477,10 @@ export function openProductForm(product, onSaved) {
       body.stock = Number(body.stock);
       if (body.sale_price) body.sale_price = Number(body.sale_price);
       else delete body.sale_price;
+
+      body.parent_id = body.parent_id ? Number(body.parent_id) : null;
+      body.dial_color = body.dial_color ? body.dial_color.trim() : null;
+      body.strap_type = body.strap_type ? body.strap_type.trim() : null;
 
       // Build specs JSON object
       const specsObj = {};
@@ -698,4 +696,205 @@ function injectFormStyles() {
   s.id = 'pf-styles';
   s.textContent = `.form-label{display:block;font-size:.8125rem;font-weight:500;color:#374151;margin-bottom:.375rem}.form-input{width:100%;padding:.5rem .75rem;border:1px solid #d1d5db;border-radius:.5rem;font-size:.875rem;outline:none;transition:border-color .15s;background:#fff}.form-input:focus{border-color:#C9A84C;box-shadow:0 0 0 3px rgba(201,168,76,.15)}`;
   document.head.appendChild(s);
+}
+
+async function setupParentAutocomplete(overlay, product) {
+  const parentIdInput = overlay.querySelector('#pf-parent-id');
+  const searchInput = overlay.querySelector('#pf-parent-search');
+  const clearBtn = overlay.querySelector('#pf-parent-clear');
+  const resultsDiv = overlay.querySelector('#pf-parent-results');
+
+  // If there's an existing parent_id, fetch its details to display in the input
+  if (product && product.parent_id) {
+    const parentId = product.parent_id;
+    try {
+      const token = localStorage.getItem('token') || '';
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) headers.Authorization = `Bearer ${token}`;
+      const res = await fetch(`/api/admin/products/${parentId}`, { headers }).then(r => r.json());
+      if (res.success && res.data) {
+        const parentProd = res.data;
+        searchInput.value = `[${parentProd.sku}] ${parentProd.name}`;
+        clearBtn.classList.remove('hidden');
+      }
+    } catch (err) {
+      console.error('Failed to load parent product:', err);
+    }
+  }
+
+  let debounceTimeout;
+  searchInput.addEventListener('input', () => {
+    clearTimeout(debounceTimeout);
+    const query = searchInput.value.trim();
+    if (!query) {
+      resultsDiv.innerHTML = '';
+      resultsDiv.classList.add('hidden');
+      return;
+    }
+
+    debounceTimeout = setTimeout(async () => {
+      try {
+        const res = await getProducts({ search: query, limit: 10 });
+        const items = res.data || [];
+        resultsDiv.innerHTML = '';
+        
+        // Filter out current product to prevent self-referencing
+        const filteredItems = items.filter(item => !product || item.id !== product.id);
+
+        if (filteredItems.length === 0) {
+          resultsDiv.innerHTML = '<div class="p-3 text-xs text-gray-500 italic">Không tìm thấy sản phẩm phù hợp</div>';
+        } else {
+          filteredItems.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'p-3 text-xs text-gray-700 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-0 flex items-center justify-between';
+            div.innerHTML = `
+              <span class="font-medium text-gray-900">${item.name}</span>
+              <span class="text-gray-400 font-mono">${item.sku || ''}</span>
+            `;
+            div.addEventListener('click', () => {
+              parentIdInput.value = item.id;
+              searchInput.value = `[${item.sku}] ${item.name}`;
+              resultsDiv.classList.add('hidden');
+              clearBtn.classList.remove('hidden');
+            });
+            resultsDiv.appendChild(div);
+          });
+        }
+        resultsDiv.classList.remove('hidden');
+      } catch (err) {
+        console.error('Error fetching parent products autocomplete:', err);
+      }
+    }, 300);
+  });
+
+  // Close results div when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!searchInput.contains(e.target) && !resultsDiv.contains(e.target)) {
+      resultsDiv.classList.add('hidden');
+    }
+  });
+
+  clearBtn.addEventListener('click', () => {
+    parentIdInput.value = '';
+    searchInput.value = '';
+    clearBtn.classList.add('hidden');
+    resultsDiv.innerHTML = '';
+    resultsDiv.classList.add('hidden');
+  });
+}
+
+async function setupRelatedVariants(overlay, product, onSaved, closeForm) {
+  const container = overlay.querySelector('#pf-related-variants-list');
+  if (!container) return;
+
+  if (!product) {
+    container.innerHTML = '<div class="text-xs text-gray-400 italic">Sản phẩm mới chưa lưu, chưa có biến thể liên quan.</div>';
+    return;
+  }
+
+  try {
+    const res = await getVariants(product.id);
+    const variants = res.data || [];
+
+    if (variants.length === 0) {
+      container.innerHTML = '<div class="text-xs text-gray-400 italic">Không có biến thể khác.</div>';
+      return;
+    }
+
+    container.innerHTML = '';
+    
+    const wrapper = document.createElement('div');
+    wrapper.className = 'border border-gray-200 rounded-lg overflow-hidden bg-gray-50/50';
+    
+    let html = `
+      <table class="w-full text-left border-collapse text-xs">
+        <thead>
+          <tr class="bg-gray-100 border-b border-gray-200 text-gray-600 font-semibold">
+            <th class="p-2 w-10">Ảnh</th>
+            <th class="p-2">SKU</th>
+            <th class="p-2">Tên biến thể</th>
+            <th class="p-2">Màu mặt số</th>
+            <th class="p-2">Giá</th>
+            <th class="p-2">Kho</th>
+            <th class="p-2 text-right">Thao tác</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200 bg-white">
+    `;
+
+    const formatPriceLocal = (num) => {
+      if (num === null || num === undefined) return '-';
+      return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(num);
+    };
+
+    variants.forEach(v => {
+      const img = v.images?.[0] || '';
+      const attrText = v.dial_color || '-';
+      
+      const priceText = v.sale_price 
+        ? `<div class="text-red-600 font-semibold">${formatPriceLocal(v.sale_price)}</div><div class="line-through text-gray-400 text-[10px]">${formatPriceLocal(v.price)}</div>`
+        : `<div class="font-medium text-gray-700">${formatPriceLocal(v.price)}</div>`;
+
+      const lowStock = Number(v.stock ?? 0) < 5;
+      const stockBadge = `<span class="px-1.5 py-0.5 rounded font-medium ${lowStock ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-700'}">${v.stock ?? 0}</span>`;
+
+      html += `
+        <tr class="hover:bg-gray-50/50 transition-colors">
+          <td class="p-2">
+            ${img 
+              ? `<img src="${img}" class="w-8 h-8 object-cover rounded border border-gray-100 bg-gray-50" onerror="this.style.display='none'">`
+              : `<div class="w-8 h-8 rounded bg-gray-100 border border-gray-200"></div>`
+            }
+          </td>
+          <td class="p-2 text-gray-500 font-mono text-[10px]">${v.sku || '-'}</td>
+          <td class="p-2">
+            <div class="font-medium text-gray-900 line-clamp-1" title="${v.name}">${v.name}</div>
+          </td>
+          <td class="p-2 text-gray-500 text-[10px]">${attrText}</td>
+          <td class="p-2 whitespace-nowrap">${priceText}</td>
+          <td class="p-2">${stockBadge}</td>
+          <td class="p-2 text-right font-mono">
+            <button type="button" data-id="${v.id}" class="edit-variant-btn inline-flex items-center gap-1 px-2 py-1 rounded bg-[#C9A84C]/10 text-[#B8963E] hover:bg-[#C9A84C]/20 transition-colors font-medium">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              Sửa
+            </button>
+          </td>
+        </tr>
+      `;
+    });
+
+    html += `
+        </tbody>
+      </table>
+    `;
+
+    wrapper.innerHTML = html;
+    container.appendChild(wrapper);
+
+    container.querySelectorAll('.edit-variant-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const variantId = Number(btn.dataset.id);
+        btn.textContent = '...';
+        btn.disabled = true;
+        try {
+          const detailRes = await getProduct(variantId);
+          if (detailRes.success && detailRes.data) {
+            closeForm();
+            openProductForm(detailRes.data, onSaved);
+          } else {
+            showToast('Không thể tải thông tin chi tiết biến thể này.', 'error');
+            btn.innerHTML = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Sửa`;
+            btn.disabled = false;
+          }
+        } catch (e) {
+          showToast('Lỗi khi tải chi tiết biến thể: ' + (e.message || ''), 'error');
+          btn.innerHTML = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Sửa`;
+          btn.disabled = false;
+        }
+      });
+    });
+
+  } catch (err) {
+    container.innerHTML = `<div class="text-xs text-red-500 italic">Lỗi khi tải danh sách biến thể: ${err.message}</div>`;
+  }
 }

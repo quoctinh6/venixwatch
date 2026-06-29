@@ -24,7 +24,7 @@ export function openUserForm(user, onSaved) {
       <form id="user-form" class="p-6 space-y-4">
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1.5">Họ và tên *</label>
-          <input name="name" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-[#C9A84C]" value="${user?.name || ''}"/>
+          <input name="full_name" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-[#C9A84C]" value="${user?.full_name || user?.name || ''}"/>
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1.5">Email *</label>
@@ -82,7 +82,7 @@ export function openUserForm(user, onSaved) {
     try {
       const fd = new FormData(e.target);
       const body = {
-        name: fd.get('name'),
+        full_name: fd.get('full_name'),
         email: fd.get('email'),
         phone: fd.get('phone'),
         is_active: fd.has('is_active'),

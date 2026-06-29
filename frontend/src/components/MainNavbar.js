@@ -24,6 +24,97 @@ export class MainNavbar {
     this._authListener = null;
   }
 
+  updateActiveLinks() {
+    if (!this._el) return;
+    const currentPath = window.location.pathname;
+
+    // Highlights normal links on mobile
+    this._el.querySelectorAll('.mobile-link').forEach((link) => {
+      const href = link.getAttribute('href');
+      if (href) {
+        const isActive = href === currentPath || (currentPath.startsWith(href) && href !== '/');
+        if (isActive) {
+          link.classList.add('bg-[#C9A961]/8', 'border-l-[3px]', 'border-[#C9A961]', 'text-[#C9A961]');
+          link.classList.remove('text-zinc-800');
+        } else {
+          link.classList.remove('bg-[#C9A961]/8', 'border-l-[3px]', 'border-[#C9A961]', 'text-[#C9A961]');
+          const textClass = (link.innerText?.toUpperCase().includes('SALE')) ? 'text-[#C9A961]' : 'text-zinc-800';
+          link.classList.add(textClass);
+        }
+      }
+    });
+
+    // Auto-opens and highlights current categories matching URL path on mobile
+    this._el.querySelectorAll('.mobile-accordion').forEach((acc) => {
+      const content = acc.querySelector('.mobile-accordion-content');
+      const toggle = acc.querySelector('.mobile-accordion-toggle');
+      const chevron = toggle?.querySelector('.accordion-chevron');
+
+      let hasActiveChild = false;
+      acc.querySelectorAll('.mobile-sublink').forEach((sublink) => {
+        const href = sublink.getAttribute('href');
+        const isActive = href && currentPath === href;
+        if (isActive) {
+          sublink.classList.add('text-[#C9A961]', 'font-bold');
+          sublink.classList.remove('text-zinc-650');
+          hasActiveChild = true;
+        } else {
+          sublink.classList.remove('text-[#C9A961]', 'font-bold');
+          sublink.classList.add('text-zinc-650');
+        }
+      });
+
+      if (content && toggle) {
+        if (hasActiveChild) {
+          content.style.maxHeight = `${content.scrollHeight}px`;
+          chevron?.classList.add('rotate-180');
+          toggle.classList.add('bg-[#C9A961]/8', 'border-l-[3px]', 'border-[#C9A961]', 'text-[#C9A961]');
+          toggle.classList.remove('text-zinc-800');
+        } else {
+          content.style.maxHeight = '0px';
+          chevron?.classList.remove('rotate-180');
+          toggle.classList.remove('bg-[#C9A961]/8', 'border-l-[3px]', 'border-[#C9A961]', 'text-[#C9A961]');
+          toggle.classList.add('text-zinc-800');
+        }
+      }
+    });
+
+    // Highlights desktop links
+    this._el.querySelectorAll('.nav-link-a').forEach((link) => {
+      const href = link.getAttribute('href');
+      const isActive = href && (href === currentPath || (currentPath.startsWith(href) && href !== '/'));
+      link.classList.toggle('active-nav', !!isActive);
+      if (isActive) {
+        link.classList.add('text-[#C9A961]');
+        link.classList.remove('text-[#0A0A0A]');
+      } else {
+        link.classList.remove('text-[#C9A961]');
+        link.classList.add('text-[#0A0A0A]');
+      }
+    });
+
+    // Highlights desktop dropdown buttons and child links
+    this._el.querySelectorAll('.nav-dropdown').forEach((dd) => {
+      const btn = dd.querySelector('button.nav-link');
+      if (!btn) return;
+      let isDropdownActive = false;
+      dd.querySelectorAll('.dd-link').forEach((link) => {
+        const href = link.getAttribute('href');
+        const isActive = href && (href === currentPath || (currentPath.startsWith(href) && href !== '/'));
+        link.classList.toggle('active-nav', !!isActive);
+        if (isActive) isDropdownActive = true;
+      });
+      btn.classList.toggle('active-nav', isDropdownActive);
+      if (isDropdownActive) {
+        btn.classList.add('text-[#C9A961]');
+        btn.classList.remove('text-[#0A0A0A]');
+      } else {
+        btn.classList.remove('text-[#C9A961]');
+        btn.classList.add('text-[#0A0A0A]');
+      }
+    });
+  }
+
   updateCartCount() {
     const count = cartService.getCount();
 
@@ -62,6 +153,24 @@ export class MainNavbar {
   }
 
   render() {
+    // Add dynamic style for active links if not already present
+    if (!document.getElementById('navbar-active-link-styles')) {
+      const style = document.createElement('style');
+      style.id = 'navbar-active-link-styles';
+      style.textContent = `
+        .nav-dropdown>button.active-nav::after,
+        .nav-link-a.active-nav::after {
+          transform: scaleX(1) !important;
+        }
+        .dd-link.active-nav {
+          color: #C9A961 !important;
+          border-left-color: #C9A961 !important;
+          background-color: rgba(201, 169, 97, 0.08) !important;
+        }
+      `;
+      document.head.appendChild(style);
+    }
+
     const nav = document.createElement('nav');
     nav.id = 'main-navbar';
     nav.className = 'sticky top-0 z-50 border-b border-zinc-200 bg-white/95 backdrop-blur-md transition-all duration-300';
@@ -300,8 +409,45 @@ export class MainNavbar {
         "href": "/sale",
         "children": [],
         "badge": "HOT"
+      },
+      {
+        "label": "CHÍNH SÁCH",
+        "href": "/van-chuyen",
+        "children": [
+          { "label": "Về Chúng Tôi", "href": "/gioi-thieu" },
+          { "label": "Chính Sách Vận Chuyển", "href": "/van-chuyen" },
+          { "label": "Đổi Trả & Hoàn Tiền", "href": "/doi-tra" },
+          { "label": "Chính Sách Bảo Hành", "href": "/bao-hanh" },
+          { "label": "Chính Sách Bảo Mật", "href": "/bao-mat" },
+          { "label": "Điều Khoản Dịch Vụ", "href": "/dieu-khoan" },
+          { "label": "Hỏi Đáp (FAQ)", "href": "/faq" }
+        ]
       }
     ];
+
+    // Auto-append CHÍNH SÁCH if not configured explicitly in navigation_menu
+    if (!menuItems.some(item => item.href === '/van-chuyen' || item.label.toLowerCase() === 'chính sách')) {
+      const policyItem = {
+        "label": "CHÍNH SÁCH",
+        "href": "/van-chuyen",
+        "children": [
+          { "label": "Về Chúng Tôi", "href": "/gioi-thieu" },
+          { "label": "Chính Sách Vận Chuyển", "href": "/van-chuyen" },
+          { "label": "Đổi Trả & Hoàn Tiền", "href": "/doi-tra" },
+          { "label": "Chính Sách Bảo Hành", "href": "/bao-hanh" },
+          { "label": "Chính Sách Bảo Mật", "href": "/bao-mat" },
+          { "label": "Điều Khoản Dịch Vụ", "href": "/dieu-khoan" },
+          { "label": "Hỏi Đáp (FAQ)", "href": "/faq" }
+        ]
+      };
+
+      const newsIdx = menuItems.findIndex(item => item.href === '/tin-tuc' || item.label.toLowerCase() === 'tin tức');
+      if (newsIdx !== -1) {
+        menuItems.splice(newsIdx, 0, policyItem);
+      } else {
+        menuItems.push(policyItem);
+      }
+    }
 
     // Auto-append TIN TỨC if not configured explicitly in navigation_menu
     if (!menuItems.some(item => item.href === '/tin-tuc' || item.label.toLowerCase() === 'tin tức')) {
@@ -326,7 +472,7 @@ export class MainNavbar {
                 ${item.label}
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="group-hover/menu:rotate-180 transition-transform duration-300"><polyline points="6 9 12 15 18 9"/></svg>
               </button>
-              <div class="mega-menu absolute left-1/2 top-[100%] z-50 mt-1 w-[calc(100%-48px)] xl:w-full max-w-[1344px] -translate-x-1/2 opacity-0 invisible -translate-y-2 group-hover/menu:opacity-100 group-hover/menu:visible group-hover/menu:translate-y-0 transition-all duration-[250ms] ease-[cubic-bezier(0.4,0,0.2,1)] border-t-2 border-[#C9A961] bg-white py-8 px-10 rounded-b-[8px] flex gap-6" style="box-shadow: 0 12px 32px rgba(0,0,0,0.08);">
+              <div class="mega-menu absolute left-1/2 top-[100%] z-50 w-[calc(100%-48px)] xl:w-full max-w-[1344px] -translate-x-1/2 opacity-0 invisible -translate-y-2 group-hover/menu:opacity-100 group-hover/menu:visible group-hover/menu:translate-y-0 transition-all duration-[250ms] ease-[cubic-bezier(0.4,0,0.2,1)] border-t-2 border-[#C9A961] bg-white py-8 px-10 rounded-b-[8px] flex gap-6" style="box-shadow: 0 12px 32px rgba(0,0,0,0.08);">
                 ${this._megaMenuHtml(genderKey)}
               </div>
             </div>
@@ -338,7 +484,7 @@ export class MainNavbar {
                 ${item.label}
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="group-hover/menu:rotate-180 transition-transform duration-300"><polyline points="6 9 12 15 18 9"/></svg>
               </button>
-              <div class="mega-menu absolute left-0 top-[100%] z-50 mt-1 w-56 opacity-0 invisible -translate-y-2 group-hover/menu:opacity-100 group-hover/menu:visible group-hover/menu:translate-y-0 transition-all duration-[200ms] border-t-2 border-[#C9A961] bg-white py-2 rounded-b-[8px] flex flex-col" style="box-shadow: 0 8px 24px rgba(0,0,0,0.08);">
+              <div class="mega-menu absolute left-0 top-[100%] z-50 w-56 opacity-0 invisible -translate-y-2 group-hover/menu:opacity-100 group-hover/menu:visible group-hover/menu:translate-y-0 transition-all duration-[200ms] border-t-2 border-[#C9A961] bg-white py-2 rounded-b-[8px] flex flex-col" style="box-shadow: 0 8px 24px rgba(0,0,0,0.08);">
                 ${item.children.map(child => `
                   <a href="${child.href}" class="dd-link px-4 py-2.5 text-xs font-semibold text-zinc-700 hover:bg-zinc-50 hover:text-[#C9A961] transition-colors">
                     ${child.label}
@@ -364,6 +510,8 @@ export class MainNavbar {
         let icon = `<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`;
         if (item.label.toUpperCase().includes('NỮ')) {
           icon = `<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.182 15.182a4.5 4.5 0 01-6.364 0M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`;
+        } else if (item.label.toUpperCase().includes('CHÍNH SÁCH')) {
+          icon = `<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>`;
         }
         return `
           <div class="mobile-accordion">
@@ -529,13 +677,25 @@ export class MainNavbar {
           </button>
         </div>
 
-        <!-- Drawer Content (Scrollable) -->
         <div class="flex-1 overflow-y-auto py-4 space-y-4" data-lenis-prevent>
           <!-- Navigation list with accordion sub-menus -->
           <div class="space-y-1">
             ${mobileMenuHtml}
           </div>
-        </div>1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
+
+          <!-- Divider -->
+          <div class="mx-6 my-4 h-px bg-zinc-100"></div>
+
+          <!-- User links -->
+          <div class="space-y-1">
+            <a href="/tai-khoan" class="mobile-link flex h-14 items-center gap-4 px-6 text-[15px] font-medium tracking-[0.08em] text-zinc-800 transition hover:bg-zinc-50">
+              <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+              <span class="mobile-user-name">${authService.getUser() ? (authService.getUser().name || authService.getUser().full_name) : 'TÀI KHOẢN'}</span>
+            </a>
+
+            <!-- Giỏ hàng -->
+            <a href="/gio-hang" class="mobile-link flex h-14 items-center gap-4 px-6 text-[15px] font-medium tracking-[0.08em] text-zinc-800 transition hover:bg-zinc-50">
+              <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
               GIỎ HÀNG
             </a>
           </div>
@@ -677,7 +837,7 @@ export class MainNavbar {
       if (e.key === 'Enter') {
         const q = searchInput.value.trim();
         if (q) {
-          navigate(`/nam?search=${encodeURIComponent(q)}`);
+          navigate(`/tim-kiem?search=${encodeURIComponent(q)}`);
           closeSearchFn();
         }
       }
@@ -757,39 +917,7 @@ export class MainNavbar {
     });
 
     // Auto-highlight active links and toggle matching accordions on load
-    const currentPath = window.location.pathname;
-
-    // Highlights normal links
-    nav.querySelectorAll('.mobile-link').forEach((link) => {
-      const href = link.getAttribute('href');
-      if (href && (href === currentPath || (currentPath.startsWith(href) && href !== '/'))) {
-        link.classList.add('bg-[#C9A961]/8', 'border-l-[3px]', 'border-[#C9A961]', 'text-[#C9A961]');
-        link.classList.remove('text-zinc-800');
-      }
-    });
-
-    // Auto-opens and highlights current categories matching URL path
-    nav.querySelectorAll('.mobile-accordion').forEach((acc) => {
-      const content = acc.querySelector('.mobile-accordion-content');
-      const toggle = acc.querySelector('.mobile-accordion-toggle');
-      const chevron = toggle?.querySelector('.accordion-chevron');
-
-      let hasActiveChild = false;
-      acc.querySelectorAll('.mobile-sublink').forEach((sublink) => {
-        const href = sublink.getAttribute('href');
-        if (href && currentPath === href) {
-          sublink.classList.add('text-[#C9A961]', 'font-bold');
-          sublink.classList.remove('text-zinc-600');
-          hasActiveChild = true;
-        }
-      });
-
-      if (hasActiveChild && content && toggle) {
-        content.style.maxHeight = `${content.scrollHeight}px`;
-        chevron?.classList.add('rotate-180');
-        toggle.classList.add('bg-[#C9A961]/8', 'border-l-[3px]', 'border-[#C9A961]', 'text-[#C9A961]');
-      }
-    });
+    this.updateActiveLinks();
 
     // Drawer integrated search actions
     const drawerSearchInput = nav.querySelector('#drawer-search-input');
@@ -799,7 +927,7 @@ export class MainNavbar {
       const q = drawerSearchInput?.value.trim();
       if (q) {
         closeSidebarFn();
-        navigate(`/nam?search=${encodeURIComponent(q)}`);
+        navigate(`/tim-kiem?search=${encodeURIComponent(q)}`);
       }
     };
 

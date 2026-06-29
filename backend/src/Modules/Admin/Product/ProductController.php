@@ -40,6 +40,13 @@ class ProductController
         $this->respond($this->service->getById($id));
     }
 
+    /** GET /api/admin/products/{id}/variants */
+    public function variants(int $id): void
+    {
+        RBACMiddleware::require('products:read');
+        $this->respond($this->service->getVariants($id));
+    }
+
     /** POST /api/admin/products */
     public function store(): void
     {
@@ -73,6 +80,13 @@ class ProductController
     {
         RBACMiddleware::require('products:write');
         $this->respond($this->service->computeBadges());
+    }
+
+    /** POST /api/admin/products/bulk-discount */
+    public function bulkDiscount(): void
+    {
+        RBACMiddleware::require('products:write');
+        $this->respond($this->service->applyBulkDiscount($this->body()));
     }
 
     /** GET /api/admin/products/low-stock */

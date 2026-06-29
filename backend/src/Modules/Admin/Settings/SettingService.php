@@ -53,8 +53,62 @@ class SettingService
                 'menu_brands' => [],
                 'menu_brands_nam' => [],
                 'menu_brands_nu' => [],
-                'home_sections' => []
+                'home_sections' => [],
+                'trust_badges' => [],
+                'policy_content' => [],
+                'footer_settings' => [
+                    'hotline' => '0929 000 063',
+                    'email' => 'venixwatch@gmail.com',
+                    'address' => 'B37-44 Khu B Geleximco Lê Trọng Tấn, Xã An Khánh, TP Hà Nội',
+                    'social_facebook' => 'https://www.facebook.com/people/Venix-Watch/61590595195580/',
+                    'social_instagram' => 'https://www.instagram.com/venixwatch/',
+                    'social_tiktok' => 'https://www.tiktok.com/@venix.watch',
+                    'social_youtube' => 'https://www.youtube.com/@Venixwatch',
+                    'bank_name' => 'Ngân hàng TMCP Kỹ Thương Việt Nam',
+                    'bank_account' => '8826882699',
+                    'bank_owner' => 'VND-TGTT-CTTNHH THUONG MAI VA XNK LIK',
+                    'momo_phone' => '',
+                    'momo_owner' => ''
+                ]
             ];
+        }
+
+        if (!isset($settings['footer_settings'])) {
+            $settings['footer_settings'] = [
+                'hotline' => '0929 000 063',
+                'email' => 'venixwatch@gmail.com',
+                'address' => 'B37-44 Khu B Geleximco Lê Trọng Tấn, Xã An Khánh, TP Hà Nội',
+                'social_facebook' => 'https://www.facebook.com/people/Venix-Watch/61590595195580/',
+                'social_instagram' => 'https://www.instagram.com/venixwatch/',
+                'social_tiktok' => 'https://www.tiktok.com/@venix.watch',
+                'social_youtube' => 'https://www.youtube.com/@Venixwatch',
+                'bank_name' => 'Ngân hàng TMCP Kỹ Thương Việt Nam',
+                'bank_account' => '8826882699',
+                'bank_owner' => 'VND-TGTT-CTTNHH THUONG MAI VA XNK LIK',
+                'momo_phone' => '',
+                'momo_owner' => ''
+            ];
+        } else {
+            // Tự động cập nhật các đường dẫn mạng xã hội cũ sang liên kết chính thức của Venix Watch
+            $socialUpdates = [
+                'social_instagram' => [
+                    'old' => 'https://instagram.com/donghoatuan',
+                    'new' => 'https://www.instagram.com/venixwatch/'
+                ],
+                'social_tiktok' => [
+                    'old' => 'https://tiktok.com/@donghoatuan',
+                    'new' => 'https://www.tiktok.com/@venix.watch'
+                ],
+            ];
+            foreach ($socialUpdates as $key => $vals) {
+                $current = $settings['footer_settings'][$key] ?? '';
+                if ($current === $vals['old'] || empty($current)) {
+                    $settings['footer_settings'][$key] = $vals['new'];
+                }
+            }
+            if (empty($settings['footer_settings']['social_youtube'])) {
+                $settings['footer_settings']['social_youtube'] = 'https://www.youtube.com/@Venixwatch';
+            }
         }
 
         return $settings;
@@ -188,6 +242,45 @@ class SettingService
                         'details' => "Thay đổi nội dung, hình ảnh hoặc nút bấm của các section trang chủ"
                     ];
                     $this->updateSetting('home_sections', $newVal);
+                }
+            }
+
+            // 7b. Compare trust_badges
+            if (isset($newSettings['trust_badges'])) {
+                $oldVal = json_encode($oldSettings['trust_badges'] ?? [], JSON_UNESCAPED_UNICODE);
+                $newVal = json_encode($newSettings['trust_badges'], JSON_UNESCAPED_UNICODE);
+                if ($oldVal !== $newVal) {
+                    $logs[] = [
+                        'action' => 'Cập nhật Trust Badges',
+                        'details' => 'Thay đổi nội dung các mục cam kết chính sách (trust badges)'
+                    ];
+                    $this->updateSetting('trust_badges', $newVal);
+                }
+            }
+
+            // 7b. Compare policy_content
+            if (isset($newSettings['policy_content'])) {
+                $oldVal = json_encode($oldSettings['policy_content'] ?? [], JSON_UNESCAPED_UNICODE);
+                $newVal = json_encode($newSettings['policy_content'], JSON_UNESCAPED_UNICODE);
+                if ($oldVal !== $newVal) {
+                    $logs[] = [
+                        'action' => 'Cập nhật Nội dung Chính Sách',
+                        'details' => 'Thay đổi nội dung HTML của một hoặc nhiều trang chính sách'
+                    ];
+                    $this->updateSetting('policy_content', $newVal);
+                }
+            }
+
+            // 7. Compare footer_settings
+            if (isset($newSettings['footer_settings'])) {
+                $oldVal = json_encode($oldSettings['footer_settings'] ?? [], JSON_UNESCAPED_UNICODE);
+                $newVal = json_encode($newSettings['footer_settings'], JSON_UNESCAPED_UNICODE);
+                if ($oldVal !== $newVal) {
+                    $logs[] = [
+                        'action' => 'Cập nhật cấu hình Footer',
+                        'details' => "Thay đổi thông tin liên hệ và liên kết mạng xã hội dưới chân trang"
+                    ];
+                    $this->updateSetting('footer_settings', $newVal);
                 }
             }
 

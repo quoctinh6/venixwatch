@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+date_default_timezone_set('Asia/Ho_Chi_Minh');
+
 // ============================================================
 // Bootstrap
 // ============================================================
@@ -183,9 +185,11 @@ function dispatch(string $method, string $path): void
         // ---- ADMIN PRODUCTS ----
         ['GET',    '/admin/products/low-stock',        'App\Modules\Admin\Product\ProductController', 'lowStock'],
         ['POST',   '/admin/products/compute-badges',   'App\Modules\Admin\Product\ProductController', 'computeBadges'],
+        ['POST',   '/admin/products/bulk-discount',    'App\Modules\Admin\Product\ProductController', 'bulkDiscount'],
         ['GET',    '/admin/products',                  'App\Modules\Admin\Product\ProductController', 'index'],
         ['POST',   '/admin/products',                  'App\Modules\Admin\Product\ProductController', 'store'],
         ['GET',    '/admin/products/{id}',             'App\Modules\Admin\Product\ProductController', 'show'],
+        ['GET',    '/admin/products/{id}/variants',    'App\Modules\Admin\Product\ProductController', 'variants'],
         ['PUT',    '/admin/products/{id}',             'App\Modules\Admin\Product\ProductController', 'update'],
         ['DELETE', '/admin/products/{id}',             'App\Modules\Admin\Product\ProductController', 'destroy'],
         ['PATCH',  '/admin/products/{id}/toggle',      'App\Modules\Admin\Product\ProductController', 'toggle'],

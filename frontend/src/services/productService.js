@@ -122,7 +122,13 @@ export async function getProductsOffline(params = {}) {
     }
     if (params.search) {
       const q = String(params.search).toLowerCase();
-      list = list.filter(p => p.name.toLowerCase().includes(q) || p.brand.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q));
+      list = list.filter(p =>
+        p.name.toLowerCase().includes(q) ||
+        (p.brand || '').toLowerCase().includes(q) ||
+        (p.sku || '').toLowerCase().includes(q) ||
+        (p.category_name || '').toLowerCase().includes(q) ||
+        (p.subcategory_name || '').toLowerCase().includes(q)
+      );
     }
     if (params.featured !== undefined) {
       list = list.filter(p => p.is_featured == params.featured);

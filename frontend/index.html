@@ -2,6 +2,16 @@
 <html lang="vi">
 
 <head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-J2ZXJPKY48"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-J2ZXJPKY48');
+  </script>
+  <meta name="google-site-verification" content="oHcmqls6qe40Ad_yMjePCsdemR9pA8zG5dF5M0MJmNg" />
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script>
@@ -860,7 +870,14 @@
       <div class="spinner"></div>
     </div>
   </div>
-  <script type="module" src="./src/main.js"></script>
+  <script>
+    (function() {
+      var script = document.createElement('script');
+      script.type = 'module';
+      script.src = './src/main.js';
+      document.body.appendChild(script);
+    })();
+  </script>
 </body>
 
 </html>

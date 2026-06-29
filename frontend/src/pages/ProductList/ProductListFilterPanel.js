@@ -138,6 +138,56 @@ export class ProductListFilterPanel {
         </div>
       </section>
       <section class="mt-8 border-t border-zinc-100 pt-6">
+        <h3 class="mb-4 text-[12px] font-bold uppercase tracking-[0.12em] text-[#0A0A0A]">Màu sắc mặt</h3>
+        <div class="space-y-2">
+          ${[
+            { name: 'Đen', colorClass: 'bg-[#121212] border-white/20' },
+            { name: 'Trắng / Bạc', colorClass: 'bg-[#F2F2F2]' },
+            { name: 'Xanh dương / Xanh lam', colorClass: 'bg-[#1E3A8A]' },
+            { name: 'Xanh lá / Lục', colorClass: 'bg-[#065F46]' },
+            { name: 'Hồng / Vàng hồng', colorClass: 'bg-[#E5A99E]' },
+            { name: 'Vàng (Gold)', colorClass: 'bg-[#D4AF37]' },
+            { name: 'Nâu / Cà phê', colorClass: 'bg-[#78350F]' },
+            { name: 'Xám / Ghi', colorClass: 'bg-[#6B7280]' },
+            { name: 'Đỏ / Đỏ rượu', colorClass: 'bg-[#991B1B]' }
+          ].map((item) => {
+            const isActive = String(this._opts.dialColor || '').toLowerCase() === item.name.toLowerCase();
+            return `
+              <button type="button" data-color-filter="${item.name}" class="flex w-full items-center justify-between text-left text-sm transition py-1 hover:text-[#C9A961] ${
+                isActive ? 'font-bold text-[#C9A961]' : 'text-zinc-600'
+              }">
+                <div class="flex items-center gap-2">
+                  <span class="inline-block w-3.5 h-3.5 rounded-full border border-black/10 ${item.colorClass}"></span>
+                  <span>${item.name}</span>
+                </div>
+                ${isActive ? '<span class="text-xs">✓</span>' : ''}
+              </button>
+            `;
+          }).join('')}
+        </div>
+      </section>
+      <section class="mt-8 border-t border-zinc-100 pt-6">
+        <h3 class="mb-4 text-[12px] font-bold uppercase tracking-[0.12em] text-[#0A0A0A]">Loại dây đeo</h3>
+        <div class="space-y-2">
+          ${[
+            'Dây da',
+            'Dây cao su / Nhựa / Silicone',
+            'Dây kim loại / Thép',
+            'Dây Nato / Vải'
+          ].map((strap) => {
+            const isActive = String(this._opts.strapType || '').toLowerCase() === strap.toLowerCase();
+            return `
+              <button type="button" data-strap-filter="${strap}" class="flex w-full items-center justify-between text-left text-sm transition py-1 hover:text-[#C9A961] ${
+                isActive ? 'font-bold text-[#C9A961]' : 'text-zinc-600'
+              }">
+                <span>${strap}</span>
+                ${isActive ? '<span class="text-xs">✓</span>' : ''}
+              </button>
+            `;
+          }).join('')}
+        </div>
+      </section>
+      <section class="mt-8 border-t border-zinc-100 pt-6">
         <div class="mb-4 flex items-center justify-between">
           <h3 class="text-[12px] font-bold uppercase tracking-[0.12em] text-[#0A0A0A]">Khoảng giá</h3>
           <button type="button" data-clear-price class="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400 transition hover:text-[#C9A961]">Xóa giá</button>
@@ -229,6 +279,22 @@ export class ProductListFilterPanel {
       });
     });
 
+    sidebar.querySelectorAll('[data-color-filter]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const color = button.dataset.colorFilter;
+        const nextColor = String(this._opts.dialColor || '').toLowerCase() === color.toLowerCase() ? '' : color;
+        this._opts.onDialColorChange?.(nextColor, mobile);
+      });
+    });
+
+    sidebar.querySelectorAll('[data-strap-filter]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const strap = button.dataset.strapFilter;
+        const nextStrap = String(this._opts.strapType || '').toLowerCase() === strap.toLowerCase() ? '' : strap;
+        this._opts.onStrapTypeChange?.(nextStrap, mobile);
+      });
+    });
+
     sidebar.querySelectorAll('[data-price-preset]').forEach((button) => {
       button.addEventListener('click', () => {
         this._opts.onPriceChange?.({ priceMin: button.dataset.min || '', priceMax: button.dataset.max || '', closeDrawer: mobile });
@@ -263,6 +329,47 @@ export class ProductListFilterPanel {
 
     sidebar.querySelectorAll('[data-brand-filter]').forEach((button) => {
       const isActive = String(button.dataset.brandFilter) === String(this._opts.brand || '').toLowerCase();
+      button.className = `flex w-full items-center justify-between text-left text-sm transition py-1 hover:text-[#C9A961] ${
+        isActive ? 'font-bold text-[#C9A961]' : 'text-zinc-600'
+      }`;
+      const tick = button.querySelector('span:last-child');
+      if (isActive) {
+        if (!tick || tick === button.querySelector('span')) {
+          const check = document.createElement('span');
+          check.className = 'text-xs';
+          check.textContent = '✓';
+          button.appendChild(check);
+        }
+      } else {
+        if (tick && tick !== button.querySelector('span')) {
+          tick.remove();
+        }
+      }
+    });
+
+    sidebar.querySelectorAll('[data-color-filter]').forEach((button) => {
+      const isActive = String(button.dataset.colorFilter).toLowerCase() === String(this._opts.dialColor || '').toLowerCase();
+      button.className = `flex w-full items-center justify-between text-left text-sm transition py-1 hover:text-[#C9A961] ${
+        isActive ? 'font-bold text-[#C9A961]' : 'text-zinc-600'
+      }`;
+      const tick = button.querySelector('span:last-child');
+      const containerDiv = button.querySelector('div');
+      if (isActive) {
+        if (!tick || tick === containerDiv || tick === containerDiv.querySelector('span')) {
+          const check = document.createElement('span');
+          check.className = 'text-xs';
+          check.textContent = '✓';
+          button.appendChild(check);
+        }
+      } else {
+        if (tick && tick !== containerDiv && tick !== containerDiv.querySelector('span')) {
+          tick.remove();
+        }
+      }
+    });
+
+    sidebar.querySelectorAll('[data-strap-filter]').forEach((button) => {
+      const isActive = String(button.dataset.strapFilter).toLowerCase() === String(this._opts.strapType || '').toLowerCase();
       button.className = `flex w-full items-center justify-between text-left text-sm transition py-1 hover:text-[#C9A961] ${
         isActive ? 'font-bold text-[#C9A961]' : 'text-zinc-600'
       }`;

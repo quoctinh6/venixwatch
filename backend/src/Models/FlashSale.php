@@ -14,7 +14,7 @@ class FlashSale
     {
         $stmt = $this->pdo->prepare(
             "SELECT fs.*, p.name AS product_name, p.slug AS product_slug,
-                    p.price AS original_price, p.images AS product_images
+                    p.price AS original_price, p.sku AS product_sku, p.images AS product_images
              FROM flash_sales fs
              INNER JOIN products p ON p.id = fs.product_id
              WHERE fs.starts_at <= NOW() AND fs.ends_at >= NOW()
@@ -23,9 +23,16 @@ class FlashSale
         $stmt->execute();
         $rows = $stmt->fetchAll();
         foreach ($rows as &$row) {
-            $row['product_images'] = $row['product_images']
-                ? json_decode($row['product_images'], true)
-                : [];
+            $images = $row['product_images'] ? json_decode($row['product_images'], true) : [];
+            $row['product'] = [
+                'id' => $row['product_id'],
+                'name' => $row['product_name'],
+                'slug' => $row['product_slug'],
+                'price' => $row['original_price'],
+                'sku' => $row['product_sku'],
+                'images' => $images
+            ];
+            $row['product_images'] = $images;
         }
         return $rows;
     }
@@ -34,26 +41,50 @@ class FlashSale
     {
         $stmt = $this->pdo->prepare(
             "SELECT fs.*, p.name AS product_name, p.slug AS product_slug,
-                    p.price AS original_price
+                    p.price AS original_price, p.sku AS product_sku, p.images AS product_images
              FROM flash_sales fs
              INNER JOIN products p ON p.id = fs.product_id
              ORDER BY fs.starts_at DESC"
         );
         $stmt->execute();
-        return $stmt->fetchAll();
+        $rows = $stmt->fetchAll();
+        foreach ($rows as &$row) {
+            $images = $row['product_images'] ? json_decode($row['product_images'], true) : [];
+            $row['product'] = [
+                'id' => $row['product_id'],
+                'name' => $row['product_name'],
+                'slug' => $row['product_slug'],
+                'price' => $row['original_price'],
+                'sku' => $row['product_sku'],
+                'images' => $images
+            ];
+        }
+        return $rows;
     }
 
     public function findById(int $id): array|false
     {
         $stmt = $this->pdo->prepare(
-            "SELECT fs.*, p.name AS product_name, p.price AS original_price
+            "SELECT fs.*, p.name AS product_name, p.price AS original_price, p.sku AS product_sku, p.images AS product_images, p.slug AS product_slug
              FROM flash_sales fs
              INNER JOIN products p ON p.id = fs.product_id
              WHERE fs.id = :id LIMIT 1"
         );
         $stmt->bindValue(':id', $id, PDO::PARAM_INT);
         $stmt->execute();
-        return $stmt->fetch();
+        $row = $stmt->fetch();
+        if ($row) {
+            $images = $row['product_images'] ? json_decode($row['product_images'], true) : [];
+            $row['product'] = [
+                'id' => $row['product_id'],
+                'name' => $row['product_name'],
+                'slug' => $row['product_slug'],
+                'price' => $row['original_price'],
+                'sku' => $row['product_sku'],
+                'images' => $images
+            ];
+        }
+        return $row;
     }
 
     public function findByProduct(int $productId): array|false
